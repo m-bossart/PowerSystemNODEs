@@ -1,6 +1,6 @@
 #A model of a grid forming inverter.
 #This is the type of model that we want to surrogatize usign UODEs
-
+#Vr(t) and Vi(t) are how the model interacts with a larger system
 function uode_surrogate(dx,x,p,t)
     #STATE INDEX AND STATES
     i__vi_filter, vi_filter = 1, x[1]
