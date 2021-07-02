@@ -22,6 +22,8 @@ function uode_surrogate(dx,x,p,t)
     i__θ_oc, θ_oc = 17, x[17]
     i__ii_cnv, ii_cnv = 18, x[18]
     i__ii_filter, ii_filter = 19, x[19]
+    i__vr_t, vr_t = 20, x[20]
+    i__vi_t, vi_t = 21, x[21]
 
     #PARAMETERS
     ω_lp = p[1]
@@ -54,6 +56,13 @@ function uode_surrogate(dx,x,p,t)
 
     ω_base = 60.0*2*pi
     ω_sys = 1.0
+    r_branch = 0.001
+    x_branch = 0.001
+    c_branch = 0.1
+    Y11 = 1/(r_branch+im*x_branch)+im*c_branch
+    Y12 = -1/(r_branch+im*x_branch)
+    Y = [[Y11, Y12] [Y12, Y11]]
+    i_network = Y*[complex(vr_t,vi_t), complex(Vr(t),Vi(t))]
 
     #PLL
     δω_pll = kp_pll * atan(vq_pll/vd_pll) + ki_pll* ε_pll
@@ -105,31 +114,37 @@ function uode_surrogate(dx,x,p,t)
 
     #active damping equations
     Vd_cnv_ref =(
-      kpc*(Id_cnv_ref - id_cnv_olc) + kic*γd_ic - lf*ω_oc*iq_cnv_olc +     #docs:(3k)
+      kpc*(Id_cnv_ref - id_cnv_olc) + kic*γd_ic - lf*ω_oc*iq_cnv_olc +        #docs:(3k)
       kffv*vd_filt_olc - kad*(vd_filt_olc-ϕd_ic)
     )
     Vq_cnv_ref =(
-      kpc*(Iq_cnv_ref - iq_cnv_olc) + kic*γq_ic + lf*ω_oc*id_cnv_olc +     #docs:(3l)
+      kpc*(Iq_cnv_ref - iq_cnv_olc) + kic*γq_ic + lf*ω_oc*id_cnv_olc +        #docs:(3l)
       kffv*vq_filt_olc - kad*(vq_filt_olc-ϕq_ic)
     )
     dx[i__ϕd_ic] =  ωad * (vd_filt_olc - ϕd_ic)                #docs:(3e)
-    dx[i__ϕq_ic]=  ωad * (vq_filt_olc - ϕq_ic)                 #docs:(3f)
+    dx[i__ϕq_ic]=  ωad * (vq_filt_olc - ϕq_ic)                #docs:(3f)
 
     #LCL FILTER
     #reference transformations
     Vr_cnv =   sin(θ_oc + pi/2)*Vd_cnv_ref + cos(θ_oc + pi/2)*Vq_cnv_ref
     Vi_cnv =  -cos(θ_oc + pi/2)*Vd_cnv_ref + sin(θ_oc + pi/2)*Vq_cnv_ref
 
-    dx[i__ir_cnv]= (ω_base/lf) *                             #docs:(5a)
+    dx[i__ir_cnv]= (ω_base/lf) *                            #docs:(5a)
       (Vr_cnv - vr_filter - rf*ir_cnv + ω_sys*lf*ii_cnv)
     dx[i__ii_cnv]= (ω_base/lf) *                             #docs:(5b)
       (Vi_cnv - vi_filter - rf*ii_cnv - ω_sys*lf*ir_cnv)
-    dx[i__vr_filter]= (ω_base/cf) *                          #docs:(5c)
+    dx[i__vr_filter]= (ω_base/cf) *                       #docs:(5c)
       (ir_cnv - ir_filter + ω_sys*cf*vi_filter)
-    dx[i__vi_filter]= (ω_base/cf) *                          #docs:(5d)
+    dx[i__vi_filter]= (ω_base/cf) *                       #docs:(5d)
       (ii_cnv - ii_filter - ω_sys*cf*vr_filter)
-    dx[i__ir_filter]= (ω_base/lg) *                          #docs:(5e)
-      (vr_filter - Vr(t) - rg*ir_filter + ω_sys*lg*ii_filter)
-    dx[i__ii_filter]= +(ω_base/lg) *                         #docs:(5f)
-      (vi_filter - Vi(t) - rg*ii_filter - ω_sys*lg*ir_filter)
+    dx[i__ir_filter]= (ω_base/lg) *                       #docs:(5e)
+      (vr_filter - vr_t - rg*ir_filter + ω_sys*lg*ii_filter)
+    dx[i__ii_filter]= +(ω_base/lg) *                       #docs:(5f)
+      (vi_filter - vi_t - rg*ii_filter - ω_sys*lg*ir_filter)
+
+
+    dx[i__vr_t] =   ir_filter - real(i_network[1])
+    dx[i__vi_t] =   ii_filter - imag(i_network[1])
+     #out[sum(o_gen)+2*j-1] += (vr[j]-vr[k])*Gbus[j,k] - (vi[j]-vi[k])*Bbus[j,k]
+     #out[sum(o_gen)+2*j]   += (vr[j]-vr[k])*Bbus[j,k] + (vi[j]-vi[k])*Gbus[j,k]
 end
