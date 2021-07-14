@@ -1,5 +1,6 @@
 using NLsolve
 using PowerSystems
+const PSY = PowerSystems
 using PowerSimulationsDynamics
 using OrdinaryDiffEq
 const PSID = PowerSimulationsDynamics
@@ -79,29 +80,4 @@ x₀ = Float32.([value for (key,value) in x₀_dict])
 
 f = get_init_gfm(p_inv, x₀[1], x₀[10], x₀[9], x₀[19])
 
-nlsolve(f, j!, x₀)
-
-f = get_init_gfm_mm(p_inv, x₀[1], x₀[10], x₀[9], x₀[19])
-
-x0_init =   [vi_filter, # Same as above
-            γd_ic,
-            vq_pll,
-            γq_ic,
-            ir_filter,  # Same as above
-            ξd_ic,
-            ϕd_ic,
-            ε_pll,
-            ir_cnv,
-            vr_filter,# Same as above
-            ω_oc,
-            ξq_ic,
-            vd_pll,
-            q_oc,
-            ϕq_ic,
-            θ_pll,
-            θ_oc,
-            ii_cnv,
-            ii_filter# Same as above
-        ]
-
-nlsolve(f, j!, x0_init)
+res = nlsolve(f, x₀)
