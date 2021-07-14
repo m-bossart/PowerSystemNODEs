@@ -78,6 +78,10 @@ Vi₀ =  Vm₀ * sin(θ₀)
 x₀_dict = get_initial_conditions(sim)[surrogate_device_name]
 x₀ = Float32.([value for (key,value) in x₀_dict])
 
+dx = similar(x₀)
+gfm(dx,x₀,p_inv,0)
+@assert all(isapprox.(dx, 0.0; atol=1e-6))
+
 f = get_init_gfm(p_inv, x₀[1], x₀[10], x₀[9], x₀[19])
 
 res = nlsolve(f, x₀)
