@@ -1,3 +1,4 @@
+include("InverterModels.jl")
 function get_init_gfm(p, vr_filter, vi_filter, ir_filter, ii_filter)
     return function init_gfm(dx, x, p, vr_filter, vi_filter, ir_filter, ii_filter)
             dx[1] = 0
