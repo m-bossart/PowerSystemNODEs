@@ -1,5 +1,5 @@
 #activate the environment
-cd(@__DIR__)
+
 using Pkg
 Pkg.activate(".")
 
@@ -11,15 +11,15 @@ const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 using Plots
 include("DynamicComponents.jl")
-include("gfm_inverter.jl")
+include("InverterModels.jl")
 
 #SIMULATION PARAMETERS
 dtmax = 0.02
-tspan = (0.0, .5)
+tspan = (0.0, 5.5)
 step = 1e-5
 tsteps = tspan[1]:step:tspan[2]
 tfault = 0.1
-
+solver =Rodas5()#, #Rodas4P2() # Rodas5(), Rodas4P2(),
 #Parameters for reference change
 fault_inj = 2
 P_ref =  1.6
@@ -113,7 +113,7 @@ ir_index = PSID.get_global_index(sim.simulation_inputs)[surrogate_device_name][:
 ii_index = PSID.get_global_index(sim.simulation_inputs)[surrogate_device_name][:ii_filter]
 
 execute!(sim, #simulation structure
-        Rodas5(), #IDA() is Sundials DAE Solver for implicit form
+        solver, #IDA() is Sundials DAE Solver for implicit form
         reset_simulation=true,dtmax=dtmax,saveat=tsteps); #
 
 Vr(t) = sim.solution(t)[vr_index]
@@ -121,6 +121,8 @@ Vi(t) = sim.solution(t)[vi_index]
 Ir(t) = sim.solution(t)[ir_index]
 Ii(t) = sim.solution(t)[ii_index]
 
+#Vr(t) = sin(t)
+#Vi(t) = 0.0
 push!(x₀, Vr(0.0), Vi(0.0))
 
 p1 = plot(get_state_series(sim,(surrogate_device_name,:ir_filter)), label = "real current PSID")
@@ -150,9 +152,9 @@ for i = 1:length(x₀)-2
   M[i,i] = 1.0f0
 end
 
-uodefunc = ODEFunction(uode_surrogate, mass_matrix = M)
+uodefunc = ODEFunction(uode_surrogate, mass_matrix = M) #changed to gfm?
 prob_uode = ODEProblem(uodefunc,x₀,tspan,p_inv)
-sol = solve(prob_uode,Rodas5(), dtmax=dtmax,saveat=tsteps)      #  Use same SOVLER!
+sol = solve(prob_uode,solver, dtmax=dtmax,saveat=tsteps)      #  Use same SOVLER!
 
 
 plot!(p1, sol, vars = (0, 5), label="real current DiffEq") #5,9 - cnv real current
@@ -161,7 +163,7 @@ Vmag = sqrt.(Vr.(sol.t).^2 + Vi.(sol.t).^2)
 Vang = tan.(Vi.(sol.t) ./ Vr.(sol.t))
 plot!(p3, sol.t, Vmag, label = "voltage mag DiffEq ")
 plot!(p4, sol.t, Vang, label = "voltage ang DiffEq")
-display(plot(p1,p2,p3,p4,layout = (2,2),legend=true,))
+display(plot(p1,p2,p3,p4,layout = (2,2),legend=true,xlim=(0,0.5)))
 
 #plot(get_voltage_magnitude_series(sim,surrogate_bus)[2]-Vmag)
 #maximum(get_voltage_magnitude_series(sim,surrogate_bus)[2]-Vmag)
