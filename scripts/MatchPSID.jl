@@ -10,15 +10,15 @@ using PowerSimulationsDynamics
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 using Plots
-include("DynamicComponents.jl")
-include("InverterModels.jl")
+include("../models/DynamicComponents.jl")
+include("../models/InverterModels.jl")
 
 #SIMULATION PARAMETERS
 dtmax = 0.02
 tspan = (0.0, 5.5)
 step = 1e-5
 tsteps = tspan[1]:step:tspan[2]
-tfault = 0.1
+tfault = 10.0
 solver =Rodas5()#, #Rodas4P2() # Rodas5(), Rodas4P2(),
 #Parameters for reference change
 fault_inj = 2
@@ -152,7 +152,7 @@ for i = 1:length(x₀)-2
   M[i,i] = 1.0f0
 end
 
-uodefunc = ODEFunction(uode_surrogate, mass_matrix = M) #changed to gfm?
+uodefunc = ODEFunction(gfm_ib, mass_matrix = M) #changed to gfm?
 prob_uode = ODEProblem(uodefunc,x₀,tspan,p_inv)
 sol = solve(prob_uode,solver, dtmax=dtmax,saveat=tsteps)      #  Use same SOVLER!
 

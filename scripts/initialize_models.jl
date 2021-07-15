@@ -1,12 +1,17 @@
+using Pkg
+Pkg.activate(".")
+using Revise
 using NLsolve
 using PowerSystems
 const PSY = PowerSystems
 using PowerSimulationsDynamics
 using OrdinaryDiffEq
+using DiffEqFlux
 const PSID = PowerSimulationsDynamics
 
 include("../models/DynamicComponents.jl")
 include("../models/init_functions.jl")
+include("../models/inf_bus_models.jl")
 
 #SIMULATION PARAMETERS
 dtmax = 0.02
@@ -66,8 +71,8 @@ Vref = PSY.get_ext(surrogate_device)["control_refs"][1]
 Pref = PSY.get_ext(surrogate_device)["control_refs"][3]
 Qref = PSY.get_ext(surrogate_device)["control_refs"][4]
 
-p_inv = Float32.(vcat(ω_lp,kp_pll,ki_pll,Ta,kd,kω,kq,ωf,kpv,kiv,kffv,rv,lv,kpc,kic,kffi,
-              ωad,kad,lf,rf,cf,lg,rg,Vref,ωref,Pref,Qref))
+p_inv = vcat(ω_lp,kp_pll,ki_pll,Ta,kd,kω,kq,ωf,kpv,kiv,kffv,rv,lv,kpc,kic,kffi,
+              ωad,kad,lf,rf,cf,lg,rg,Vref,ωref,Pref,Qref)
 
 
 surrogate_bus = get_component(Generator, sim.sys, surrogate_device_name).bus.number
@@ -76,12 +81,38 @@ Vm₀ = get_initial_conditions(sim)["Vm"][surrogate_bus]
 Vr₀ = Vm₀ * cos(θ₀)
 Vi₀ =  Vm₀ * sin(θ₀)
 x₀_dict = get_initial_conditions(sim)[surrogate_device_name]
-x₀ = Float32.([value for (key,value) in x₀_dict])
+x₀ =[value for (key,value) in x₀_dict]
 
+
+#Initialize the gfm model
 dx = similar(x₀)
 gfm(dx,x₀,p_inv,0)
 @assert all(isapprox.(dx, 0.0; atol=1e-6))
-
-f = get_init_gfm(p_inv, x₀[1], x₀[10], x₀[9], x₀[19])
-
+f = get_init_gfm(p_inv, x₀[5], x₀[19]) #Takes p, Ir, Ii
 res = nlsolve(f, x₀)
+gfm(dx,res.zero,p_inv,0)
+@assert all(isapprox.(dx, 0.0; atol=1e-8))
+
+
+
+#Initialize the gfm_nn model
+x₀_plus = vcat(x₀,0.0,0.0)
+dx = similar(x₀_plus)
+dim_hidden = 3
+dim_output = 2
+dim_input =  length(x₀_plus)
+nn = FastChain(FastDense(dim_input, dim_hidden, tanh),
+                       FastDense(dim_hidden, dim_output))
+p_nn= initial_params(nn)
+n_weights = length(p_nn)
+p_all = vcat(p_nn, p_inv)
+
+gfm_nn(dx,x₀_plus,p_all,0)
+
+g = get_init_gfm_nn(p_all, x₀_plus[5], x₀_plus[19])
+res_nn = nlsolve(g,vcat(x₀,0.0,0.0))
+
+nn(res_nn.zero,p_nn)
+@assert converged(res_nn)
+gfm_nn(dx,res_nn.zero,p_all,0)
+@assert all(isapprox.(dx, 0.0; atol=1e-8))
