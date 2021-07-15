@@ -1,3 +1,5 @@
+#Script for exploring techniques to initialize surrogate models. 
+
 using Pkg
 Pkg.activate(".")
 using Revise
@@ -19,7 +21,7 @@ tspan = (0.0, 1.0)
 step = Float32(0.01)
 tsteps = tspan[1]:step:tspan[2]
 
-solver =Rodas5()#, #Rodas4P2() # Rodas5(), Rodas4P2(),
+solver =Rodas5()
 
 sys = System("cases/case9.m")     #build system from case file
 surrogate_device_name = "gen-1"   #The name of the device we want to surrogatize (ie get initial conditions for)
@@ -75,44 +77,43 @@ p_inv = vcat(ω_lp,kp_pll,ki_pll,Ta,kd,kω,kq,ωf,kpv,kiv,kffv,rv,lv,kpc,kic,kff
               ωad,kad,lf,rf,cf,lg,rg,Vref,ωref,Pref,Qref)
 
 
-surrogate_bus = get_component(Generator, sim.sys, surrogate_device_name).bus.number
-Vm₀ = get_initial_conditions(sim)["Vm"][surrogate_bus]
-θ₀ =  get_initial_conditions(sim)["θ"][surrogate_bus]
-Vr₀ = Vm₀ * cos(θ₀)
-Vi₀ =  Vm₀ * sin(θ₀)
+#CHECK THE INITILAIZATION OF THE STANDARD GFM FROM PSID
 x₀_dict = get_initial_conditions(sim)[surrogate_device_name]
 x₀ =[value for (key,value) in x₀_dict]
-
-
-#Initialize the gfm model
 dx = similar(x₀)
 gfm(dx,x₀,p_inv,0)
 @assert all(isapprox.(dx, 0.0; atol=1e-6))
-f = get_init_gfm(p_inv, x₀[5], x₀[19]) #Takes p, Ir, Ii
+f = get_init_gfm(p_inv, x₀[5], x₀[19])
 res = nlsolve(f, x₀)
 gfm(dx,res.zero,p_inv,0)
 @assert all(isapprox.(dx, 0.0; atol=1e-8))
 
+##
+#INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON STATES
+nn_states = FastChain(FastDense(length(x₀), 3, tanh),
+                       FastDense(3, 2))
+p_nn_states = initial_params(nn_states)
+n_weights_nn_states = length(p_nn_states)
+p_all_states = vcat(p_nn_states, p_inv)
+x₀_nn_states = vcat(x₀, 0.0,0.0,nn_states(x₀,p_nn_states)[1],nn_states(x₀, p_nn_states)[2], x₀[5], x₀[19])
+dx = similar(x₀_nn_states)
+g = get_init_gfm_nn_states(p_all_states, x₀[5], x₀[19])
+res_nn_states= nlsolve(g,x₀_nn_states)
+@assert converged(res_nn_states)
+gfm_nn_states(dx,res_nn_states.zero,p_all_states,0)
+@assert all(isapprox.(dx, 0.0; atol=1e-8))
 
-
-#Initialize the gfm_nn model
-x₀_plus = vcat(x₀,0.0,0.0)
-dx = similar(x₀_plus)
-dim_hidden = 3
-dim_output = 2
-dim_input =  length(x₀_plus)
-nn = FastChain(FastDense(dim_input, dim_hidden, tanh),
-                       FastDense(dim_hidden, dim_output))
-p_nn= initial_params(nn)
-n_weights = length(p_nn)
-p_all = vcat(p_nn, p_inv)
-
-gfm_nn(dx,x₀_plus,p_all,0)
-
-g = get_init_gfm_nn(p_all, x₀_plus[5], x₀_plus[19])
-res_nn = nlsolve(g,vcat(x₀,0.0,0.0))
-
-nn(res_nn.zero,p_nn)
-@assert converged(res_nn)
-gfm_nn(dx,res_nn.zero,p_all,0)
+##
+#INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON VOLTAGE
+nn_voltage = FastChain(FastDense(2, 3, tanh),
+                       FastDense(3, 2))
+p_nn_voltage = initial_params(nn_voltage)
+n_weights_nn_voltage = length(p_nn_voltage)
+p_all_voltage = vcat(p_nn_voltage, p_inv)
+x₀_nn_voltage = vcat(x₀, 0.0,0.0,nn_voltage([Vr(0),Vi(0)],p_nn_voltage)[1],nn_voltage([Vr(0),Vi(0)], p_nn_voltage)[2], x₀[5], x₀[19])
+dx = similar(x₀_nn_voltage)
+g = get_init_gfm_nn_voltage(p_all_voltage, x₀[5], x₀[19])
+res_nn_voltage= nlsolve(g,x₀_nn_voltage)
+@assert converged(res_nn_voltage)
+gfm_nn_voltage(dx,res_nn_voltage.zero,p_all_voltage,0)
 @assert all(isapprox.(dx, 0.0; atol=1e-8))
