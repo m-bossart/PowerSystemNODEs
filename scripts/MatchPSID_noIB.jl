@@ -55,6 +55,15 @@ injs_names =  [get_name(i) for i in injs]
 injs = injs[sortperm(injs_names)]
 disturbance_ControlReferenceChange = ControlReferenceChange(tfault, injs[1] , PowerSimulationsDynamics.P_ref_index, 0.8)
 
+sim = Simulation!(
+    MassMatrixModel,
+    sys,
+    pwd(),
+    tspan,
+    disturbance_NetworkSwitch,
+)
+
+
 #GET PARAMETERS TO USE IN UODE SURROGATE
 #pll
 ω_lp = get_ω_lp(surrogate_device.freq_estimator)
@@ -84,14 +93,6 @@ cf = get_cf(surrogate_device.filter)
 lg = get_lg(surrogate_device.filter)
 rg = get_rg(surrogate_device.filter)
 
-sim = Simulation!(
-    MassMatrixModel,
-    sys,
-    pwd(),
-    tspan,
-    disturbance_NetworkSwitch,
-)
-
 #References
 Vref = PSY.get_ext(surrogate_device)["control_refs"][1]
 ωref = PSY.get_ext(surrogate_device)["control_refs"][2]
@@ -106,6 +107,10 @@ surrogate_bus = get_component(Generator, sim.sys, surrogate_device_name).bus.num
 
 x₀_dict = get_initial_conditions(sim)[surrogate_device_name]
 x₀ = [value for (key,value) in x₀_dict ]
+
+dx = similar(x₀)
+gfm(dx,x₀,p_inv,0)
+@assert all(isapprox.(dx, 0.0; atol=1e-6))
 
 vr_index  = get(PSID.get_lookup(sim.simulation_inputs), surrogate_bus, 0)
 vi_index = vr_index + PSID.get_bus_count(sim.simulation_inputs)
@@ -123,7 +128,7 @@ Ii(t) = sim.solution(t)[ii_index]
 
 #Vr(t) = sin(t)
 #Vi(t) = 0.0
-push!(x₀, Vr(0.0), Vi(0.0))
+
 
 p1 = plot(get_state_series(sim,(surrogate_device_name,:ir_filter)), label = "real current PSID")
 p2 = plot(get_state_series(sim,(surrogate_device_name,:ii_filter)), label = "imaginary current PSID")
@@ -148,11 +153,11 @@ p4 = plot(get_voltage_angle_series(sim,surrogate_bus), label = "voltage ang PSID
 
 
 M = zeros(length(x₀) ,length(x₀) )
-for i = 1:length(x₀)-2
+for i = 1:length(x₀)
   M[i,i] = 1.0f0
 end
 
-uodefunc = ODEFunction(gfm_ib, mass_matrix = M) #changed to gfm?
+uodefunc = ODEFunction(gfm, mass_matrix = M) #changed to gfm?
 prob_uode = ODEProblem(uodefunc,x₀,tspan,p_inv)
 sol = solve(prob_uode,solver, dtmax=dtmax,saveat=tsteps)      #  Use same SOVLER!
 
