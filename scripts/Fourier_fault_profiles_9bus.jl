@@ -65,6 +65,7 @@ sim = Simulation!(
     tspan,
 
 )
+
 #Define a control reference change disturbance
 injs = collect(get_components(DynamicInjection, sys))
 for fault_inj in injs
@@ -83,7 +84,7 @@ p4 =plot()
 for dist in list_disturbances
     if typeof(dist) == NetworkSwitch
         color = :black
-    elseif typeof(dist) ==BranchTrip
+    elseif typeof(dist) == BranchTrip
         color =:red
     elseif typeof(dist) == ControlReferenceChange
         color = :green
