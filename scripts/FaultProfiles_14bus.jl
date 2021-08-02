@@ -97,7 +97,7 @@ source_bus = 2      #Bus number for the bus that will become the IB
 surrogate_bus = 16  #Bus number where the devices to be surrogatized are attached (cannot be reference bus in full system)
 
 devices = [inv_case78]#[inv_case78 dyn_gen_classic] # TODO add in the GFL and VSM
-dispatches = [1.0]#[0.9,1.0]  #fraction of loading relative to nominal case read from file
+#dispatches = [1.0]#[0.9,1.0]  #fraction of loading relative to nominal case read from file
 Prefchange = [1.0] # [0.8, 0.9] #fraction of initial reference
 n_devices = 2
 
@@ -108,9 +108,6 @@ to_json(sys,base_system_path , force=true)
 global sys = System(base_system_path)
 base_sys = System(base_system_path)
 surrogate_gens = collect(get_components(ThermalStandard, sys, x-> get_bus(x).number == surrogate_bus))  #TODO reformulate so that this is a list of the surrogate generators. Because we will need to filter often to not include this set.
-
-
-
 
 source_surrogate_branch = find_acbranch(source_bus, surrogate_bus)
 
@@ -146,91 +143,83 @@ for a in devices
                     gen_name = get_name(gen)
                     add_component!(sys, dyn_models[i](gen_name),gen)
                 end
-                for e in dispatches #TODO -Would need to go thorugh and change P for the generators as well.
-                    for load in get_components(PowerLoad,sys)
-                        orig_load = get_component(PowerLoad,base_sys,get_name(load))
-                        set_active_power!(load, get_active_power(orig_load)*e)
-                    end
 
-                    sim = Simulation!(MassMatrixModel, sys, pwd(), tspan) #Need to initialize before building disturbances
-                    disturbances = []
-                    disturbances = build_disturbances(sys)
-                    print_device_states(sim)        #BUG ωoc is not equal to 1.0. How is this possible? Does system frequency change?
+                sim = Simulation!(MassMatrixModel, sys, pwd(), tspan) #Need to initialize before building disturbances
+                disturbances = []
+                disturbances = build_disturbances(sys)
+                print_device_states(sim)
+
+
+                for gen in get_components(ThermalStandard,sys)
+                    @info get_ext(gen)
+                end
+                for (n,e) in enumerate(disturbances)
+                    sim = Simulation!(MassMatrixModel, sys, pwd(), tspan, e)
+                    to_json(sys,"systems/full_system.json", force=true)
                     @info solve_powerflow(sys)["flow_results"]
                     @info solve_powerflow(sys)["bus_results"]
-                    @info get_ext(collect(get_components(DynamicInverter,sys, x-> get_name(x) in get_name.(surrogate_gens)))[1])["control_refs"]
-                    @info get_ext(collect(get_components(DynamicInverter,sys, x-> get_name(x) in get_name.(surrogate_gens)))[2])["control_refs"]
 
-                    for gen in get_components(ThermalStandard,sys)
-                        @info get_ext(gen)
+                    P = get_active_power_flow(source_surrogate_branch)
+                    Q = get_reactive_power_flow(source_surrogate_branch)
+                    execute!(sim,
+                            solver,
+                            reset_simulation=true,dtmax=dtmax,saveat=tsteps);
+
+                    V = get_voltage_magnitude_series(sim,source_bus)[2]
+                    θ = get_voltage_angle_series(sim,source_bus)[2]
+
+                    t = sim.solution.t[1:end-1]
+                    if (sim.solution.retcode == :Success)
+                        global count_stable += 1
+                        plot!(p1, t, V, title = "Voltage magnitude time series source bus",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1,size =(3000,2000))
+                        plot!(p2, t, θ, title = "Voltage angle time series source bus",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1, size =(3000,2000))
+
+                        F_V = fft(V)
+                        F_V = F_V[freqs .>= 0]
+                        F_V = F_V/N
+                        F_V[2:end]= F_V[2:end]*2
+                        internal_voltage_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
+
+                        F_θ = fft(θ)
+                        F_θ = F_θ[freqs .>= 0]
+                        F_θ = F_θ/N
+                        F_θ[2:end]= F_θ[2:end]*2
+                        internal_angle_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
+
+                        inf_source = Source(
+                            name = string(count_stable),
+                            active_power = P,
+                            available = false, #availability
+                            reactive_power = Q,
+                            bus = slack_bus, #bus
+                            R_th = 0.0, #Rth
+                            X_th = 5e-9,#5e-6, #Xth
+                            internal_voltage = V[1],
+                            internal_angle =   θ[1],
+                        )
+                         @info abs(F_V[1])
+                         @info abs abs(F_θ[1])
+
+                        fault_source = PeriodicVariableSource(
+                            name = get_name(inf_source),
+                            R_th = 0.0,
+                            X_th = 0.0,
+                            internal_voltage_bias = abs(F_V[1]),
+                            internal_voltage_frequencies = freqs_pos[2:end],
+                            internal_voltage_coefficients = internal_voltage_coefficients,
+                            internal_angle_bias = abs(F_θ[1]),
+                            internal_angle_frequencies =  freqs_pos[2:end],
+                            internal_angle_coefficients =internal_angle_coefficients ,
+                        )
+
+                        add_component!(sys_faults, inf_source)
+                        add_component!(sys_faults, fault_source, inf_source)
+                    else
+                        global count_unstable += 1
                     end
-                    for (n,f) in enumerate(disturbances)
-                        sim = Simulation!(MassMatrixModel, sys, pwd(), tspan, f)
-                        to_json(sys,"systems/full_system.json", force=true)
-                        @info solve_powerflow(sys)["flow_results"]
-                        @info solve_powerflow(sys)["bus_results"]
-
-                        P = get_active_power_flow(source_surrogate_branch)
-                        Q = get_reactive_power_flow(source_surrogate_branch)
-                        execute!(sim,
-                                solver,
-                                reset_simulation=true,dtmax=dtmax,saveat=tsteps);
-
-                        V = get_voltage_magnitude_series(sim,source_bus)[2]
-                        θ = get_voltage_angle_series(sim,source_bus)[2]
-
-                        t = sim.solution.t[1:end-1]
-                        if (sim.solution.retcode == :Success)
-                            global count_stable += 1
-                            plot!(p1, t, V, title = "Voltage magnitude time series source bus",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1,size =(3000,2000))
-                            plot!(p2, t, θ, title = "Voltage angle time series source bus",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1, size =(3000,2000))
-
-                            F_V = fft(V)
-                            F_V = F_V[freqs .>= 0]
-                            F_V = F_V/N
-                            F_V[2:end]= F_V[2:end]*2
-                            internal_voltage_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
-
-                            F_θ = fft(θ)
-                            F_θ = F_θ[freqs .>= 0]
-                            F_θ = F_θ/N
-                            F_θ[2:end]= F_θ[2:end]*2
-                            internal_angle_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
-
-                            inf_source = Source(
-                                name = string(count_stable),
-                                active_power = P,
-                                available = false, #availability
-                                reactive_power = Q,
-                                bus = slack_bus, #bus
-                                R_th = 0.0, #Rth
-                                X_th = 5e-9,#5e-6, #Xth
-                                internal_voltage = V[1],
-                                internal_angle =   θ[1],
-                            )
-                             @info abs(F_V[1])
-                             @info abs abs(F_θ[1])
-
-                            fault_source = PeriodicVariableSource(
-                                name = get_name(inf_source),
-                                R_th = 0.0,
-                                X_th = 0.0,
-                                internal_voltage_bias = abs(F_V[1]),
-                                internal_voltage_frequencies = freqs_pos[2:end],
-                                internal_voltage_coefficients = internal_voltage_coefficients,
-                                internal_angle_bias = abs(F_θ[1]),
-                                internal_angle_frequencies =  freqs_pos[2:end],
-                                internal_angle_coefficients =internal_angle_coefficients ,
-                            )
-
-                            add_component!(sys_faults, inf_source)
-                            add_component!(sys_faults, fault_source, inf_source)
-                        else
-                            global count_unstable += 1
-                        end
-                        global counter  += 1;  print("Plotting simulation number ", counter, "\n")
-                    end
+                    global counter  += 1;  print("Plotting simulation number ", counter, "\n")
                 end
+
                 global sys = System(base_system_path)
                 @info "Building new system"
             end
