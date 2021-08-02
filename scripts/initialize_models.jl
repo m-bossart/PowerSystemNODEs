@@ -1,4 +1,4 @@
-#Script for exploring techniques to initialize surrogate models. 
+#Script for exploring techniques to initialize surrogate models.
 
 using Pkg
 Pkg.activate(".")
@@ -13,7 +13,10 @@ const PSID = PowerSimulationsDynamics
 
 include("../models/DynamicComponents.jl")
 include("../models/init_functions.jl")
-include("../models/inf_bus_models.jl")
+# Place holders for time_dependent functions from Periodic Source
+Vr(t) = 1.0000000201046026
+Vi(t) = 1.0880616805155173e-9
+
 
 #SIMULATION PARAMETERS
 dtmax = 0.02
