@@ -72,7 +72,7 @@ Builds a train and test system by combining a system with pre-defined faults and
 
 function build_train_test(sys_faults::System,  sys_full::System, Ref_bus_number::Integer, train_split; add_pvs = true )
     sys_train = deepcopy(sys_full)
-    remove_components!(sys_train, FixedAdmittance)
+    #remove_components!(sys_train, FixedAdmittance) #BUG add back if you include fixed admittance
     remove_components!(sys_train, PowerLoad)
     remove_components!(sys_train, LoadZone)
     remove_components!( x-> !(get_name(get_area(get_to(x))) == "surrogate" && get_name(get_area(get_from(x)))  == "surrogate"), sys_train, Arc)
@@ -104,6 +104,7 @@ function build_train_test(sys_faults::System,  sys_full::System, Ref_bus_number:
 
         if rand()<train_split
             set_bus!(s,slack_bus_train)
+            display(s)
             add_component!(sys_train, s)
             add_pvs && add_component!(sys_train, pvs, s)
         else

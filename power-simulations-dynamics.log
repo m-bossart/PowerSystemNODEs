@@ -1,172 +1,100 @@
-┌ Debug: 2021-07-15T12:26:32.228 [23520:1]: System doesn't contain Dynamic Branches
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_inputs.jl:188
-┌ Debug: 2021-07-15T12:26:32.228 [23520:1]: gen-2
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_inputs.jl:203
-┌ Debug: 2021-07-15T12:26:32.228 [23520:1]: gen-1
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_inputs.jl:203
-┌ Debug: 2021-07-15T12:26:32.228 [23520:1]: gen-3
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_inputs.jl:203
-┌ Debug: 2021-07-15T12:26:32.228 [23520:1]: Using default mass matrix entries FixedDCSource
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\DCside_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.228 [23520:1]: Using default mass matrix entries KauraPLL
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\frequency_estimator_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.229 [23520:1]: Using default mass matrix entries OuterControl{VirtualInertia, ReactivePowerDroop}
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\outer_control_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.229 [23520:1]: Using default mass matrix entries VoltageModeControl
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\inner_control_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.229 [23520:1]: Using default mass matrix entries AverageConverter
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\converter_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.229 [23520:1]: Using default mass matrix entries LCLFilter
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\filter_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.229 [23520:1]: Using default mass matrix entries FixedDCSource
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\DCside_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.229 [23520:1]: Using default mass matrix entries KauraPLL
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\frequency_estimator_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries OuterControl{VirtualInertia, ReactivePowerDroop}
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\outer_control_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries VoltageModeControl
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\inner_control_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries AverageConverter
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\converter_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries LCLFilter
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\filter_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries FixedDCSource
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\DCside_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries KauraPLL
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\frequency_estimator_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries OuterControl{VirtualInertia, ReactivePowerDroop}
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\outer_control_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries VoltageModeControl
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\inner_control_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries AverageConverter
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\converter_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Using default mass matrix entries LCLFilter
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\models\inverter_models\filter_models.jl:6
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Base.ImmutableDict(:bus_count => 9, :total_variables => 75, :first_dyn_branch_point => 0, :first_dyn_injection_pointer => 19, :branches_n_states => 0, :injection_n_states => 57)
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_inputs.jl:279
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Simulation Inputs Created
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation.jl:181
-┌ Info: 2021-07-15T12:26:32.230 [23520:1]: Initializing Simulation States
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation.jl:210
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Auxiliary Arrays created with Type Real
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_inputs.jl:127
-┌ Debug: 2021-07-15T12:26:32.230 [23520:1]: Start state intialization routine
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:183
-┌ Info: 2021-07-15T12:26:32.230 [23520:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\61h6O\src\base.jl:339
-┌ Info: 2021-07-15T12:26:32.230 [23520:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\61h6O\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-07-15T12:26:32.230 [23520:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\61h6O\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-07-15T12:26:32.231 [23520:1]: PowerFlow solve converged, the results have been stored in the system
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\61h6O\src\utils\power_flow.jl:307
-┌ Info: 2021-07-15T12:26:32.231 [23520:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\61h6O\src\base.jl:345
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: Updating Voltage guess
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:12
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 8
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 0.9968650171739423
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = 0.06534774943298297
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 4
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 0.9871080838274241
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = -0.04143161307976152
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 1
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 1.0
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = 0.0
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 5
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 0.9747543326485173
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = -0.06843782045151477
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 2
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 0.9859856801967184
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = 0.1668299686717427
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 6
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 1.0055513661304236
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = 0.03313343781814201
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 7
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 0.9884586864602286
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = 0.010189096464329677
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 9
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 0.9566047341697222
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = -0.07270419223837907
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: 3
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:14
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_r
-│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 0.9966015236421641
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:15
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: V_i
-│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = 0.08237355810038187
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:16
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: Updating Source internal voltages
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:26
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: Updating Dynamic Injection Component Initial Guess
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:46
-┌ Debug: 2021-07-15T12:26:32.231 [23520:1]: gen-2
+┌ Debug: 2021-08-02T17:25:42.062 [18964:1]: System doesn't contain Dynamic Branches
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_inputs.jl:188
+┌ Debug: 2021-08-02T17:25:42.062 [18964:1]: 1
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_inputs.jl:206
+┌ Debug: 2021-08-02T17:25:42.062 [18964:1]: 2
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_inputs.jl:206
+┌ Debug: 2021-08-02T17:25:42.062 [18964:1]: Using default mass matrix entries FixedDCSource
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\DCside_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.062 [18964:1]: Using default mass matrix entries KauraPLL
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\frequency_estimator_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.065 [18964:1]: Using default mass matrix entries OuterControl{VirtualInertia, ReactivePowerDroop}
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\outer_control_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.066 [18964:1]: Using default mass matrix entries VoltageModeControl
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\inner_control_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.066 [18964:1]: Using default mass matrix entries AverageConverter
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\converter_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.066 [18964:1]: Using default mass matrix entries LCLFilter
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\filter_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.066 [18964:1]: Using default mass matrix entries FixedDCSource
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\DCside_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.066 [18964:1]: Using default mass matrix entries KauraPLL
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\frequency_estimator_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Using default mass matrix entries OuterControl{VirtualInertia, ReactivePowerDroop}
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\outer_control_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Using default mass matrix entries VoltageModeControl
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\inner_control_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Using default mass matrix entries AverageConverter
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\converter_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Using default mass matrix entries LCLFilter
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\models\inverter_models\filter_models.jl:6
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Base.ImmutableDict(:bus_count => 2, :total_variables => 42, :first_dyn_branch_point => 0, :first_dyn_injection_pointer => 5, :branches_n_states => 0, :injection_n_states => 38)
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_inputs.jl:282
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Simulation Inputs Created
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation.jl:181
+┌ Info: 2021-08-02T17:25:42.069 [18964:1]: Initializing Simulation States
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation.jl:210
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Auxiliary Arrays created with Type Real
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_inputs.jl:127
+┌ Debug: 2021-08-02T17:25:42.069 [18964:1]: Start state intialization routine
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:197
+┌ Info: 2021-08-02T17:25:42.069 [18964:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
+┌ Info: 2021-08-02T17:25:42.069 [18964:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-08-02T17:25:42.069 [18964:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-08-02T17:25:42.070 [18964:1]: PowerFlow solve converged, the results have been stored in the system
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\power_flow.jl:311
+┌ Info: 2021-08-02T17:25:42.070 [18964:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:345
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: Updating Voltage guess
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:12
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: BUS 16      
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:14
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: V_r
+│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 1.0410908756650268
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:15
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: V_i
+│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = -0.09030386817311646
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:16
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: BUS 2       
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:14
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: V_r
+│   PSY.get_magnitude(bus) * cos(PSY.get_angle(bus)) = 1.0410876104368996
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:15
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: V_i
+│   PSY.get_magnitude(bus) * sin(PSY.get_angle(bus)) = -0.09030739697749836
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:16
+┌ Debug: 2021-08-02T17:25:42.070 [18964:1]: Updating Source internal voltages
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:26
+┌ Warning: 2021-08-02T17:25:42.097 [18964:1]: Initialization in Source failed
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\initialization\init_device.jl:81
+┌ Debug: 2021-08-02T17:25:42.097 [18964:1]: Updating Dynamic Injection Component Initial Guess
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:46
+┌ Debug: 2021-08-02T17:25:42.097 [18964:1]: 1
 │   typeof(d) = ThermalStandard
 │   typeof(dynamic_device) = DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:51
-┌ Debug: 2021-07-15T12:26:32.233 [23520:1]: gen-1
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:51
+┌ Debug: 2021-08-02T17:25:42.097 [18964:1]: 2
 │   typeof(d) = ThermalStandard
 │   typeof(dynamic_device) = DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:51
-┌ Debug: 2021-07-15T12:26:32.234 [23520:1]: gen-3
-│   typeof(d) = ThermalStandard
-│   typeof(dynamic_device) = DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:51
-┌ Debug: 2021-07-15T12:26:32.236 [23520:1]: No Dynamic Branches in the system
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:191
-┌ Debug: 2021-07-15T12:26:32.236 [23520:1]: Start NLSolve System Run
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:159
-┌ Debug: 2021-07-15T12:26:32.236 [23520:1]: [1.0, 0.9859856801967184, 0.9966015236421641, 0.9871080838274241, 0.9747543326485173, 1.0055513661304236, 0.9884586864602286, 0.9968650171739423, 0.9566047341697222, 0.0, 0.1668299686717427, 0.08237355810038187, -0.04143161307976152, -0.06843782045151477, 0.03313343781814201, 0.010189096464329677, 0.06534774943298297, -0.07270419223837907, 1.0, 0.7289890245434635, 0.5811197011536825, 0.0018391481568985114, -0.0012356347095507413, 0.07315148641677477, -0.01910626421497047, 1.0419453162103094, -0.27072260869544484, 1.0765411152529802, 0.0, 0.0, 0.47478564103405135, 1.5789555429301891, 0.29422107865011016, 0.9574656946010549, 0.4921384119265514, 1.6153737854125931, 0.22336861724969131, 1.0, 0.25465336588845644, 0.33731598132686913, 0.0008691846542462578, -0.0005404882921095674, 0.07382204988457522, -0.009014227701644452, 1.0537077500689835, -0.1279439811050428, 1.0614469769407842, 0.0, 0.0, 0.13382222795208537, 0.7088190007120614, -0.1459740005000681, 1.0519567500002052, 0.14162161199990994, 0.719299, -0.2238188, 1.0, 0.4256304939874555, 0.01504461697024398, 0.0011483539648836178, -0.0002184225468177714, 0.06887214978343596, -0.011839294427553448, 0.9822986499784113, -0.16903770363085807, 0.9967368670328657, 0.0, 0.0, 0.2552157479611068, 0.8175355566452835, 0.27392775623772075, 0.9644514153921606, 0.25163038260688325, 0.8361562049581069, 0.2025583514987622]
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:160
-┌ Info: 2021-07-15T12:26:32.244 [23520:1]: Initialization succeeded with a tolerance of 1.0e-9. Saving solution
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:146
-┌ Debug: 2021-07-15T12:26:32.245 [23520:1]: Write result to initial guess vector under condition converged = true
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_initialization.jl:166
-┌ Info: 2021-07-15T12:26:32.245 [23520:1]: Attaching Perturbations
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation.jl:186
-┌ Debug: 2021-07-15T12:26:32.245 [23520:1]: The simulation has no perturbations
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation.jl:188
-┌ Debug: 2021-07-15T12:26:32.245 [23520:1]: Auxiliary Arrays created with Type Real
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation_inputs.jl:127
-┌ Info: 2021-07-15T12:26:32.245 [23520:1]: Simulations status = BUILT
-└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\HZMHg\src\base\simulation.jl:278
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:51
+┌ Debug: 2021-08-02T17:25:42.108 [18964:1]: No Dynamic Branches in the system
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:205
+┌ Debug: 2021-08-02T17:25:42.108 [18964:1]: Start NLSolve System Run
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:166
+┌ Debug: 2021-08-02T17:25:42.108 [18964:1]: [1.0410876104368996, 1.0410908756650268, -0.09030739697749836, -0.09030386817311646, 1.0, 0.04723892790198696, 0.3590757254859389, 0.0004941267897173991, -0.0004987515790096194, 0.08427093378493758, -0.005229357439416802, 1.114012054046194, -0.06845579554207258, 1.1161133670929064, 0.0, -3.2669589726637247e-34, -0.014133680444344009, 0.3569498717217372, -0.2502005069365625, 1.1160018910304992, -0.015774264477640534, 0.3558674220227378, -0.3267819483559774, 1.0, 0.041537851212655005, 0.35470951969322695, 0.0004429848938036394, -0.00044206165822082257, 0.07823984690861324, -0.004897525769980674, 1.1081251762929971, -0.06862468765585447, 1.110248058380224, -2.465190328815662e-32, 6.443692945108872e-34, -0.020311804071715435, 0.35741180206859197, -0.25075878238866645, 1.1100190390751217, -0.02254959041307912, 0.3558674220227378, -0.3267819483559774]
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:167
+┌ Info: 2021-08-02T17:25:42.143 [18964:1]: Initialization succeeded with a tolerance of 1.0e-9 using solver trust_region. Saving solution.
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:151
+┌ Debug: 2021-08-02T17:25:42.143 [18964:1]: Write result to initial guess vector under condition converged = true
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_initialization.jl:177
+┌ Info: 2021-08-02T17:25:42.143 [18964:1]: Attaching Perturbations
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation.jl:186
+┌ Debug: 2021-08-02T17:25:42.143 [18964:1]: The simulation has no perturbations
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation.jl:188
+┌ Debug: 2021-08-02T17:25:42.143 [18964:1]: Auxiliary Arrays created with Type Real
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation_inputs.jl:127
+┌ Info: 2021-08-02T17:25:42.143 [18964:1]: Simulations status = BUILT
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation.jl:278

@@ -60,7 +60,7 @@ end
 function build_disturbances(sys) #TODO make this more flexible, add options for which faults to include
     disturbances = []
     #BRANCH FAULTS
-    lines = deepcopy(collect(get_components(Line, sys, x-> get_name(x) == "BUS 4       -BUS 5       -i_7")))
+    lines = deepcopy(collect(get_components(Line, sys, x-> get_name(x) == "BUS 4       -BUS 5       -i_7"))) #TODO - change back to
     for l in lines
         push!(disturbances, BranchTrip(tfault,get_name(l)))
     end
@@ -88,7 +88,10 @@ freqs_pos = freqs[freqs .>= 0]
 tfault = 0.1
 solver = Rodas5()
 base_system_path = "systems\\base_system.json"
-sys = System("cases/IEEE 14 bus_modified_33.raw")
+
+#BUG possible power flow issues using 14-bus system due to Fixed Admittance
+#sys = System("cases/IEEE 14 bus_modified_33.raw")
+sys = System("cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw")
 #You want a single line connecting the source_bus and surrogate_bus becaues this will be the structure in the 2bus train system.
 source_bus = 2      #Bus number for the bus that will become the IB
 surrogate_bus = 16  #Bus number where the devices to be surrogatized are attached (cannot be reference bus in full system)
@@ -163,7 +166,9 @@ for a in devices
                     end
                     for (n,f) in enumerate(disturbances)
                         sim = Simulation!(MassMatrixModel, sys, pwd(), tspan, f)
-
+                        to_json(sys,"systems/full_system.json", force=true)
+                        @info solve_powerflow(sys)["flow_results"]
+                        @info solve_powerflow(sys)["bus_results"]
 
                         P = get_active_power_flow(source_surrogate_branch)
                         Q = get_reactive_power_flow(source_surrogate_branch)
@@ -171,14 +176,14 @@ for a in devices
                                 solver,
                                 reset_simulation=true,dtmax=dtmax,saveat=tsteps);
 
-                        V = get_voltage_magnitude_series(sim,surrogate_bus)[2]
-                        θ = get_voltage_angle_series(sim,surrogate_bus)[2]
+                        V = get_voltage_magnitude_series(sim,source_bus)[2]
+                        θ = get_voltage_angle_series(sim,source_bus)[2]
 
                         t = sim.solution.t[1:end-1]
                         if (sim.solution.retcode == :Success)
                             global count_stable += 1
-                            plot!(p1, t, V, title = "Voltage magnitude time series",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1,size =(3000,2000))
-                            plot!(p2, t, θ, title = "Voltage angle time series",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1, size =(3000,2000))
+                            plot!(p1, t, V, title = "Voltage magnitude time series source bus",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1,size =(3000,2000))
+                            plot!(p2, t, θ, title = "Voltage angle time series source bus",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1, size =(3000,2000))
 
                             F_V = fft(V)
                             F_V = F_V[freqs .>= 0]
@@ -200,9 +205,11 @@ for a in devices
                                 bus = slack_bus, #bus
                                 R_th = 0.0, #Rth
                                 X_th = 5e-9,#5e-6, #Xth
-                                internal_voltage = abs(F_V[1]),
-                                internal_angle =   abs(F_θ[1])
+                                internal_voltage = V[1],
+                                internal_angle =   θ[1],
                             )
+                             @info abs(F_V[1])
+                             @info abs abs(F_θ[1])
 
                             fault_source = PeriodicVariableSource(
                                 name = get_name(inf_source),
@@ -211,7 +218,7 @@ for a in devices
                                 internal_voltage_bias = abs(F_V[1]),
                                 internal_voltage_frequencies = freqs_pos[2:end],
                                 internal_voltage_coefficients = internal_voltage_coefficients,
-                                internal_angle_bias =  abs(F_θ[1]),
+                                internal_angle_bias = abs(F_θ[1]),
                                 internal_angle_frequencies =  freqs_pos[2:end],
                                 internal_angle_coefficients =internal_angle_coefficients ,
                             )
@@ -266,6 +273,3 @@ display(p3)
 
 
 to_json(sys_faults,"systems/fault_library.json", force=true)
-
-
-#TODO:  To check we can write a script to read the json file, and re-generate  the time domain data .

@@ -23,9 +23,8 @@ for g in get_components(ThermalStandard,sys)
     inv_case = inv_case78(get_name(g))
     add_component!(sys, inv_case, g)
 end
-solve_powerflow(sys)["bus_results"]
-sim = Simulation!(MassMatrixModel, sys, pwd(), tspan)
-print_device_states(sim)
-collect(get_components(DynamicInverter,sys))[1]
 
-x₀_dict = get_initial_conditions(sim)
+
+sim = Simulation!(MassMatrixModel, sys, pwd(), tspan)
+display(solve_powerflow(sys)["bus_results"])
+display( get_initial_conditions(sim)["Vm"])

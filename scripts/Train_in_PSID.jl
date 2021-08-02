@@ -64,24 +64,27 @@ to_json(sys_test,"systems/sys_test.json", force = true)
 
 available_source = activate_next_source!(sys_train)
 
-@info solve_powerflow(sys_train)["flow_results"]
-@info solve_powerflow(sys_train)["bus_results"]
+#Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
+Vsource = get_internal_voltage(available_source)
+set_magnitude!(get_bus(available_source),Vsource)
+θsource = get_internal_angle(available_source)
+set_angle!(get_bus(available_source),θsource)
+
 sim = Simulation!(
     MassMatrixModel,
     sys_train,
     pwd(),
     tspan,
 )
+@info solve_powerflow(sys_train)["flow_results"]
+@info solve_powerflow(sys_train)["bus_results"]
 
 #TODO Pretty print the control references and states of the dynamic inverters
-@info get_ext(collect(get_components(DynamicInverter,sys_train))[1])["control_refs"]
-@info get_ext(collect(get_components(DynamicInverter,sys_train))[2])["control_refs"]
+for inv in get_components(DynamicInverter,sys_train)
+    @info "control refs", get_ext(inv)["control_refs"]
+    @info "initial conditions", get_initial_conditions(sim)[get_name(inv)]
+end
 
-
-#x₀_dict = get_initial_conditions(sim)["1"]
-#x₀ = Float64.([value for (key,value) in x₀_dict])
-#refs = get_ext(collect(get_components(DynamicInverter, sys_train))[1])["control_refs"]
-print_device_states(sim)0
 
 ## Below this is initailizing the surrogate
 
