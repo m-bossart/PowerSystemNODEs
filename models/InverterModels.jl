@@ -1,7 +1,7 @@
 #A model of a grid forming inverter.
 #This is the type of model that we want to surrogatize usign UODEs
 #Vr(t) and Vi(t) are how the model interacts with a larger system
-
+#TODO - add the IB as an algebraic state to both gfm and surrogate model
 #19th order GFM model
 function gfm(dx,x,p,t)
     #STATE INDEX AND STATES
@@ -49,7 +49,7 @@ function gfm(dx,x,p,t)
     cf = p[21]
     lg = p[22]
     rg = p[23]
-    Vref = p[24]    #Reference treated as parameter
+    Vref = p[24]    #Reference treated as parameter TODO include references through a closure instead. 
     ωref = p[25]    #Reference treated as parameter
     Pref = p[26]    #Reference treated as parameter
     Qref = p[27]    #Reference treated as parameter

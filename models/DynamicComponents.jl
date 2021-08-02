@@ -60,6 +60,8 @@ function inv_case78(static_device)
     )
 end
 
+
+
 function add_source_to_ref(sys::System)
     for g in get_components(StaticInjection, sys)
         isa(g, ElectricLoad) && continue
