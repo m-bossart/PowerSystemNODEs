@@ -232,7 +232,7 @@ p = plot(p1,p2, layout= (2,1))
 display(p)
 png(p,"figs/fault_fft_invs")
 print( "Considered...\n", length(devices), " device model(s) at each of the non-surrogate generator bus\n")
-print(length(dispatches), " system loading levels\n")
+
 print(length(build_disturbances(sys)), " line or reference change faults\n\n")
 print("Resulting in...\n")
 print(count_stable, " stable runs\n")
@@ -256,9 +256,5 @@ for fault_source in fault_sources
     plot!(p3,tsteps, V_reconstruct, title="reconstructed voltage mag")
 end
 display(p3)
-
-
-
-
 
 to_json(sys_faults,"systems/fault_library.json", force=true)
