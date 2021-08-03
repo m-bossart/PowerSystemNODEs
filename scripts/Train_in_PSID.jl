@@ -76,51 +76,53 @@ sim = Simulation!(
     pwd(),
     tspan,
 )
-@info solve_powerflow(sys_train)["flow_results"]
-@info solve_powerflow(sys_train)["bus_results"]
+@info "train system power flow", solve_powerflow(sys_train)["flow_results"]
+@info "train system power flow", solve_powerflow(sys_train)["bus_results"]
 
-#TODO Pretty print the control references and states of the dynamic inverters
-for inv in get_components(DynamicInverter,sys_train)
-    @info "control refs", get_ext(inv)["control_refs"]
-    @info "initial conditions", get_initial_conditions(sim)[get_name(inv)]
+for g in get_components(DynamicInverter,sys_train)
+    @info "real current", get_initial_conditions(sim)[get_name(g)][:ir_filter]
+    @info "imag current", get_initial_conditions(sim)[get_name(g)][:ii_filter]
 end
 
 
 ## Below this is initailizing the surrogate. Need to reforumulate
+p_start = [500.0, 0.084, 4.69, 2.0, 400.0, 20.0,0.2,1000.0,0.59,  736.0, 0.0, 0.0, 0.2,  1.27, 14.3,    0.0,
+ 50.0,  0.2,  0.08, 0.003, 0.074, 0.2,0.01]
 
-Ir, Ii = get_total_initial_current(sim) #TODO implement this. sum the currents from all devices.
-#TODO Use Ir,Ii from above along with Vr,Vi to initialize the surrogate.
-#Build a system in PSID (sys_init) to get the approximate x₋0   and then fine tune with custom methods.
+sys_init = build_sys_init(sys_train, p_start)
+sim_init = Simulation!(
+    MassMatrixModel,
+    sys_init,
+    pwd(),
+    tspan,
+)
+@info "init system power flow", solve_powerflow(sys_init)["flow_results"]
+@info "init system power flow", solve_powerflow(sys_init)["bus_results"]
+
+for g in get_components(DynamicInverter,sys_init)
+    @info "real current", get_initial_conditions(sim_init)[get_name(g)][:ir_filter]
+    @info "imag current", get_initial_conditions(sim_init)[get_name(g)][:ii_filter]
+end
+
+x₀_dict = get_initial_conditions(sim_init)["1"]
+x₀ = Float64.([value for (key,value) in x₀_dict])
+
+##
 
 
-
-execute!(sim, #simulation structure
-        solver, #IDA() is Sundials DAE Solver for implicit form
-        reset_simulation=true,dtmax=dtmax,saveat=tsteps); #
+#TODO use x0 as a starting guess to initialize the various surrogates!
+#TODO confirm the surrogate matches in a steady state sim (cannot use PVS yet!)
 
 
 #TODO The Source has the available field... get the available source and then get the dynamic injector from it.
 active_source = collect(get_components(Source, sys_train,  x -> PSY.get_available(x)))[1]
-one_source = collect(get_components(Source, sys_train))[1]
-V, θ = PVS_to_function_of_time(get_dynamic_injector(active_source))
+V, θ = Source_to_function_of_time(active_source)
 M = MassMatrix(19, 0)
 gfm_func = ODEFunction(gfm, mass_matrix = M)
 
-#TODO- need to build a two bus system in PSID to get the initial conditions
-p_start = [500.0, 0.084, 4.69, 2.0, 400.0, 20.0,0.2,1000.0,0.59,  736.0, 0.0, 0.0, 0.2,  1.27, 14.3,    0.0,
- 50.0,  0.2,  0.08, 0.003, 0.074, 0.2,0.01]
-inv_forinit = collect(get_components(DynamicInverter,sys_train_surrogate))[1]
-set_inv_parameters!(inv_forinit, p_start)
-#BUG Cannot build a simulation with the PVS, but this is needed to initialize the scratch model...
-
-
-x₀_dict = get_initial_conditions(sim)["1"]
-x₀ = Float64.([value for (key,value) in x₀_dict])
-refs = get_ext(collect(get_components(DynamicInverter, sys_surrogate))[1])["control_refs"]
-#TODO : references should not be learned. Need to be included in the function throug ha closrue?
-p_all = [p_start, p_refs ]
-
-
+#refs = get_ext(collect(get_components(DynamicInverter, sys_surrogate))[1])["control_refs"]
+#TODO : references should not be learned. Need to be included in the function throug a closrue?
+#p_all = [p_start, p_refs ]
 
 gfm_prob = ODEProblem(gfm_func,x₀,Float32.(tspan),p_inv)
 #TODO Build an ODE problem with the various surrogate models

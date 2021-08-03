@@ -121,7 +121,7 @@ end
 
 Takes in a PeriodicVariableSource from PowerSystems and generates functions of time for voltage magnitude and angle
 """
-function PVS_to_function_of_time(source::PeriodicVariableSource)
+function Source_to_function_of_time(source::PeriodicVariableSource)
      V_bias = get_internal_voltage_bias(source)
      V_freqs = get_internal_voltage_frequencies(source)
      V_coeffs = get_internal_voltage_coefficients(source)
@@ -146,6 +146,21 @@ function PVS_to_function_of_time(source::PeriodicVariableSource)
    end
     return (V, θ)
 end
+
+function Source_to_function_of_time(source::Source)
+    function V(t::Float64)
+        return get_internal_voltage(source)
+    end
+
+   function θ(t::Float64)
+       return get_internal_angle(source)
+   end
+    return (V, θ)
+end
+
+
+
+
 """
     activate_next_source!(sys::System)
 
@@ -202,12 +217,37 @@ function find_acbranch(from_bus_number::Int, to_bus_number::Int)
 end
 
 
-function build_sys_init(sys_train::System)
-    #strip the devices at the surrogate device, add a single device.
-end
-function initalize_sys_init!(sys::System, p, )
-    #Take the current ODE parameters, the initialization system.
-    return x0
+function build_sys_init(sys_train::System, p)
+    sys_init = deepcopy(sys_train)
+    base_power_total = 0.0
+    power_total = 0.0
+    for gfm in get_components(ThermalStandard,sys_init, x->typeof(get_dynamic_injector(x)) == DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter})
+        base_power_total += get_base_power(gfm)
+        power_total +=  get_base_power(gfm) * get_active_power(gfm)
+        @info base_power_total
+        @info power_total
+        remove_component!(sys_init, get_dynamic_injector(gfm))
+        remove_component!(sys_init, gfm)
+    end
+    g = ThermalStandard(
+       name = string(1),
+       available = true,
+       status = true,
+       bus = collect(get_components(Bus,sys_init, x->get_bustype(x) == BusTypes.PV))[1],
+       active_power = power_total / base_power_total, #Only divide base power by n_devices
+       reactive_power = 0.0,
+       rating =  total_rating/n_devices,
+       active_power_limits=(min=0.0, max=3.0),
+       reactive_power_limits= (-3.0,3.0),
+       ramp_limits=nothing,
+       operation_cost=ThreePartCost(nothing),
+       base_power =  base_power_total,
+       )
+    add_component!(sys_init, g)
+    inv_typ = inv_case78(get_name(g))
+    set_inv_parameters!(inv_typ, p_start)
+    add_component!(sys_init, inv_typ, g)
+    return sys_init
 end
 
 
