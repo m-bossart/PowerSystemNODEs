@@ -217,7 +217,7 @@ function find_acbranch(from_bus_number::Int, to_bus_number::Int)
 end
 
 
-function build_sys_init(sys_train::System, p)
+function build_sys_init(sys_train::System)
     sys_init = deepcopy(sys_train)
     base_power_total = 0.0
     power_total = 0.0
@@ -245,9 +245,25 @@ function build_sys_init(sys_train::System, p)
        )
     add_component!(sys_init, g)
     inv_typ = inv_case78(get_name(g))
-    set_inv_parameters!(inv_typ, p_start)
+    #set_inv_parameters!(inv_typ, p_start)
     add_component!(sys_init, inv_typ, g)
     return sys_init
+end
+
+function initalize_sys_init!(sys::System, p::Vector{Float64})
+    gfm = collect(get_components(DynamicInverter, sys))[1]
+    #@info "# of gfms", get_components(DynamicInverter, sys)
+    set_inv_parameters!(gfm, p)
+    sim = Simulation!(
+        MassMatrixModel,
+        sys,
+        pwd(),
+        (0.0, 1.0),
+    )
+    x₀_dict = get_initial_conditions(sim)[get_name(gfm)]
+    x₀ = Float64.([value for (key,value) in x₀_dict])
+    refs = get_ext(gfm)["control_refs"]
+    return x₀, refs
 end
 
 

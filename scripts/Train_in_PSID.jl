@@ -10,6 +10,7 @@ const PSY = PowerSystems
 using Plots
 using FFTW
 using Statistics
+using NLsolve
 include("../models/DynamicComponents.jl")
 include("../models/InverterModels.jl")
 include("../models/StaticComponents.jl")
@@ -20,7 +21,7 @@ include("../models/init_functions.jl")
 #Make the non-reference bus a PV bus.
 #set_bustype!(collect(get_components(Bus, sys_full, x->x.bustype==BusTypes.PQ ))[1],BusTypes.PV)
 
-const train_split = 0.5     #proportion of faults for training (rest for test)
+const train_split = 0.99    #proportion of faults for training (rest for test)
 n_devices = 10             #number of devices in the surrogate
 param_range = (0.9,1.1)
 total_rating = 150.0  #MVA rating at the surrogate bus.
@@ -58,10 +59,7 @@ sys_train, sys_test = build_train_test(sys_faults, sys_full, 2, train_split, add
 to_json(sys_train,"systems/sys_train.json", force = true )
 to_json(sys_test,"systems/sys_test.json", force = true)
 
-
-##
 ##############################TRAINING##########################################
-
 available_source = activate_next_source!(sys_train)
 
 #Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
@@ -83,42 +81,41 @@ for g in get_components(DynamicInverter,sys_train)
     @info "real current", get_initial_conditions(sim)[get_name(g)][:ir_filter]
     @info "imag current", get_initial_conditions(sim)[get_name(g)][:ii_filter]
 end
+p_inv = [500.0, 0.084, 4.69, 2.0, 400.0, 20.0,0.2,1000.0,0.59,  736.0, 0.0, 0.0, 0.2,  1.27, 14.3, 0.0, 50.0,  0.2,  0.08, 0.003, 0.074, 0.2,0.01]
+
+sys_init = build_sys_init(sys_train)              #Build the initialization system (done once)
+transformer = collect(get_components(Transformer2W,sys_init))[1]
+
+x₀, refs = initalize_sys_init!(sys_init, p_inv) #Set the current parameters, get the initial conditions and refs
 
 
-## Below this is initailizing the surrogate. Need to reforumulate
-p_start = [500.0, 0.084, 4.69, 2.0, 400.0, 20.0,0.2,1000.0,0.59,  736.0, 0.0, 0.0, 0.2,  1.27, 14.3,    0.0,
- 50.0,  0.2,  0.08, 0.003, 0.074, 0.2,0.01]
-
-sys_init = build_sys_init(sys_train, p_start)
-sim_init = Simulation!(
-    MassMatrixModel,
-    sys_init,
-    pwd(),
-    tspan,
-)
-@info "init system power flow", solve_powerflow(sys_init)["flow_results"]
+@info "init system power flw", solve_powerflow(sys_init)["flow_results"]
 @info "init system power flow", solve_powerflow(sys_init)["bus_results"]
-
-for g in get_components(DynamicInverter,sys_init)
-    @info "real current", get_initial_conditions(sim_init)[get_name(g)][:ir_filter]
-    @info "imag current", get_initial_conditions(sim_init)[get_name(g)][:ii_filter]
-end
-
-x₀_dict = get_initial_conditions(sim_init)["1"]
-x₀ = Float64.([value for (key,value) in x₀_dict])
-
-##
-
-
-#TODO use x0 as a starting guess to initialize the various surrogates!
-#TODO confirm the surrogate matches in a steady state sim (cannot use PVS yet!)
-
 
 #TODO The Source has the available field... get the available source and then get the dynamic injector from it.
 active_source = collect(get_components(Source, sys_train,  x -> PSY.get_available(x)))[1]
 V, θ = Source_to_function_of_time(active_source)
 M = MassMatrix(19, 0)
 gfm_func = ODEFunction(gfm, mass_matrix = M)
+
+
+p_all = vcat(p_inv, refs, get_x(transormer), get_r(transformer))
+##
+
+dx = similar(x₀)
+gfm(dx,x₀,p_all,0.0)
+@assert all(isapprox.(dx, 0.0; atol=5e-6)) #TODO add the transformer impedance into gfm formulation so it can match!
+f = get_init_gfm(p_all, x₀[5], x₀[19])
+res = nlsolve(f, x₀)
+gfm(dx,res.zero,p_all,0.0)
+@assert all(isapprox.(dx, 0.0; atol=1e-8))
+
+
+#TODO use x0 as a starting guess to initialize the various surrogates!
+#TODO confirm the surrogate matches in a steady state sim (cannot use PVS yet!)
+
+
+
 
 #refs = get_ext(collect(get_components(DynamicInverter, sys_surrogate))[1])["control_refs"]
 #TODO : references should not be learned. Need to be included in the function throug a closrue?
