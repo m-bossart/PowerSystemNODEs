@@ -86,7 +86,7 @@ for inv in get_components(DynamicInverter,sys_train)
 end
 
 
-## Below this is initailizing the surrogate
+## Below this is initailizing the surrogate. Need to reforumulate
 
 Ir, Ii = get_total_initial_current(sim) #TODO implement this. sum the currents from all devices.
 #TODO Use Ir,Ii from above along with Vr,Vi to initialize the surrogate.
