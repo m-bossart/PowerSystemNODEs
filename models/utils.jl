@@ -90,7 +90,7 @@ function build_train_test(sys_faults::System,  sys_full::System, Ref_bus_number:
 
     #Remove all buses and
     slack_bus_train = collect(get_components(Bus, sys_train, x-> get_number(x) == Ref_bus_number))[1]
-    set_bustype!(slack_bus_train,BusTypes.REF )
+    set_bustype!(slack_bus_train,BusTypes.REF)
 
     sys_test = deepcopy(sys_train)
     slack_bus_test = collect(get_components(Bus,sys_test, x->get_bustype(x) == BusTypes.REF))[1]
@@ -125,7 +125,7 @@ function Source_to_function_of_time(source::PeriodicVariableSource)
      V_bias = get_internal_voltage_bias(source)
      V_freqs = get_internal_voltage_frequencies(source)
      V_coeffs = get_internal_voltage_coefficients(source)
-    function V(t::Float64)
+    function V(t)
         val = V_bias
         for (i,f) in enumerate(V_freqs)
             val += V_coeffs[i][1]* sin.(f *2 * pi * t)
@@ -136,7 +136,7 @@ function Source_to_function_of_time(source::PeriodicVariableSource)
     θ_bias = get_internal_angle_bias(source)
     θ_freqs = get_internal_angle_frequencies(source)
     θ_coeffs = get_internal_angle_coefficients(source)
-   function θ(t::Float64)
+   function θ(t)
        val = θ_bias
        for (i,f) in enumerate(θ_freqs)
            val += θ_coeffs[i][1]* sin.(f *2 * pi * t)
@@ -148,11 +148,11 @@ function Source_to_function_of_time(source::PeriodicVariableSource)
 end
 
 function Source_to_function_of_time(source::Source)
-    function V(t::Float64)
+    function V(t)
         return get_internal_voltage(source)
     end
 
-   function θ(t::Float64)
+   function θ(t)
        return get_internal_angle(source)
    end
     return (V, θ)
@@ -266,6 +266,12 @@ function initalize_sys_init!(sys::System, p::Vector{Float64})
     return x₀, refs
 end
 
+function set_bus_from_source(available_source::Source)
+    Vsource = get_internal_voltage(available_source)
+    set_magnitude!(get_bus(available_source),Vsource)
+    θsource = get_internal_angle(available_source)
+    set_angle!(get_bus(available_source),θsource)
+end
 
 
 #Before you can initialize your surrogate, you need the true response in steady state.
