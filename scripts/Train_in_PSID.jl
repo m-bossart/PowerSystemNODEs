@@ -3,6 +3,7 @@ Pkg.activate(".")
 using Revise
 using Distributions
 using OrdinaryDiffEq
+using DifferentialEquations
 using PowerSystems
 using PowerSimulationsDynamics
 const PSID = PowerSimulationsDynamics
@@ -11,16 +12,13 @@ using Plots
 using FFTW
 using Statistics
 using NLsolve
+using DiffEqFlux
 include("../models/DynamicComponents.jl")
 include("../models/InverterModels.jl")
 include("../models/StaticComponents.jl")
 include("../models/utils.jl")
 include("../models/init_functions.jl")
 ########################PARAMETERS##############################################
-
-#Make the non-reference bus a PV bus.
-#set_bustype!(collect(get_components(Bus, sys_full, x->x.bustype==BusTypes.PQ ))[1],BusTypes.PV)
-
 const train_split = 0.99    #proportion of faults for training (rest for test)
 n_devices = 10             #number of devices in the surrogate
 param_range = (0.9,1.1)
@@ -28,28 +26,11 @@ total_rating = 150.0  #MVA rating at the surrogate bus.
 
 solver = Rodas5()
 dtmax = 0.02
-tspan = (0.0, 5.5)
+tspan = (0.0, 1.0)
 step = 1e-2
 tsteps = tspan[1]:step:tspan[2]
-################################################################################
-#NAMING FOR THE VARIOUS PSID SYSTEMS USED IN THIS SCRIPT
-    #sys_faults: system with only Sources and PeriodicVariableSources for various faults
-    #sys_surrogate: THe strucutre of the surrogate system... Do we need this?
-    #sys_full: The structure of the full system
-    #sys_train: Train system for the full system
-    #sys_test: Test system for the full system.
 
-
-###############BUILD THE SURROGATE SYSTEMS (FOR INITIALIZATION)#################
-#PQbus = [b for b in get_components(Bus, sys_surrogate) if b.bustype == BusTypes.PQ][1]
-#g = StaticGen("1", PQbus)
-#set_rating!(g, total_rating/get_base_power(g))
-#add_component!(sys_surrogate, g)
-#inv_typ = inv_case78(get_name(g))
-#add_component!(sys_surrogate, inv_typ, g)
-#(sys_train_surrogate, sys_test_full) = build_train_test(sys_faults, sys_surrogate, train_split)
-
-################BUILD THE FULL SYSTEMS (FOR GENERATING TRUTH DATA)##############
+################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DAT#############
 sys_faults = System("systems/fault_library.json")
 sys_full = System("systems/base_system.json")
 sys_train, sys_test = build_train_test(sys_faults, sys_full, 2, train_split, add_pvs = false) #Don't add PVS because can't build a sim with it yet.
@@ -61,12 +42,7 @@ to_json(sys_test,"systems/sys_test.json", force = true)
 
 ##############################TRAINING##########################################
 available_source = activate_next_source!(sys_train)
-
-#Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
-Vsource = get_internal_voltage(available_source)
-set_magnitude!(get_bus(available_source),Vsource)
-θsource = get_internal_angle(available_source)
-set_angle!(get_bus(available_source),θsource)
+set_bus_from_source(available_source) #Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
 
 sim = Simulation!(
     MassMatrixModel,
@@ -92,41 +68,80 @@ x₀, refs = initalize_sys_init!(sys_init, p_inv) #Set the current parameters, g
 @info "init system power flw", solve_powerflow(sys_init)["flow_results"]
 @info "init system power flow", solve_powerflow(sys_init)["bus_results"]
 
-#TODO The Source has the available field... get the available source and then get the dynamic injector from it.
+execute!(sim,
+        solver,
+        reset_simulation=true,dtmax=dtmax,saveat=tsteps);
+
+
+
 active_source = collect(get_components(Source, sys_train,  x -> PSY.get_available(x)))[1]
 V, θ = Source_to_function_of_time(active_source)
-M = MassMatrix(19, 0)
-gfm_func = ODEFunction(gfm, mass_matrix = M)
+p_all = vcat(p_inv, refs, get_x(transformer), get_r(transformer))
 
+ir_truth, ii_truth = get_total_current_series(sim)
+plot(ir_truth, title="PSID system (truth)")
+plot!(ii_truth)
+## INITIALIZE THE PLAIN GFM
 
-p_all = vcat(p_inv, refs, get_x(transormer), get_r(transformer))
-##
-
-dx = similar(x₀)
-gfm(dx,x₀,p_all,0.0)
-@assert all(isapprox.(dx, 0.0; atol=5e-6)) #TODO add the transformer impedance into gfm formulation so it can match!
 f = get_init_gfm(p_all, x₀[5], x₀[19])
 res = nlsolve(f, x₀)
+@assert converged(res)
+dx = similar(x₀)
 gfm(dx,res.zero,p_all,0.0)
 @assert all(isapprox.(dx, 0.0; atol=1e-8))
 
+M = MassMatrix(19, 0)
+gfm_func = ODEFunction(gfm, mass_matrix = M)
+gfm_prob = ODEProblem(gfm_func,res.zero,tspan,p_all)
 
-#TODO use x0 as a starting guess to initialize the various surrogates!
-#TODO confirm the surrogate matches in a steady state sim (cannot use PVS yet!)
+sol = solve(gfm_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
+plot(sol, vars = [5,19], title="GFM surrogate")
+##
 
+## INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON STATES
 
+nn_states = FastChain(FastDense(length(x₀), 3, tanh),
+                       FastDense(3, 2))
+p_nn_states = initial_params(nn_states)
+n_weights_nn_states = length(p_nn_states)
+p_all_states = vcat(p_nn_states, p_all)
+x₀_nn_states = vcat(x₀, 0.0,0.0,nn_states(x₀,p_nn_states)[1],nn_states(x₀, p_nn_states)[2], x₀[5], x₀[19])
 
+g = get_init_gfm_nn_states(p_all_states, x₀[5], x₀[19])
+res_nn_states= nlsolve(g,x₀_nn_states)
+@assert converged(res_nn_states)
+dx = similar(x₀_nn_states)
+gfm_nn_states(dx,res_nn_states.zero,p_all_states,0.0)
+@assert all(isapprox.(dx, 0.0; atol=1e-8))
 
-#refs = get_ext(collect(get_components(DynamicInverter, sys_surrogate))[1])["control_refs"]
-#TODO : references should not be learned. Need to be included in the function throug a closrue?
-#p_all = [p_start, p_refs ]
+M = MassMatrix(23, 2)
+gfm_nn_states_func = ODEFunction(gfm_nn_states, mass_matrix = M)
+gfm_nn_states_prob = ODEProblem(gfm_nn_states_func,res_nn_states.zero,tspan,p_all_states)
 
-gfm_prob = ODEProblem(gfm_func,x₀,Float32.(tspan),p_inv)
-#TODO Build an ODE problem with the various surrogate models
-#TODO Solve the system using V,θ from above.
+sol = solve(gfm_nn_states_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
+plot(sol, vars = [24,25], title="GFM+NN(states) surrogate")
+## INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON VOLTAGE
+nn_voltage = FastChain(FastDense(2, 3, tanh),
+                       FastDense(3, 2))
+p_nn_voltage = initial_params(nn_voltage)
+n_weights_nn_voltage = length(p_nn_voltage)
+p_all_voltage = vcat(p_nn_voltage, p_all)
+x₀_nn_voltage = vcat(x₀, 0.0,0.0,nn_voltage([V(0.0), θ(0.0)],p_nn_voltage)[1], nn_voltage([V(0.0), θ(0.0)],p_nn_voltage)[2], x₀[5], x₀[19])
+h = get_init_gfm_nn_voltage(p_all_voltage, x₀[5], x₀[19])
+res_nn_voltage= nlsolve(h,x₀_nn_voltage)
+@assert converged(res_nn_voltage)
+dx = similar(x₀_nn_voltage)
+gfm_nn_voltage(dx,res_nn_voltage.zero,p_all_voltage,0.0)
+@assert all(isapprox.(dx, 0.0; atol=1e-8))
 
+M = MassMatrix(23, 2)
+gfm_nn_voltage_func = ODEFunction(gfm_nn_voltage, mass_matrix = M)
+gfm_nn_voltage_prob = ODEProblem(gfm_nn_voltage_func,res_nn_voltage.zero,tspan,p_all_voltage)
 
+sol = solve(gfm_nn_voltage_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
+plot(sol,vars = [24,25],  title="GFM+NN(voltage) surrogate")
 
+#TODO Improve the plotting of power system results
 #TODO Will need to implement a method similar to get_activepower_series() for the PVS.
     #Will require a compute_output_current method for the PVS.
     #I can implement this once Jose has implemented the PVS dynamic model.
@@ -134,30 +149,73 @@ gfm_prob = ODEProblem(gfm_func,x₀,Float32.(tspan),p_inv)
 
 
 ## PSEUDO CODE BELOW
-function predict_solution(θ)        #Start with the non-UODE case, just optimize parameters.
+function predict_gfm(θ)
+    x₀, refs = initalize_sys_init!(sys_init, θ)
+    p_all = vcat(θ, refs, get_x(transformer), get_r(transformer))
+    f = get_init_gfm(p_all, x₀[5], x₀[19])
+    res = nlsolve(f, x₀)
+    @assert converged(res)
+
+    gfm_prob = ODEProblem(gfm_func,res.zero,tspan,p_all)
+    #u₀ = initialize_surrogate()
+    _prob = remake(gfm_prob, p=p_all, u0=res.zero)
+    Array(solve(_prob,Rodas5(), dtmax=dtmax, saveat=tsteps))
+end
+
+function loss_gfm(θ)
+    ir_pred = predict_gfm(θ)[5,:]
+    ii_pred = predict_gfm(θ)[19,:]
+    loss = sum(abs2,  ir_truth[2] - ir_pred)
+    loss += sum(abs2, ii_truth[2] - ii_pred)
+end
+
+l = loss_gfm(p_inv)
+
+function predict_gfm_nn_states(θ)        #Start with the non-UODE case, just optimize parameters.
     u₀ = initialize_surrogate()
     Array(solve(prob_surrogate))
 end
 
-function loss(θ)
+function loss_gfm_nn_states(θ)
     pred = predict_solution(θ)
-    loss = real_solution - pred
+    loss = sum(abs2,  ir_truth - ir_pred)
+    loss += sum(abs2, ii_truth - ii_pred)
 end
+
+function predict_gfm_nn_voltage(θ)        #Start with the non-UODE case, just optimize parameters.
+    u₀ = initialize_surrogate()
+    Array(solve(prob_surrogate))
+end
+
+function loss_gfm_nn_voltage(θ)
+    pred = predict_solution(θ)
+    loss = sum(abs2,  ir_truth - ir_pred)
+    loss += sum(abs2, ii_truth - ii_pred)
+end
+
+
+
+
+
 
 list_losses = Float64[]
 
 #TODO Need to figure out how to modify funcitons/data from within the callback.
-#Look for examples that do this sort of thing.
+cb = function(θ,l)
+    push!(list_losses,l)
+    return false
+end
 cb_iters = function (θ,l)
     push!(list_losses,l)    #record loss
 
     if (loss < ϵ) # or if you've reach some number of epochs?
         activate_next_source!(sys)
         sim = Simulation!(MassMatrixModel, sys, pwd(),tspan)
-        execture!(sim)
+        exectute!(sim)
         #TODO: Modify the ground truth data here
         active_pvs = get_components(PeriodicVariableSource, sys,  x -> PSY.get_available(x))
         V, θ = PVS_to_function_of_time(active_pvs)
+    end
     return false
 end
 
@@ -172,8 +230,9 @@ cb_threshold = function (θ,l)
         #TODO: Modify the ground truth data here
         active_pvs = get_components(PeriodicVariableSource, sys,  x -> PSY.get_available(x))
         V, θ = PVS_to_function_of_time(active_pvs)
+    end
     return false
 end
 
-res = @time DiffEqFlux.sciml_train(loss,  p_nn,ADAM(0.1), cb = cb_iters, maxiters = 10) #TODO make maxiters = (#oftrainingfaults x iters_per_fault)
-res = @time DiffEqFlux.sciml_train(loss,  p_nn,ADAM(0.1), cb = cb_threshold, maxiters = 10 )
+res = @time DiffEqFlux.sciml_train(loss_gfm, p_inv, ADAM(0.1), cb = cb, maxiters = 5) #TODO make maxiters = (#oftrainingfaults x iters_per_fault)
+res = @time DiffEqFlux.sciml_train(loss,  p_nn, ADAM(0.1), cb = cb_threshold, maxiters = 10 )

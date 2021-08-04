@@ -138,6 +138,9 @@ end
 
 #19th order gfm model with nn current source on the output with input V(t)
 #and output I(t)
+"""
+Surrogate with NN source depending on all 19 inverter states
+"""
 function gfm_nn_states(dx,x,p,t)
     #PARAMETERS
     p_nn = p[1:n_weights_nn_states]
@@ -166,12 +169,12 @@ function gfm_nn_states(dx,x,p,t)
     cf = p_ode[21]
     lg = p_ode[22]
     rg = p_ode[23]
-    Vref = p[24]    #Reference treated as parameter, but should NOT get updated during training
-    ωref = p[25]    #Reference treated as parameter, but should NOT get updated during training
-    Pref = p[26]    #Reference treated as parameter, but should NOT get updated during training
-    Qref = p[27]    #Reference treated as parameter, but should NOT get updated during training
-    Xtrans = p[28]
-    Rtrans = p[29]
+    Vref = p_ode[24]    #Reference treated as parameter, but should NOT get updated during training
+    ωref = p_ode[25]    #Reference treated as parameter, but should NOT get updated during training
+    Pref = p_ode[26]    #Reference treated as parameter, but should NOT get updated during training
+    Qref = p_ode[27]    #Reference treated as parameter, but should NOT get updated during training
+    Xtrans = p_ode[28]
+    Rtrans = p_ode[29]
 
     #STATE INDEX AND STATES
     i__vi_filter, vi_filter = 1, x[1]
@@ -328,12 +331,12 @@ function gfm_nn_voltage(dx,x,p,t)
     lg = p_ode[22]
     rg = p_ode[23]
     rg = p_ode[23]
-    Vref = p[24]    #Reference treated as parameter, but should NOT get updated during training
-    ωref = p[25]    #Reference treated as parameter, but should NOT get updated during training
-    Pref = p[26]    #Reference treated as parameter, but should NOT get updated during training
-    Qref = p[27]    #Reference treated as parameter, but should NOT get updated during training
-    Xtrans = p[28]
-    Rtrans = p[29]
+    Vref = p_ode[24]    #Reference treated as parameter, but should NOT get updated during training
+    ωref = p_ode[25]    #Reference treated as parameter, but should NOT get updated during training
+    Pref = p_ode[26]    #Reference treated as parameter, but should NOT get updated during training
+    Qref = p_ode[27]    #Reference treated as parameter, but should NOT get updated during training
+    Xtrans = p_ode[28]
+    Rtrans = p_ode[29]
 
     #STATE INDEX AND STATES
     i__vi_filter, vi_filter = 1, x[1]
@@ -447,8 +450,8 @@ function gfm_nn_voltage(dx,x,p,t)
       (vi_filter - Vi_pcc - rg*ii_filter - ω_sys*lg*ir_filter)
 
      #NN CURRENT SOURCE (NN input includes terminal voltage only)
-     dx[i__ir_nn] =ir_offset -  nn_voltage([Vr_pcc, Vi_pcc],p_nn)[1]
-     dx[i__ii_nn] =ii_offset -  nn_voltage([Vr_pcc, Vi_pcc],p_nn)[2]
+     dx[i__ir_nn] =ir_offset -  nn_voltage([V(t), θ(t)],p_nn)[1]
+     dx[i__ii_nn] =ii_offset -  nn_voltage([V(t), θ(t)],p_nn)[2]
 
      #Current offset for the NN Current Source
      dx[i__ir_offset] = 0.0

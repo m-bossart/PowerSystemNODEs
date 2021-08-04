@@ -273,6 +273,20 @@ function set_bus_from_source(available_source::Source)
     set_angle!(get_bus(available_source),θsource)
 end
 
+function get_total_current_series(sim::Simulation)
+    ir_total = []
+    ii_total = []
+    for (i,g) in enumerate(get_components(DynamicInjection, sys_train, x->typeof(x)!== PeriodicVariableSource))
+        if i == 1
+            ir_total = get_real_current_series(sim, get_name(g))
+            ii_total = get_imaginary_current_series(sim, get_name(g))
+        else
+            ir_total[2] .+= get_real_current_series(sim, get_name(g))[2]
+            ii_total[2] .+= get_imaginary_current_series(sim, get_name(g))[2]
+        end
+    end
+    return [ir_total, ii_total]
+end
 
 #Before you can initialize your surrogate, you need the true response in steady state.
 

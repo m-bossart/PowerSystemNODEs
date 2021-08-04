@@ -37,7 +37,7 @@ function add_devices_to_surrogatize!(sys::System, n_devices::Integer, surrogate_
     remove_component!(sys,gen)
     for i in 1:n_devices
         g = ThermalStandard(
-           name = string(i),
+           name = string("gen",string(i)),
            available = true,
            status = true,
            bus = surrogate_bus,
@@ -187,7 +187,7 @@ for a in devices
                         internal_angle_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
 
                         inf_source = Source(
-                            name = string(count_stable),
+                            name = string("source",string(count_stable)),
                             active_power = P,
                             available = false, #availability
                             reactive_power = Q,
