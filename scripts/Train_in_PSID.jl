@@ -18,6 +18,7 @@ using DiffEqFlux
 include("../models/DynamicComponents.jl")
 include("../models/InverterModels.jl")
 include("../models/utils.jl")
+include("../models/parameter_utils.jl")
 include("../models/init_functions.jl")
 configure_logging(console_level = Logging.Error)
 
@@ -49,58 +50,45 @@ sim = Simulation!(
 @info "train system power flow", solve_powerflow(sys_train)["flow_results"]
 @info "train system power flow", solve_powerflow(sys_train)["bus_results"]
 
-for g in get_components(DynamicInverter,sys_train)
-    @info "real current", get_initial_conditions(sim)[get_name(g)][:ir_filter]
-    @info "imag current", get_initial_conditions(sim)[get_name(g)][:ii_filter]
-end
 p_inv = [500.0, 0.084, 4.69, 2.0, 400.0, 20.0,0.2,1000.0,0.59,  736.0, 0.0, 0.0, 0.2,  1.27, 14.3, 0.0, 50.0,  0.2,  0.08, 0.003, 0.074, 0.2,0.01]
 
-sys_init = build_sys_init(sys_train)              #Build the initialization system (done once)
+sys_init = build_sys_init(sys_train)
 transformer = collect(get_components(Transformer2W,sys_init))[1]
 
-x₀, refs = initialize_sys!(sys_init, "gen1",p_inv) #Set the current parameters, get the initial conditions and refs
-
-
-@info "init system power flw", solve_powerflow(sys_init)["flow_results"]
-@info "init system power flow", solve_powerflow(sys_init)["bus_results"]
-
+x₀, refs = initialize_sys!(sys_init, "gen1", p_inv)
 execute!(sim,
         solver,
         reset_simulation=true,dtmax=dtmax,saveat=tsteps);
 
-
-
 active_source = collect(get_components(Source, sys_train,  x -> PSY.get_available(x)))[1]
 V, θ = Source_to_function_of_time(active_source)
-p_all = vcat(p_inv, refs, get_x(transformer), get_r(transformer))
+p_ode = vcat(p_inv, refs, get_x(transformer), get_r(transformer))
 
 ir_truth, ii_truth = get_total_current_series(sim) #TODO Better to measure current at the PVS (implement method after PVS is complete)
 plot(ir_truth, title="PSID system (truth)")
 plot!(ii_truth)
-## INITIALIZE THE PLAIN GFM
 
-f = get_init_gfm(p_all, x₀[5], x₀[19])
+## INITIALIZE THE PLAIN GFM
+f = get_init_gfm(p_ode, x₀[5], x₀[19])
 res = nlsolve(f, x₀)
 @assert converged(res)
 dx = similar(x₀)
-gfm(dx,res.zero,p_all,0.0)
+gfm(dx,res.zero,p_ode,0.0)
 @assert all(isapprox.(dx, 0.0; atol=1e-8))
 
 M = MassMatrix(19, 0)
 gfm_func = ODEFunction(gfm, mass_matrix = M)
-gfm_prob = ODEProblem(gfm_func,res.zero,tspan,p_all)
+gfm_prob = ODEProblem(gfm_func,res.zero,tspan,p_ode)
 
 sol = solve(gfm_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
 plot(sol, vars = [5,19], title="GFM surrogate")
-##
 
 ## INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON STATES
-
 nn_states = FastChain(FastDense(length(x₀), 3, tanh),
                        FastDense(3, 2))
 p_nn_states = initial_params(nn_states)
 n_weights_nn_states = length(p_nn_states)
-p_all_states = vcat(p_nn_states, p_all)
+p_all_states = vcat(p_nn_states, p_ode)
 x₀_nn_states = vcat(x₀, 0.0,0.0,nn_states(x₀,p_nn_states)[1],nn_states(x₀, p_nn_states)[2], x₀[5], x₀[19])
 
 g = get_init_gfm_nn_states(p_all_states, x₀[5], x₀[19])
@@ -116,41 +104,36 @@ gfm_nn_states_prob = ODEProblem(gfm_nn_states_func,res_nn_states.zero,tspan,p_al
 
 sol = solve(gfm_nn_states_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
 plot(sol, vars = [24,25], title="GFM+NN(states) surrogate")
-## INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON VOLTAGE
-nn_voltage = FastChain(FastDense(2, 3, tanh),
-                       FastDense(3, 2))
-p_nn_voltage = initial_params(nn_voltage)
-n_weights_nn_voltage = length(p_nn_voltage)
-p_all_voltage = vcat(p_nn_voltage, p_all)
-x₀_nn_voltage = vcat(x₀, 0.0,0.0,nn_voltage([V(0.0), θ(0.0)],p_nn_voltage)[1], nn_voltage([V(0.0), θ(0.0)],p_nn_voltage)[2], x₀[5], x₀[19])
-h = get_init_gfm_nn_voltage(p_all_voltage, x₀[5], x₀[19])
-res_nn_voltage= nlsolve(h,x₀_nn_voltage)
-@assert converged(res_nn_voltage)
-dx = similar(x₀_nn_voltage)
-gfm_nn_voltage(dx,res_nn_voltage.zero,p_all_voltage,0.0)
-@assert all(isapprox.(dx, 0.0; atol=1e-8))
 
-M = MassMatrix(23, 2)
-gfm_nn_voltage_func = ODEFunction(gfm_nn_voltage, mass_matrix = M)
-gfm_nn_voltage_prob = ODEProblem(gfm_nn_voltage_func,res_nn_voltage.zero,tspan,p_all_voltage)
-
-sol = solve(gfm_nn_voltage_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
-plot(sol,vars = [24,25],  title="GFM+NN(voltage) surrogate")
-
+## INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON VOLTAGE - DON"T CONSIDER YET
+#nn_voltage = FastChain(FastDense(2, 3, tanh),
+#                       FastDense(3, 2))
+#p_nn_voltage = initial_params(nn_voltage)
+#n_weights_nn_voltage = length(p_nn_voltage)
+#p_all_voltage = vcat(p_nn_voltage, p_ode)
+#x₀_nn_voltage = vcat(x₀, 0.0,0.0,nn_voltage([V(0.0), θ(0.0)],p_nn_voltage)[1], nn_voltage([V(0.0), θ(0.0)],p_nn_voltage)[2], x₀[5], x₀[19])
+#h = get_init_gfm_nn_voltage(p_all_voltage, x₀[5], x₀[19])
+#res_nn_voltage= nlsolve(h,x₀_nn_voltage)
+#@assert converged(res_nn_voltage)
+#dx = similar(x₀_nn_voltage)
+#gfm_nn_voltage(dx,res_nn_voltage.zero,p_all_voltage,0.0)
+#@assert all(isapprox.(dx, 0.0; atol=1e-8))
+#M = MassMatrix(23, 2)
+#gfm_nn_voltage_func = ODEFunction(gfm_nn_voltage, mass_matrix = M)
+#gfm_nn_voltage_prob = ODEProblem(gfm_nn_voltage_func,res_nn_voltage.zero,tspan,p_all_voltage)
+#sol = solve(gfm_nn_voltage_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
+#plot(sol,vars = [24,25],  title="GFM+NN(voltage) surrogate")
 #TODO Improve the plotting of power system results (PowerGraphics?)
-
 #TODO Make sure the surrogate matches the PSID system when we have identical models...
-
-
 ##
 
-function predict_gfm(θ)     #TODO BoxConstrain parameters so you don't get negative resistors for example
+function predict_gfm(θ)     #TODO Constrain parameters so you don't get negative resistors for example
     x₀, refs = initialize_sys!(sys_init, "gen1", θ)
-    p_all = vcat(θ, refs, get_x(transformer), get_r(transformer))
-    f = get_init_gfm(p_all, x₀[5], x₀[19])
+    p = vcat(θ, refs, get_x(transformer), get_r(transformer))
+    f = get_init_gfm(p, x₀[5], x₀[19])
     res = nlsolve(f, x₀)
     @assert converged(res)
-    _prob = remake(gfm_prob, p=p_all, u0=res.zero)
+    _prob = remake(gfm_prob, p=p, u0=res.zero)
     Array(solve(_prob,Rodas5(), dtmax=dtmax, saveat=tsteps))
 end
 
@@ -161,44 +144,33 @@ end
 
 l = loss_gfm(p_inv)
 
-function predict_gfm_nn_states(θ)        #Start with the non-UODE case, just optimize parameters.
-    u₀ = initialize_surrogate()
-    Array(solve(prob_surrogate))
+function predict_gfm_nn_states(θ)
+    x₀, refs = initialize_sys!(sys_init, "gen1", p_inv)
+    p = vcat(θ, p_ode)
+    f = get_init_gfm_nn_states(p, x₀[5], x₀[19])
+    x₀_nn_states = vcat(x₀, 0.0,0.0,nn_states(x₀,θ)[1],nn_states(x₀, θ)[2], x₀[5], x₀[19])
+    res = nlsolve(f, x₀_nn_states)
+    @assert converged(res)
+    _prob = remake(gfm_nn_states_prob, p=p, u0=res.zero)
+    Array(solve(_prob,Rodas5(), dtmax=dtmax, saveat=tsteps))
 end
 
 function loss_gfm_nn_states(θ)
-    pred = predict_solution(θ)
-    loss = sum(abs2,  ir_truth - ir_pred)
-    loss += sum(abs2, ii_truth - ii_pred)
+    sol = predict_gfm_nn_states(θ)
+    loss = sum(abs2,  ir_truth[2] - sol[5,:]) + sum(abs2, ii_truth[2] - sol[19,:])
 end
 
-function predict_gfm_nn_voltage(θ)        #Start with the non-UODE case, just optimize parameters.
-    u₀ = initialize_surrogate()
-    Array(solve(prob_surrogate))
-end
-
-function loss_gfm_nn_voltage(θ)
-    pred = predict_solution(θ)
-    loss = sum(abs2,  ir_truth - ir_pred)
-    loss += sum(abs2, ii_truth - ii_pred)
-end
-
-
-
-
+l = loss_gfm_nn_states(p_nn_states)
 
 list_losses = Float64[]
-
-#TODO Need to figure out how to modify funcitons/data from within the callback.
+#TODO Need to modify true result within callback? 
 cb = function(θ,l)
     push!(list_losses,l)
     display(l)
     return false
 end
-
 cb_iters = function (θ,l)
     push!(list_losses,l)    #record loss
-
     if (loss < ϵ) # or if you've reach some number of epochs?
         activate_next_source!(sys)
         sim = Simulation!(MassMatrixModel, sys, pwd(),tspan)
@@ -209,8 +181,6 @@ cb_iters = function (θ,l)
     end
     return false
 end
-
-
 cb_threshold = function (θ,l)
     push!(list_losses,l)    #record loss
 
@@ -224,7 +194,9 @@ cb_threshold = function (θ,l)
     end
     return false
 end
-
 ##
-res = @time DiffEqFlux.sciml_train(loss_gfm, p_inv, ADAM(0.1), cb = cb, maxiters = 2) #TODO make maxiters = (#oftrainingfaults x iters_per_fault)
-#res = @time DiffEqFlux.sciml_train(loss,  p_nn, ADAM(0.1), cb = cb_threshold, maxiters = 10 )
+
+#TRAIN THE PLAIN GFM
+#res = @time DiffEqFlux.sciml_train(loss_gfm, p_inv, ADAM(0.1), cb = cb, maxiters = 2) #TODO make maxiters = (#oftrainingfaults x iters_per_fault)
+#BUG Compiling Tuple Error
+res = @time DiffEqFlux.sciml_train(loss_gfm_nn_states, p_nn_states, ADAM(0.1), cb = cb, maxiters = 2)

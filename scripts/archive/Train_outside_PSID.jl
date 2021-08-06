@@ -1,4 +1,5 @@
 #NOTE: p_inv (inverter parameters), p_ode (all ode parameters), p_nn (nn parameters)
+#TODO everything should be Float32 when you have NNs?
 using Pkg
 Pkg.activate(".")
 using Revise
@@ -17,9 +18,9 @@ include("../../models/parameter_utils.jl")
 include("../../models/init_functions.jl")
 
 #SIMULATION PARAMETERS
-dtmax = 2e-3
-tspan = (0.0, 1.0)
-step = 0.01
+dtmax = 0.002f0
+tspan = (0.0f0, 1.0f0)
+step = 0.01f0
 tsteps = tspan[1]:step:tspan[2]
 
 solver =Rodas5() #, #Rodas4P2() # Rodas5(), Rodas4P2(),
@@ -55,7 +56,7 @@ V(t) = Vm₀ + 0.01* sin(20*t)
 M = MassMatrix(length(x₀), 0)
 
 
-p_ode = vcat(p_inv, refs, 0.0,0.0)
+p_ode = vcat(p_inv,refs, 0.0f0, 0.0f0)
 
 f = get_init_gfm(p_ode, x₀[5], x₀[19])
 
@@ -63,7 +64,7 @@ res = nlsolve(f, x₀)
 @assert converged(res)
 
 func_gfm = ODEFunction(gfm, mass_matrix = M)
-prob_gfm = ODEProblem(func_gfm,res.zero,tspan,p_ode)
+prob_gfm = ODEProblem(func_gfm,Float32.(res.zero),tspan,p_ode)
 sol_gfm = solve(prob_gfm,solver, dtmax=dtmax,saveat=tsteps)
 
 
@@ -75,7 +76,6 @@ p3 = plot(sol_gfm.t, Vmag, label = "voltage mag DiffEq ")
 p4 = plot(sol_gfm.t, Vang, label = "voltage ang DiffEq")
 p5 = plot(sol_gfm)
 p6 = plot(sol_gfm)
-
 
 
 #BUILD NN AND UDE PROBLEM
@@ -98,7 +98,7 @@ res = nlsolve(f, x₀_nn_states)
 M2 = MassMatrix(23, 2)
 #TODO Update gfm_nn_dist to the newer version, once this is up and running, contact JDL
 func_gfm_nn_states = ODEFunction(gfm_nn_states, mass_matrix = M2)
-prob_gfm_nn_states = ODEProblem(func_gfm_nn_states, x₀_nn_states, tspan, p_all)
+prob_gfm_nn_states = ODEProblem(func_gfm_nn_states, Float32.(x₀_nn_states), tspan, p_all)
 sol_gfm_nn_states = solve(prob_gfm_nn_states, solver, dtmax=dtmax,saveat=tsteps)
 
 
@@ -118,9 +118,10 @@ display(plot(p1,p2,p3,p4,p5,p6,layout = (3,2),legend=true))
 sensealg = InterpolatingAdjoint(autojacvec=ReverseDiffVJP(true))
 #sensealg = QuadratureAdjoint()
 #sensealg = ReverseDiffAdjoint()
-
+p_ode = Float32.(p_ode)
 function predict_solution(θ)
     p = vcat(θ,p_ode)   #p_ode is fixed, only the NN parameters are updated
+    print(typeof(p))
     Array(solve(prob_gfm_nn_states ,Rodas5(), p=p, saveat = tsteps, sensealg=sensealg)) #autojacvec=ReverseDiffVJP(true)
 end
 
