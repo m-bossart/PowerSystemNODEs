@@ -114,7 +114,7 @@ for a in devices
                             reactive_power = Q,
                             bus = slack_bus, #bus
                             R_th = 0.0, #Rth
-                            X_th = 5e-9,#5e-6, #Xth
+                            X_th = 5e-6, #Xth
                             internal_voltage = V[1],
                             internal_angle =   θ[1],
                         )
@@ -122,7 +122,7 @@ for a in devices
                         fault_source = PeriodicVariableSource(
                             name = get_name(inf_source),
                             R_th = 0.0,
-                            X_th = 0.0,
+                            X_th = 5e-6,
                             internal_voltage_bias = abs(F_V[1]),
                             internal_voltage_frequencies = freqs_pos[2:end],
                             internal_voltage_coefficients = internal_voltage_coefficients,
