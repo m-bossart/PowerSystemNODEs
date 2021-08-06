@@ -1,69 +1,6 @@
 
-"""
-    randomize_inv_parameters!(inv::DynamicInverter, param_range::Tuple{Float64,Float64})
-
-Change each inverter parameter by scaling by randomly generated factor in param_range
-"""
-function randomize_inv_parameters!(inv::DynamicInverter, param_range::Tuple{Float64,Float64})
-    #pll
-    set_ω_lp!(inv.freq_estimator, get_ω_lp(inv.freq_estimator)*rand(Uniform(param_range[1],param_range[2])))
-    set_kp_pll!(inv.freq_estimator, get_kp_pll(inv.freq_estimator)*rand(Uniform(param_range[1],param_range[2])))
-    set_ki_pll!(inv.freq_estimator, get_ki_pll(inv.freq_estimator)*rand(Uniform(param_range[1],param_range[2])))
-    #outer control
-    PSY.set_Ta!(inv.outer_control.active_power, PSY.get_Ta(inv.outer_control.active_power)*rand(Uniform(param_range[1],param_range[2])))
-    PSY.set_kd!(inv.outer_control.active_power, PSY.get_kd(inv.outer_control.active_power)*rand(Uniform(param_range[1],param_range[2])))
-    PSY.set_kω!(inv.outer_control.active_power, PSY.get_kω(inv.outer_control.active_power)*rand(Uniform(param_range[1],param_range[2])))
-    PSY.set_kq!(inv.outer_control.reactive_power, PSY.get_kq(inv.outer_control.reactive_power)*rand(Uniform(param_range[1],param_range[2])))
-    PSY.set_ωf!(inv.outer_control.reactive_power, PSY.get_ωf(inv.outer_control.reactive_power)*rand(Uniform(param_range[1],param_range[2])))
-    #inner control
-    set_kpv!(inv.inner_control, get_kpv(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_kiv!(inv.inner_control, get_kiv(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_kffv!(inv.inner_control, get_kffv(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_rv!(inv.inner_control, get_rv(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_lv!(inv.inner_control, get_lv(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_kpc!(inv.inner_control, get_kpc(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_kic!(inv.inner_control, get_kic(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_kffi!(inv.inner_control, get_kffi(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_ωad!(inv.inner_control, get_ωad(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    set_kad!(inv.inner_control, get_kad(inv.inner_control)*rand(Uniform(param_range[1],param_range[2])))
-    #lcl
-    set_lf!(inv.filter, get_lf(inv.filter)*rand(Uniform(param_range[1],param_range[2])))
-    set_rf!(inv.filter, get_rf(inv.filter)*rand(Uniform(param_range[1],param_range[2])))
-    set_cf!(inv.filter, get_cf(inv.filter)*rand(Uniform(param_range[1],param_range[2])))
-    set_lg!(inv.filter, get_lg(inv.filter)*rand(Uniform(param_range[1],param_range[2])))
-    set_rg!(inv.filter, get_rg(inv.filter)*rand(Uniform(param_range[1],param_range[2])))
-end
 
 
-function set_inv_parameters!(inv::DynamicInverter, p::Vector{Float64})
-    #pll
-    set_ω_lp!(inv.freq_estimator, p[1])
-    set_kp_pll!(inv.freq_estimator, p[2])
-    set_ki_pll!(inv.freq_estimator ,p[3])
-    #outer control
-    PSY.set_Ta!(inv.outer_control.active_power, p[4])
-    PSY.set_kd!(inv.outer_control.active_power, p[5])
-    PSY.set_kω!(inv.outer_control.active_power, p[6])
-    PSY.set_kq!(inv.outer_control.reactive_power, p[7])
-    PSY.set_ωf!(inv.outer_control.reactive_power,p[8])
-    #inner control
-    set_kpv!(inv.inner_control, p[9])
-    set_kiv!(inv.inner_control, p[10])
-    set_kffv!(inv.inner_control, p[11])
-    set_rv!(inv.inner_control, p[12])
-    set_lv!(inv.inner_control, p[13])
-    set_kpc!(inv.inner_control, p[14])
-    set_kic!(inv.inner_control, p[15])
-    set_kffi!(inv.inner_control, p[16])
-    set_ωad!(inv.inner_control, p[17])
-    set_kad!(inv.inner_control, p[18])
-    #lcl
-    set_lf!(inv.filter, p[19])
-    set_rf!(inv.filter, p[20])
-    set_cf!(inv.filter, p[21])
-    set_lg!(inv.filter, p[22])
-    set_rg!(inv.filter, p[23])
-end
 """
     build_train_test(sys_faults::System, sys_structure::System, train_split)
 
@@ -159,6 +96,63 @@ function Source_to_function_of_time(source::Source)
 end
 
 
+function build_disturbances(sys)  #TODO make this more flexible, add options for which faults to include
+    disturbances = []
+    #BRANCH FAULTS
+    lines = deepcopy(collect(get_components(Line, sys, x-> get_name(x) == "BUS 4       -BUS 5       -i_7"))) #TODO - change back to include all lines
+    for l in lines
+        push!(disturbances, BranchTrip(tfault,get_name(l)))
+    end
+    #REFERENCE CHANGE FAULTS
+    injs = collect(get_components(DynamicInjection, sys,  x -> !(get_name(x) in get_name.(surrogate_gens))))
+    for fault_inj in injs
+        for Pref in Prefchange
+            disturbance_ControlReferenceChange = ControlReferenceChange(tfault, fault_inj , PowerSimulationsDynamics.P_ref_index,  get_ext(fault_inj)["control_refs"][PowerSimulationsDynamics.P_ref_index] * Pref)
+            #push!(disturbances, disturbance_ControlReferenceChange)
+        end
+    end
+    return disturbances
+end
+
+function add_devices_to_surrogatize!(sys::System, n_devices::Integer, surrogate_bus_number::Integer, inf_bus_number:: Integer)
+    param_range = (0.9,1.1)
+    surrogate_bus = collect(get_components(Bus,sys,x->get_number(x)==surrogate_bus_number))[1]
+    inf_bus = collect(get_components(Bus,sys,x->get_number(x)==inf_bus_number))[1]
+
+    surrogate_area = Area(;name = "surrogate")
+    add_component!(sys,surrogate_area)
+    set_area!(surrogate_bus, surrogate_area)
+    set_area!(inf_bus, surrogate_area)
+
+    gens = collect(get_components(ThermalStandard, sys, x->get_number(get_bus(x)) == surrogate_bus_number))
+
+    !(length(gens) == 1) && @error "number of devices at surrogate bus not equal to one"
+    gen = gens[1]
+    total_rating = get_rating(gen) #doesn't impact dynamics
+    total_base_power = get_base_power(gen)
+    total_active_power = get_active_power(gen)
+    remove_component!(sys,gen)
+    for i in 1:n_devices
+        g = ThermalStandard(
+           name = string("gen",string(i)),
+           available = true,
+           status = true,
+           bus = surrogate_bus,
+           active_power = total_active_power, #Only divide base power by n_devices
+           reactive_power = 0.0,
+           rating =  total_rating/n_devices,
+           active_power_limits=(min=0.0, max=3.0),
+           reactive_power_limits= (-3.0,3.0),
+           ramp_limits=nothing,
+           operation_cost=ThreePartCost(nothing),
+           base_power =  total_base_power/n_devices,
+           )
+       add_component!(sys, g)
+       inv_typ = inv_case78(get_name(g))
+       randomize_parameters!(inv_typ, param_range)
+       add_component!(sys, inv_typ, g)
+   end
+end
 
 
 """
@@ -230,14 +224,14 @@ function build_sys_init(sys_train::System)
         remove_component!(sys_init, gfm)
     end
     g = ThermalStandard(
-       name = string(1),
+       name = string("gen",string(1)),
        available = true,
        status = true,
        bus = collect(get_components(Bus,sys_init, x->get_bustype(x) == BusTypes.PV))[1],
        active_power = power_total / base_power_total, #Only divide base power by n_devices
        reactive_power = 0.0,
-       rating =  total_rating/n_devices,
-       active_power_limits=(min=0.0, max=3.0),
+       rating =  base_power_total,
+       active_power_limits = (0.0, 3.0),
        reactive_power_limits= (-3.0,3.0),
        ramp_limits=nothing,
        operation_cost=ThreePartCost(nothing),
@@ -245,24 +239,25 @@ function build_sys_init(sys_train::System)
        )
     add_component!(sys_init, g)
     inv_typ = inv_case78(get_name(g))
-    #set_inv_parameters!(inv_typ, p_start)
+
     add_component!(sys_init, inv_typ, g)
     return sys_init
 end
 
-function initalize_sys_init!(sys::System, p::Vector{Float64})
-    gfm = collect(get_components(DynamicInverter, sys))[1]
-    #@info "# of gfms", get_components(DynamicInverter, sys)
-    set_inv_parameters!(gfm, p)
+#NOTE The warning that the initialization fails in the source is because we just use the source to set the bus voltage.
+#Doesn't make physical sense, but as long as the full system solves, it should be fine.
+function initialize_sys!(sys::System, name::String, p::Vector{Float64})
+    device = get_component(DynamicInverter, sys, name)
+    set_parameters!(device, p)
     sim = Simulation!(
         MassMatrixModel,
         sys,
         pwd(),
         (0.0, 1.0),
     )
-    x₀_dict = get_initial_conditions(sim)[get_name(gfm)]
-    x₀ = Float64.([value for (key,value) in x₀_dict])
-    refs = get_ext(gfm)["control_refs"]
+    x₀_dict = get_initial_conditions(sim)[get_name(device)]
+    x₀ = [value for (key,value) in x₀_dict]
+    refs = get_ext(device)["control_refs"]
     return x₀, refs
 end
 
