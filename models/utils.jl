@@ -64,9 +64,9 @@ function Source_to_function_of_time(source::PeriodicVariableSource)
      V_coeffs = get_internal_voltage_coefficients(source)
     function V(t)
         val = V_bias
-        for (i,f) in enumerate(V_freqs)
-            val += V_coeffs[i][1]* sin.(f *2 * pi * t)
-            val += V_coeffs[i][2]* cos.(f *2 * pi * t)
+        for (i,ω) in enumerate(V_freqs)
+            val += V_coeffs[i][1]* sin.(ω * t)
+            val += V_coeffs[i][2]* cos.(ω * t)
         end
         return val
     end
@@ -75,9 +75,9 @@ function Source_to_function_of_time(source::PeriodicVariableSource)
     θ_coeffs = get_internal_angle_coefficients(source)
    function θ(t)
        val = θ_bias
-       for (i,f) in enumerate(θ_freqs)
-           val += θ_coeffs[i][1]* sin.(f *2 * pi * t)
-           val += θ_coeffs[i][2]* cos.(f *2 * pi * t)
+       for (i,ω) in enumerate(θ_freqs)
+           val += θ_coeffs[i][1]* sin.(ω * t)
+           val += θ_coeffs[i][2]* cos.(ω * t)
        end
        return val
    end
@@ -115,7 +115,7 @@ function build_disturbances(sys)  #TODO make this more flexible, add options for
 end
 
 function add_devices_to_surrogatize!(sys::System, n_devices::Integer, surrogate_bus_number::Integer, inf_bus_number:: Integer)
-    param_range = (0.9,1.1)
+    param_range = (0.8, 1.2)
     surrogate_bus = collect(get_components(Bus,sys,x->get_number(x)==surrogate_bus_number))[1]
     inf_bus = collect(get_components(Bus,sys,x->get_number(x)==inf_bus_number))[1]
 
@@ -246,7 +246,7 @@ end
 
 #NOTE The warning that the initialization fails in the source is because we just use the source to set the bus voltage.
 #Doesn't make physical sense, but as long as the full system solves, it should be fine.
-function initialize_sys!(sys::System, name::String, p::Vector{Float64})
+function initialize_sys!(sys::System, name::String, p)
     device = get_component(DynamicInverter, sys, name)
     set_parameters!(device, p)
     sim = Simulation!(
@@ -282,6 +282,32 @@ function get_total_current_series(sim::Simulation)
     end
     return [ir_total, ii_total]
 end
+
+function plot_pvs(tsteps, pvs::PeriodicVariableSource)
+    V = zeros(length(tsteps))
+    V = V .+ get_internal_voltage_bias(pvs)
+    @info V
+    retrieved_freqs = get_internal_voltage_frequencies(pvs)
+    coeffs = get_internal_voltage_coefficients(pvs)
+    for (i,ω) in enumerate(retrieved_freqs)
+        V += coeffs[i][1]* sin.(ω.* tsteps)
+        V += coeffs[i][2]* cos.(ω.* tsteps)
+    end
+
+    θ = zeros(length(tsteps))
+    θ = θ .+ get_internal_angle_bias(pvs)
+    @info θ
+    retrieved_freqs = get_internal_angle_frequencies(pvs)
+    coeffs = get_internal_angle_coefficients(pvs)
+    for (i,ω) in enumerate(retrieved_freqs)
+        θ += coeffs[i][1]* sin.(ω .* tsteps)
+        θ += coeffs[i][2]* cos.(ω.* tsteps)
+    end
+    p1 = plot(tsteps,V, label = "plot from pvs coefficients")
+    p2 = plot(tsteps,θ, label = "plot from pvs coefficients")
+    return p1, p2
+end
+
 
 #Before you can initialize your surrogate, you need the true response in steady state.
 

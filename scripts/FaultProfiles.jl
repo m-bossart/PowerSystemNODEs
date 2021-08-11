@@ -14,16 +14,17 @@ include("../models/DynamicComponents.jl")
 include("../models/InverterModels.jl")
 include("../models/utils.jl")
 include("../models/init_functions.jl")
+include("../models/parameter_utils.jl")
 
 #SIMULATION PARAMETERS
 dtmax = 1e-2
-tspan = (0.0, 5.0)
+tspan = (0.0, 1.0)
 step = 1e-3
 tsteps = tspan[1]:step:tspan[2]
 N = length(tsteps) #for dft
 fs = (N-1)/(tspan[2]-tspan[1])
 freqs = fftfreq(N, fs)
-freqs_pos = freqs[freqs .>= 0]
+freqs_pos = freqs[freqs .>= 0] * (2*pi)
 tfault = 0.1
 solver = Rodas5()
 base_system_path = "systems\\base_system.json"
@@ -98,13 +99,13 @@ for a in devices
                         F_V = fft(V)
                         F_V = F_V[freqs .>= 0]
                         F_V = F_V/N
-                        F_V[2:end]= F_V[2:end]*2
+                        F_V[2:end]= F_V[2:end]*2  #/ (2*pi)
                         internal_voltage_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
 
                         F_θ = fft(θ)
                         F_θ = F_θ[freqs .>= 0]
                         F_θ = F_θ/N
-                        F_θ[2:end]= F_θ[2:end]*2
+                        F_θ[2:end]= F_θ[2:end]*2 #/ (2*pi)
                         internal_angle_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
 
                         inf_source = Source(
@@ -114,15 +115,15 @@ for a in devices
                             reactive_power = Q,
                             bus = slack_bus, #bus
                             R_th = 0.0, #Rth
-                            X_th = 5e-6, #Xth
+                            X_th = 5e-9, #Xth
                             internal_voltage = V[1],
                             internal_angle =   θ[1],
                         )
 
                         fault_source = PeriodicVariableSource(
                             name = get_name(inf_source),
-                            R_th = 0.0,
-                            X_th = 5e-6,
+                            R_th = get_R_th(inf_source),
+                            X_th = get_X_th(inf_source),
                             internal_voltage_bias = abs(F_V[1]),
                             internal_voltage_frequencies = freqs_pos[2:end],
                             internal_voltage_coefficients = internal_voltage_coefficients,
