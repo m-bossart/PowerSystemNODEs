@@ -21,14 +21,14 @@ include("../models/InverterModels.jl")
 include("../models/utils.jl")
 include("../models/parameter_utils.jl")
 include("../models/init_functions.jl")
-configure_logging(console_level = Logging.Info)
+configure_logging(console_level = Logging.Error)
 
 ########################PARAMETERS##############################################
 const train_split = 0.99
 solver = Rodas5()
 dtmax = 0.001
 tspan = (0.0, 1.0)
-step = 1e-2
+step = 0.05
 tsteps = tspan[1]:step:tspan[2]
 ################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DAT#############
 sys_faults = System("systems/fault_library.json")
@@ -125,7 +125,9 @@ gfm_nn_states_func = ODEFunction(gfm_nn_states, mass_matrix = M)
 gfm_nn_states_prob = ODEProblem(gfm_nn_states_func,res_nn_states.zero,tspan,p_all_states)
 
 sol = solve(gfm_nn_states_prob, Rodas5(), dtmax=dtmax, saveat=tsteps)
-plot(sol, vars = [24,25], title="GFM+NN(states) surrogate")
+plot!(p3, sol, vars = [24],  label = "real current gfm+nn surrogate")
+plot!(p4, sol, vars = [25],  label = "imag current gfm+nn surrogate")
+display(plot(p3,p4, layout = (2,1)))
 
 ## INITIALIZE THE SURROGATE WITH NN THAT DEPENDS ON VOLTAGE - DON"T CONSIDER YET
 #nn_voltage = FastChain(FastDense(2, 3, tanh),
@@ -149,35 +151,53 @@ plot(sol, vars = [24,25], title="GFM+NN(states) surrogate")
 #TODO Make sure the surrogate matches the PSID system when we have identical models...
 ##
 
-function predict_gfm(θ)     #TODO Constrain parameters so you don't get negative resistors for example
-    x₀, refs = initialize_sys!(sys_init, "gen1", θ)
+global u₀ = res.zero
+
+function predict_gfm(θ)                                                         #TODO Constrain parameters? Or just use smaller step in optimizer?
     p = vcat(θ, refs, get_x(transformer), get_r(transformer))
-    f = get_init_gfm(p, x₀[5], x₀[19])
-    res = nlsolve(f, x₀)
-    @assert converged(res)
-    _prob = remake(gfm_prob, p=p, u0=res.zero)
-    Array(solve(_prob,Rodas5(autodiff=false), dtmax=dtmax, saveat=tsteps))
+    #display("predict")
+    #display(u₀)
+    _prob = remake(gfm_prob, p=p, u0=u₀)
+    Array(solve(_prob,Rodas5(), dtmax=dtmax, saveat=tsteps))
 end
 
 function loss_gfm(θ)
     sol = predict_gfm(θ)
     loss = sum(abs2,  ir_truth[2] - sol[5,:]) + sum(abs2, ii_truth[2] - sol[19,:])
 end
-
 l = loss_gfm(p_inv)
 
-
-
-
-function predict_gfm_nn_states(θ)
-    x₀, refs = initialize_sys!(sys_init, "gen1", p_inv)
-    p = vcat(θ, p_ode)
-    f = get_init_gfm_nn_states(p, x₀[5], x₀[19])
-    x₀_nn_states = vcat(x₀, 0.0,0.0,nn_states(x₀,θ)[1],nn_states(x₀, θ)[2], x₀[5], x₀[19])
-    res = nlsolve(f, x₀_nn_states)
+cb_gfm = function(θ,l)
+    push!(list_losses,l)
+    display(l)
+    x₀, refs = initialize_sys!(sys_init, "gen1", θ)
+    p = vcat(θ, refs, get_x(transformer), get_r(transformer))
+    f = get_init_gfm(p, x₀[5], x₀[19])
+    res = nlsolve(f, x₀)
     @assert converged(res)
-    _prob = remake(gfm_nn_states_prob, p=p, u0=res.zero)
-    Array(solve(_prob,Rodas5(), dtmax=dtmax, saveat=tsteps))
+    global u₀ = res.zero
+    #display("callback")
+    #display(u₀)
+    p1 = plot(predict_gfm(θ)[5,:], label = "real current prediction")
+    plot!(p1, ir_truth[2], label = "real current true")
+    p2 = plot(predict_gfm(θ)[19,:], label = "imag current prediction")
+    plot!(p2, ii_truth[2], label = "imag current true")
+    plt = plot(p1,p2,layout=(2,1))
+    push!(list_plots, plt)
+    display(plt)
+    return false
+end
+
+#TRAIN THE PLAIN GFM
+training_res = @time DiffEqFlux.sciml_train(loss_gfm, p_inv, ADAM(0.005), cb = cb_gfm, maxiters = 10) #TODO make maxiters = (#oftrainingfaults x iters_per_fault)
+
+
+##
+global u₀_nn_states = res_nn_states.zero
+function predict_gfm_nn_states(θ)
+    p = vcat(θ, p_ode)
+    _prob = remake(gfm_nn_states_prob, p=p,  u0=u₀_nn_states)
+    Array(solve(_prob,Rodas5(), dtmax=dtmax, saveat=tsteps, sensealg = QuadratureAdjoint(autojacvec=ReverseDiffVJP(true))))
 end
 
 function loss_gfm_nn_states(θ)
@@ -185,25 +205,59 @@ function loss_gfm_nn_states(θ)
     loss = sum(abs2,  ir_truth[2] - sol[5,:]) + sum(abs2, ii_truth[2] - sol[19,:])
 end
 
-#l = loss_gfm_nn_states(p_nn_states)
-iter = 0
+
 list_plots = []
 list_losses = Float64[]
-#TODO Need to modify true result within callback?
-cb = function(θ,l)
+cb_nn_states = function(θ,l)
     push!(list_losses,l)
     display(l)
-
-    #if iter == 0
-    #  list_plots = []
-    #end
-    #iter += 1
-    #plt = plot( predict_gfm_nn_states(θ)[5,:], label = "real current prediction")
-    #plot!(plt, itruth[2], label = "real current true")
-    #push!(list_plots, plt)
-    #display(plt)
+    x₀, refs = initialize_sys!(sys_init, "gen1", θ)
+    p = vcat(θ, p_ode)
+    x₀_nn_states = vcat(x₀, 0.0,0.0,nn_states(x₀,θ)[1],nn_states(x₀, θ)[2], x₀[5], x₀[19])
+    f = get_init_gfm_nn_states(p, x₀[5], x₀[19])
+    res = nlsolve(f, x₀_nn_states)
+    @assert converged(res)
+    global u₀_nn_states = res.zero
+    display("callback")
+    display(u₀)
+    p1 = plot(predict_gfm_nn_states(θ)[24,:], label = "real current prediction")
+    plot!(p1, ir_truth[2], label = "real current true")
+    p2 = plot(predict_gfm_nn_states(θ)[25,:], label = "imag current prediction")
+    plot!(p2, ii_truth[2], label = "imag current true")
+    plt = plot(p1,p2,layout=(2,1))
+    push!(list_plots, plt)
+    display(plt)
     return false
 end
+
+trainig_res3 = @time DiffEqFlux.sciml_train(loss_gfm_nn_states, p_nn_states, ADAM(0.005), cb = cb_nn_states, maxiters = 2)
+
+
+## Not yet used below
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 cb_iters = function (θ,l)
     push!(list_losses,l)    #record loss
     if (loss < ϵ) # or if you've reach some number of epochs?
@@ -229,9 +283,3 @@ cb_threshold = function (θ,l)
     end
     return false
 end
-##
-
-#TRAIN THE PLAIN GFM
-res = @time DiffEqFlux.sciml_train(loss_gfm, p_inv, ADAM(0.1), cb = cb, maxiters = 2) #TODO make maxiters = (#oftrainingfaults x iters_per_fault)
-#BUG Compiling Tuple Error
-#res = @time DiffEqFlux.sciml_train(loss_gfm_nn_states, p_nn_states, ADAM(0.1), cb = cb, maxiters = 2)

@@ -34,7 +34,14 @@ function randomize_parameters!(inv::DynamicInverter, param_range::Tuple{Float64,
     set_rg!(inv.filter, get_rg(inv.filter)*rand(Uniform(param_range[1],param_range[2])))
 end
 
-function set_parameters!(inv::DynamicInverter, p::Vector{Float64})
+function set_parameters!(inv::DynamicInverter, p)  #change p to p_
+#    function get_value(p::ForwardDiff.Dual)
+#        return p.value
+#    end
+#    function get_value(p::Float64)
+#        return p
+#    end
+#    p = get_value.(p_)
     #pll
     set_ω_lp!(inv.freq_estimator, p[1])
     set_kp_pll!(inv.freq_estimator, p[2])
