@@ -37,7 +37,7 @@ source_bus = 2  #TODO Must have single line between source_bus and surrogate_bus
 surrogate_bus = 16
 devices = [inv_case78] # TODO add in the GFL, SM, VSM, etc.
 Prefchange = [1.0]
-n_devices = 2
+n_devices = 4
 
 
 add_devices_to_surrogatize!(sys, n_devices, surrogate_bus, source_bus)
@@ -93,8 +93,8 @@ for a in devices
                     t = sim.solution.t[1:end-1]
                     if (sim.solution.retcode == :Success)
                         global count_stable += 1
-                        plot!(p1, t, V, title = "Voltage magnitude time series source bus",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1,size =(3000,2000))
-                        plot!(p2, t, θ, title = "Voltage angle time series source bus",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1, size =(3000,2000))
+                        plot!(p1, t, V, title = "Voltage magnitude time series source bus",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1)
+                        plot!(p2, t, θ, title = "Voltage angle time series source bus",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1)
 
                         F_V = fft(V)
                         F_V = F_V[freqs .>= 0]
@@ -115,7 +115,7 @@ for a in devices
                             reactive_power = Q,
                             bus = slack_bus, #bus
                             R_th = 0.0, #Rth
-                            X_th = 5e-9, #Xth
+                            X_th = 5e-6, #Xth
                             internal_voltage = V[1],
                             internal_angle =   θ[1],
                         )

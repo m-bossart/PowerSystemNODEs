@@ -115,7 +115,7 @@ function build_disturbances(sys)  #TODO make this more flexible, add options for
 end
 
 function add_devices_to_surrogatize!(sys::System, n_devices::Integer, surrogate_bus_number::Integer, inf_bus_number:: Integer)
-    param_range = (0.8, 1.2)
+    param_range = (0.5, 2.0)
     surrogate_bus = collect(get_components(Bus,sys,x->get_number(x)==surrogate_bus_number))[1]
     inf_bus = collect(get_components(Bus,sys,x->get_number(x)==inf_bus_number))[1]
 
@@ -312,3 +312,23 @@ end
 #Before you can initialize your surrogate, you need the true response in steady state.
 
 #function Initialize(V,θ,Ir,Ii)
+
+function cb_gfm_plot(sol)
+    p1 = plot(sol[5,:], label = "real current prediction")
+    plot!(p1, ir_truth[2], label = "real current true")
+    p2 = plot(sol[19,:], label = "imag current prediction")
+    plot!(p2, ii_truth[2], label = "imag current true")
+    plt = plot(p1,p2,layout=(2,1))
+    push!(list_plots, plt)
+    display(plt)
+end
+
+function cb_gfm_nn_plot(sol)
+    p1 = plot(sol[24,:], label = "real current prediction")
+    plot!(p1, ir_truth[2], label = "real current true")
+    p2 = plot(sol[25,:], label = "imag current prediction")
+    plot!(p2, ii_truth[2], label = "imag current true")
+    plt = plot(p1,p2,layout=(2,1))
+    push!(list_plots, plt)
+    display(plt)
+end
