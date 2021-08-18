@@ -1,291 +1,183 @@
-┌ Warning: 2021-08-13T15:45:02.692 [43324:1]: There are no Generator Components in the System
+┌ Warning: 2021-08-18T11:20:12.068 [25552:1]: There are no Generator Components in the System
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\system_checks.jl:56
-┌ Warning: 2021-08-13T15:45:02.693 [43324:1]: There are no ElectricLoad Components in the System
+┌ Warning: 2021-08-18T11:20:12.069 [25552:1]: There are no ElectricLoad Components in the System
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\system_checks.jl:56
-┌ Warning: 2021-08-13T15:45:02.972 [43324:1]: Rate 2739.08 MW for BUS 4       -BUS 5       -i_7 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+┌ Warning: 2021-08-18T11:20:12.323 [25552:1]: Rate 2739.08 MW for BUS 4       -BUS 5       -i_7 is larger than the max expected in the range of (min = 134.0, max = 145.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:02.974 [43324:1]: Rate 527.26 MW for BUS 1       -BUS 5       -i_2 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+┌ Warning: 2021-08-18T11:20:12.335 [25552:1]: Rate 527.26 MW for BUS 1       -BUS 5       -i_2 is larger than the max expected in the range of (min = 134.0, max = 145.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:02.977 [43324:1]: Rate 661.32 MW for BUS 2       -BUS 5       -i_5 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+┌ Warning: 2021-08-18T11:20:12.338 [25552:1]: Rate 661.32 MW for BUS 2       -BUS 5       -i_5 is larger than the max expected in the range of (min = 134.0, max = 145.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:02.979 [43324:1]: Rate 828.18 MW for BUS 6       -BUS 13      -i_10 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.341 [25552:1]: Rate 828.18 MW for BUS 6       -BUS 13      -i_10 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:02.982 [43324:1]: Rate 658.72 MW for BUS 3       -BUS 4       -i_6 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+┌ Warning: 2021-08-18T11:20:12.344 [25552:1]: Rate 658.72 MW for BUS 3       -BUS 4       -i_6 is larger than the max expected in the range of (min = 134.0, max = 145.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:02.985 [43324:1]: Rate 406.15 MW for BUS 12      -BUS 13      -i_16 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.346 [25552:1]: Rate 406.15 MW for BUS 12      -BUS 13      -i_16 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.003 [43324:1]: Rate 312.07 MW for BUS 13      -BUS 14      -i_17 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.362 [25552:1]: Rate 312.07 MW for BUS 13      -BUS 14      -i_17 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.007 [43324:1]: Rate 651.77 MW for BUS 2       -BUS 4       -i_4 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+┌ Warning: 2021-08-18T11:20:12.365 [25552:1]: Rate 651.77 MW for BUS 2       -BUS 4       -i_4 is larger than the max expected in the range of (min = 134.0, max = 145.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.009 [43324:1]: Rate 1943.38 MW for BUS 1       -BUS 2       -i_1 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+┌ Warning: 2021-08-18T11:20:12.368 [25552:1]: Rate 1943.38 MW for BUS 1       -BUS 2       -i_1 is larger than the max expected in the range of (min = 134.0, max = 145.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.012 [43324:1]: Rate 594.68 MW for BUS 2       -BUS 3       -i_3 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+┌ Warning: 2021-08-18T11:20:12.371 [25552:1]: Rate 594.68 MW for BUS 2       -BUS 3       -i_3 is larger than the max expected in the range of (min = 134.0, max = 145.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.015 [43324:1]: Rate 1340.14 MW for BUS 9       -BUS 10      -i_13 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.374 [25552:1]: Rate 1340.14 MW for BUS 9       -BUS 10      -i_13 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.017 [43324:1]: Rate 548.97 MW for BUS 6       -BUS 11      -i_8 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.377 [25552:1]: Rate 548.97 MW for BUS 6       -BUS 11      -i_8 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.019 [43324:1]: Rate 579.33 MW for BUS 10      -BUS 11      -i_15 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.398 [25552:1]: Rate 579.33 MW for BUS 10      -BUS 11      -i_15 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.024 [43324:1]: Rate 426.35 MW for BUS 6       -BUS 12      -i_9 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.401 [25552:1]: Rate 426.35 MW for BUS 6       -BUS 12      -i_9 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.040 [43324:1]: Rate 1099.9 MW for BUS 7       -BUS 9       -i_12 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.404 [25552:1]: Rate 1099.9 MW for BUS 7       -BUS 9       -i_12 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.063 [43324:1]: Rate 686.92 MW for BUS 7       -BUS 8       -i_11 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.406 [25552:1]: Rate 686.92 MW for BUS 7       -BUS 8       -i_11 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.065 [43324:1]: Rate 405.0 MW for BUS 9       -BUS 14      -i_14 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+┌ Warning: 2021-08-18T11:20:12.409 [25552:1]: Rate 405.0 MW for BUS 9       -BUS 14      -i_14 is larger than the max expected in the range of (min = 47.0, max = 52.0).
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\IO\branchdata_checks.jl:148
-┌ Warning: 2021-08-13T15:45:03.103 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Warning: 2021-08-13T15:45:03.140 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Warning: 2021-08-13T15:45:03.158 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Warning: 2021-08-13T15:45:03.186 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Warning: 2021-08-13T15:45:03.195 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Warning: 2021-08-13T15:45:03.219 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Warning: 2021-08-13T15:45:03.243 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Warning: 2021-08-13T15:45:03.249 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Info: 2021-08-13T15:45:03.753 [43324:1]: 2
+┌ Warning: 2021-08-18T11:20:12.443 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Warning: 2021-08-18T11:20:12.465 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Warning: 2021-08-18T11:20:12.495 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Warning: 2021-08-18T11:20:12.516 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Warning: 2021-08-18T11:20:12.521 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Warning: 2021-08-18T11:20:12.542 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Warning: 2021-08-18T11:20:12.564 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Warning: 2021-08-18T11:20:12.570 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Info: 2021-08-18T11:20:13.039 [25552:1]: 2
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:25
-┌ Warning: 2021-08-13T15:45:03.861 [43324:1]: SystemUnitSetting not defined, using NATURAL_UNITS for displaying device specification.
+┌ Warning: 2021-08-18T11:20:13.161 [25552:1]: SystemUnitSetting not defined, using NATURAL_UNITS for displaying device specification.
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\print.jl:72
-┌ Info: 2021-08-13T15:45:03.889 [43324:1]: ("training set size:", 1)
-└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:37
-┌ Info: 2021-08-13T15:45:03.892 [43324:1]: ("test set size:", 0)
-└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:38
-┌ Info: 2021-08-13T15:45:04.290 [43324:1]: Serialized System to systems/sys_train.json
+┌ Info: 2021-08-18T11:20:13.193 [25552:1]: ("training set size:", 1)
+└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_gfm.jl:45
+┌ Info: 2021-08-18T11:20:13.208 [25552:1]: ("test set size:", 0)
+└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_gfm.jl:46
+┌ Info: 2021-08-18T11:20:13.553 [25552:1]: Serialized System to systems/sys_train.json
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:274
-┌ Info: 2021-08-13T15:45:04.642 [43324:1]: Serialized System to systems/sys_test.json
+┌ Info: 2021-08-18T11:20:14.021 [25552:1]: Serialized System to systems/sys_test.json
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:274
-┌ Info: 2021-08-13T15:45:04.773 [43324:1]: no active sources in the system, activating the first source
+┌ Info: 2021-08-18T11:20:14.187 [25552:1]: no active sources in the system, activating the first source
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:168
-┌ Info: 2021-08-13T15:45:04.784 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:20:14.199 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:45:04.784 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:20:14.222 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:45:04.784 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:20:14.223 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:45:04.884 [43324:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
+┌ Info: 2021-08-18T11:20:14.296 [25552:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:45:04.891 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:20:14.297 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:45:04.903 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:20:14.297 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:45:04.908 [43324:1]: PowerFlow solve converged, the results are exported in DataFrames
+┌ Info: 2021-08-18T11:20:14.300 [25552:1]: PowerFlow solve converged, the results are exported in DataFrames
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\power_flow.jl:343
-┌ Info: 2021-08-13T15:45:04.913 [43324:1]: Voltages are exported in pu. Powers are exported in MW/MVAr.
+┌ Info: 2021-08-18T11:20:14.303 [25552:1]: Voltages are exported in pu. Powers are exported in MW/MVAr.
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\power_flow.jl:179
-┌ Info: 2021-08-13T15:45:04.915 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:20:14.305 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:345
-┌ Info: 2021-08-13T15:45:04.920 [43324:1]: ("train system power flow", 1×9 DataFrame
+┌ Info: 2021-08-18T11:20:14.307 [25552:1]: ("train system power flow", 1×9 DataFrame
 │  Row │ line_name                       bus_from  bus_to  P_from_to  Q_from_to  P_to_from  Q_to_from  P_losses     Q_losses
 │      │ String                          Int64     Int64   Float64    Float64    Float64    Float64    Float64      Float64
 │ ─────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│    1 │ BUS 2       -BUS 16      -i_19         2      16      -40.0   -23.3605       40.0    25.4173  1.42109e-14   2.05677)
-└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:53
-┌ Info: 2021-08-13T15:45:04.939 [43324:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
+│    1 │ BUS 2       -BUS 16      -i_19         2      16      -40.0   -23.3605       40.0    25.4173  7.10543e-15   2.05677)
+└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_gfm.jl:61
+┌ Info: 2021-08-18T11:20:14.318 [25552:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:45:04.940 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:20:14.319 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:45:04.941 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:20:14.320 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:45:04.941 [43324:1]: PowerFlow solve converged, the results are exported in DataFrames
+┌ Info: 2021-08-18T11:20:14.321 [25552:1]: PowerFlow solve converged, the results are exported in DataFrames
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\power_flow.jl:343
-┌ Info: 2021-08-13T15:45:04.942 [43324:1]: Voltages are exported in pu. Powers are exported in MW/MVAr.
+┌ Info: 2021-08-18T11:20:14.321 [25552:1]: Voltages are exported in pu. Powers are exported in MW/MVAr.
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\power_flow.jl:179
-┌ Info: 2021-08-13T15:45:04.943 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:20:14.322 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:345
-┌ Info: 2021-08-13T15:45:04.945 [43324:1]: ("train system power flow", 2×9 DataFrame
+┌ Info: 2021-08-18T11:20:14.343 [25552:1]: ("train system power flow", 2×9 DataFrame
 │  Row │ bus_number  Vm       θ          P_gen    P_load   P_net    Q_gen     Q_load   Q_net
 │      │ Int64       Float64  Float64    Float64  Float64  Float64  Float64   Float64  Float64
 │ ─────┼────────────────────────────────────────────────────────────────────────────────────────
 │    1 │          2  1.02139  -0.300633    -40.0      0.0    -40.0  -23.3605      0.0  -23.3605
 │    2 │         16  1.045    -0.263148     40.0      0.0     40.0   25.4173      0.0   25.4173)
-└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:54
-┌ Info: 2021-08-13T15:45:04.946 [43324:1]: Rebuilding the simulation after reset
+└ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_gfm.jl:62
+┌ Info: 2021-08-18T11:20:14.344 [25552:1]: Rebuilding the simulation after reset
 └ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation.jl:156
-┌ Info: 2021-08-13T15:45:04.947 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:20:14.345 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:45:04.947 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:20:14.345 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:45:05.050 [43324:1]: Simulation reset to status BUILT
+┌ Info: 2021-08-18T11:20:14.384 [25552:1]: Simulation reset to status BUILT
 └ @ PowerSimulationsDynamics C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSimulationsDynamics.jl\src\base\simulation.jl:159
-┌ Info: 2021-08-13T15:45:10.439 [43324:1]: [1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274, 1.0122583541225274]
+┌ Info: 2021-08-18T11:20:24.880 [25552:1]: [1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487]
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:289
-┌ Info: 2021-08-13T15:45:10.462 [43324:1]: [-0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405, -0.30976993287138405]
+┌ Info: 2021-08-18T11:20:24.885 [25552:1]: [-0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704]
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:299
-┌ Info: 2021-08-13T15:45:10.833 [43324:1]: 25.0
+┌ Info: 2021-08-18T11:20:25.339 [25552:1]: 25.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
-┌ Info: 2021-08-13T15:45:10.842 [43324:1]: 10.0
+┌ Info: 2021-08-18T11:20:25.340 [25552:1]: 10.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
-┌ Info: 2021-08-13T15:45:10.842 [43324:1]: 50.0
+┌ Info: 2021-08-18T11:20:25.341 [25552:1]: 50.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
-┌ Info: 2021-08-13T15:45:10.843 [43324:1]: 20.0
+┌ Info: 2021-08-18T11:20:25.341 [25552:1]: 20.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
-┌ Info: 2021-08-13T15:45:10.843 [43324:1]: 75.0
+┌ Info: 2021-08-18T11:20:25.342 [25552:1]: 75.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
-┌ Info: 2021-08-13T15:45:10.844 [43324:1]: 30.0
+┌ Info: 2021-08-18T11:20:25.342 [25552:1]: 30.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
-┌ Info: 2021-08-13T15:45:10.844 [43324:1]: 100.0
+┌ Info: 2021-08-18T11:20:25.342 [25552:1]: 100.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
-┌ Info: 2021-08-13T15:45:10.844 [43324:1]: 40.0
+┌ Info: 2021-08-18T11:20:25.343 [25552:1]: 40.0
 └ @ Main C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
-┌ Warning: 2021-08-13T15:45:10.901 [43324:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
-└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\MxGbV\src\validation.jl:51
-┌ Info: 2021-08-13T15:45:11.117 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Warning: 2021-08-18T11:20:25.404 [25552:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\3LlGM\src\validation.jl:51
+┌ Info: 2021-08-18T11:20:25.538 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:45:11.135 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:20:25.541 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:45:11.135 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:20:25.542 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Warning: 2021-08-13T15:45:11.267 [43324:1]: Flux.zeros(size...) is deprecated, please use Flux.zeros32(size...) or Base.zeros(Float32, size...)
-│   caller = FastDense(in::Int64, out::Int64, σ::Function; bias::Bool, initW::typeof(Flux.glorot_uniform), initb::typeof(Flux.zeros)) at fast_layers.jl:45
-└ @ DiffEqFlux C:\Users\Matt Bossart\.julia\packages\DiffEqFlux\MUw49\src\fast_layers.jl:45
-┌ Info: 2021-08-13T15:49:55.294 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:26:11.667 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:49:55.303 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:26:11.671 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:49:55.304 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:26:11.671 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:00.826 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:26:20.261 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:00.829 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:26:20.264 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:00.829 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:26:20.264 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:05.343 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:26:22.197 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:05.347 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:26:22.208 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:05.353 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:26:22.209 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:09.480 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:29:16.577 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:09.484 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:29:16.580 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:09.486 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:29:16.580 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:13.746 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:29:26.735 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:13.752 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:29:26.738 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:13.765 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:29:26.739 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:18.088 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+┌ Info: 2021-08-18T11:29:30.157 [25552:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:18.100 [43324:1]: Validating connectivity with Goderya algorithm
+┌ Info: 2021-08-18T11:29:30.164 [25552:1]: Validating connectivity with Goderya algorithm
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:18.101 [43324:1]: The System has no islands
+┌ Info: 2021-08-18T11:29:30.164 [25552:1]: The System has no islands
 └ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:22.439 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:22.441 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:22.442 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:26.606 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:26.614 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:26.614 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:30.732 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:30.735 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:30.738 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:34.943 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:34.946 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:34.947 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:39.243 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:39.247 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:39.247 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:43.501 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:43.505 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:43.505 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:47.853 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:47.857 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:47.868 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:52.100 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:52.115 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:52.124 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:50:56.438 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:50:56.442 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:50:56.442 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:51:00.826 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:51:00.838 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:51:00.841 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:51:05.110 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:51:05.114 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:51:05.114 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:51:09.208 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:51:09.211 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:51:09.212 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:51:13.475 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:51:13.482 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:51:13.485 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:51:17.631 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:51:17.645 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:51:17.648 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:51:17.805 [43324:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\base.jl:339
-┌ Info: 2021-08-13T15:51:17.812 [43324:1]: Validating connectivity with Goderya algorithm
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:296
-┌ Info: 2021-08-13T15:51:17.812 [43324:1]: The System has no islands
-└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\wLUVY\src\utils\network_calculations\ybus_calculations.jl:242
-┌ Info: 2021-08-13T15:55:13 [43324:1]: Saved animation to 
-│   fn = C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\figs\gfm_train.gif
-└ @ Plots C:\Users\Matt Bossart\.julia\packages\Plots\S2aH5\src\animation.jl:104
-                                                                                                                     ┌ Info: 2021-08-13T15:39:17.208 [43324:1]: Saved animation to 
-│   fn = C:\temp\jl_4NUxGZvaE2.gif
-└ @ Plots C:\Users\Matt Bossart\.julia\packages\Plots\S2aH5\src\animation.jl:104
-┌ Info: 2021-08-13T15:39:36.322 [43324:1]: Saved animation to 
-│   fn = C:\temp\jl_M6SOK9g3jR.gif
-└ @ Plots C:\Users\Matt Bossart\.julia\packages\Plots\S2aH5\src\animation.jl:104
-┌ Info: 2021-08-13T15:39:43.703 [43324:1]: Saved animation to 
-│   fn = C:\temp\jl_wAcwcVDimu.gif
-└ @ Plots C:\Users\Matt Bossart\.julia\packages\Plots\S2aH5\src\animation.jl:104
-┌ Info: 2021-08-13T15:40:23.915 [43324:1]: Saved animation to 
-│   fn = C:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\anim_fps15.gif
-└ @ Plots C:\Users\Matt Bossart\.julia\packages\Plots\S2aH5\src\animation.jl:104

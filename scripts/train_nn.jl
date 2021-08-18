@@ -15,7 +15,9 @@ using FFTW
 using Statistics
 using NLsolve
 using DiffEqFlux
+using Flux.Losses: mae, mse
 using ForwardDiff
+using Statistics
 include("../models/DynamicComponents.jl")
 include("../models/InverterModels.jl")
 include("../models/utils.jl")
@@ -24,12 +26,19 @@ include("../models/init_functions.jl")
 configure_logging(console_level = Logging.Info)
 
 ########################PARAMETERS##############################################
+label = "" #base label for training figures
 const train_split = 0.99
 solver = Rodas4() #Rodas5()
-dtmax = 0.001
+abstol = 1e-8
+reltol = 1e-5
+tfault =  0.01
 tspan = (0.0, 1.0)
-step = 0.02
-tsteps = tspan[1]:step:tspan[2]
+steps = 100
+tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps))
+nn_width = 5
+#CHANGE NN DEPTH MANUALLY (default = 1 hidden)!
+nn_activation = relu  #tanh #gelu
+nn_scale = 1.0  #1e-1, 1e-2
 ################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DAT#############
 sys_faults = System("systems/fault_library.json")
 sys_full = System("systems/base_system.json")
@@ -54,7 +63,9 @@ sim = Simulation!(
 @info "train system power flow", solve_powerflow(sys_train)["bus_results"]
 execute!(sim,
         solver,
-        reset_simulation=true, dtmax=dtmax, saveat=tsteps);
+        abstol = abstol,
+        reltol = reltol,
+        reset_simulation=true, saveat=tsteps);
 
 active_source = collect(get_components(Source, sys_train,  x -> PSY.get_available(x)))[1]
 Vmag_bus = get_voltage_magnitude_series(sim, 2)
@@ -67,6 +78,8 @@ plot!(p1,Vmag_internal,  label="internal voltage")
 p2 = plot!(p2, θ_bus, label="bus angle")
 plot!(p2, θ_internal, label="internal angle")
 ir_truth, ii_truth = get_total_current_series(sim) #TODO Better to measure current at the PVS (implement method after PVS is complete)
+Ir_scale = maximum(ir_truth[2]) - minimum(ir_truth[2])
+Ii_scale = maximum(ii_truth[2]) - minimum(ii_truth[2])
 p3 = plot(ir_truth, label = "real current true")
 p4 = plot(ii_truth, label = "imag current true")
 
@@ -81,11 +94,13 @@ V, θ = Source_to_function_of_time(get_dynamic_injector(active_source))
 p_ode = vcat(p_inv, refs, p_fixed)
 
 ######INITIALIZE THE GFM+NN SURROGATE AND BUILD THE TRAINING PROBLEM############
-nn = FastChain(FastDense(2, 3, tanh),
-                       FastDense(3, 2))
+nn = FastChain(FastDense(2, nn_width, nn_activation),
+                FastDense(nn_width, nn_width, nn_activation),
+                FastDense(nn_width, 2))
+
 p_nn = initial_params(nn)
 n_weights_nn = length(p_nn)
-p_all = vcat(p_nn, p_inv, refs, p_fixed, n_weights_nn)
+p_all = vcat(p_nn, p_inv, refs, p_fixed)
 x₀_nn = vcat(x₀, 0.0,0.0,nn([V(0.0), θ(0.0)],p_nn)[1], nn([V(0.0), θ(0.0)],p_nn)[2], x₀[5], x₀[19])
 h = get_init_gfm_nn(p_all, x₀[5], x₀[19])
 res_nn= nlsolve(h, x₀_nn)
@@ -96,10 +111,10 @@ gfm_nn(dx,res_nn.zero,p_all,0.0)
 M = MassMatrix(23, 2)
 gfm_nn_func = ODEFunction(gfm_nn, mass_matrix = M)
 gfm_nn_prob = ODEProblem(gfm_nn_func,res_nn.zero,tspan,p_all)
-sol = solve(gfm_nn_prob, solver, dtmax=dtmax, saveat=tsteps)
-sol = solve(gfm_nn_prob, solver, dtmax=dtmax, saveat=tsteps)
-plot!(p3, sol, vars = [24],  label = "real current gfm+nn surrogate")
-plot!(p4, sol, vars = [25],  label = "imag current gfm+nn surrogate")
+
+sol = solve(gfm_nn_prob, solver,  abstol=abstol, reltol=reltol,  saveat=tsteps)
+scatter!(p3, sol, vars = [24], markersize=2, label = "real current gfm+nn surrogate")
+scatter!(p4, sol, vars = [25], markersize=2, label = "imag current gfm+nn surrogate")
 display(plot(p1,p2,p3,p4, layout = (2,2)))
 
 ##
@@ -108,21 +123,30 @@ global u₀ = res_nn.zero
 global refs
 
 function predict_gfm_nn(θ)
-    p = vcat(θ, p_inv, refs, p_fixed, n_weights_nn)
+    p = vcat(θ, p_inv, refs, p_fixed)
     _prob = remake(gfm_nn_prob, p=p,  u0=u₀)
-    Array(solve(_prob, solver, dtmax=dtmax, saveat=tsteps))
+    solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=tsteps)
 end
 
 function loss_gfm_nn(θ)
-    sol = predict_gfm_nn(θ)
-    loss = sum(abs2,  ir_truth[2] - sol[5,:]) + sum(abs2, ii_truth[2] - sol[19,:])
+    solution = predict_gfm_nn(θ)
+    sol = Array(solution)
+    #if solution.retcode == :Success
+    if size(sol)[2] == size(tsteps)[1]
+        loss = mae(sol[24,:], ir_truth[2] ) / Ir_scale + mae( sol[25,:], ii_truth[2]) / Ii_scale
+    else
+        loss = Inf
+    end
     loss, sol
 end
 
 list_plots = []
 list_losses = Float64[]
-cb_gfm_nn = function(θθ,l, sol)
+list_gradnorm = Float64[]
+cb_gfm_nn = function(θθ,l, sol) #TODO Deal with  θθ nonsense and make better naming
     #DISPLAY LOSS AND PLOT
+    grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x)),θθ),2)
+    push!(list_gradnorm, grad_norm)
     push!(list_losses,l)
     display(l)
     cb_gfm_nn_plot(sol)
@@ -130,7 +154,7 @@ cb_gfm_nn = function(θθ,l, sol)
     #UPDATE REFERENCES AND INITIAL CONDITIONS
     x₀, refs_int = initialize_sys!(sys_init, "gen1", p_inv) #TODO don't need this each time
     global refs = refs_int
-    p = vcat(θθ, p_inv, refs, p_fixed, n_weights_nn)
+    p = vcat(θθ, p_inv, refs, p_fixed )
     x₀_nn = vcat(x₀, 0.0, 0.0, nn([V(0.0), θ(0.0)],θθ)[1], nn([V(0.0), θ(0.0)],θθ)[2], x₀[5], x₀[19])
     f = get_init_gfm_nn(p, x₀[5], x₀[19])
     res = nlsolve(f, x₀_nn)
@@ -139,8 +163,10 @@ cb_gfm_nn = function(θθ,l, sol)
 
     return false
 end
-
-trainig_res3 = @time DiffEqFlux.sciml_train(loss_gfm_nn, p_nn, ADAM(0.01), cb = cb_gfm_nn, maxiters = 20)
+#Zygote.gradient(x -> first(loss_gfm_nn(x)), p_nn)
+#aa = @time ForwardDiff.gradient(x -> first(loss_gfm_nn(x)), p_nn)
+res_nn = @time DiffEqFlux.sciml_train(loss_gfm_nn, p_nn, ADAM(0.01), GalacticOptim.AutoForwardDiff(), cb = cb_gfm_nn, maxiters = 2)
+res_nn = @time DiffEqFlux.sciml_train(loss_gfm_nn, p_nn, ADAM(0.01), GalacticOptim.AutoZygote(), cb = cb_gfm_nn, maxiters = 2)
 
 ##
 anim = Animation()
@@ -149,3 +175,5 @@ for plt in list_plots
 end
 display(anim)
 gif(anim, "figs/nm_train.gif", fps = 3)
+scatter(list_losses, title = "loss")
+scatter(list_gradnorm, title = "norm of gradient")

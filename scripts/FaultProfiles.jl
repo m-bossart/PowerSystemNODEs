@@ -25,8 +25,8 @@ N = length(tsteps) #for dft
 fs = (N-1)/(tspan[2]-tspan[1])
 freqs = fftfreq(N, fs)
 freqs_pos = freqs[freqs .>= 0] * (2*pi)
-tfault = 0.1
-solver = Rodas5()
+tfault = 0.01
+solver = Rodas4()
 base_system_path = "systems\\base_system.json"
 
 #SYSTEM PARAMETERS

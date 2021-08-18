@@ -140,7 +140,7 @@ end
 #and output I(t)
 function gfm_nn(dx,x,p,t)
     #PARAMETERS
-    n_weights_nn = Int(p[end])
+    #n_weights_nn = Int(p[end])
     p_nn = p[1:n_weights_nn]
     p_ode = p[n_weights_nn+1:end]
 
@@ -286,12 +286,12 @@ function gfm_nn(dx,x,p,t)
       (vi_filter - Vi_pcc - rg*ii_filter - ω_sys*lg*ir_filter)
 
      #NN CURRENT SOURCE (NN input includes terminal voltage only)
-     dx[i__ir_nn] =ir_offset -  nn([V(t), θ(t)],p_nn)[1]
-     dx[i__ii_nn] =ii_offset -  nn([V(t), θ(t)],p_nn)[2]
+     dx[i__ir_nn] =ir_offset -  nn([V(t), θ(t)],p_nn)[1] * nn_scale
+     dx[i__ii_nn] =ii_offset -  nn([V(t), θ(t)],p_nn)[2] * nn_scale
 
      #Current offset for the NN Current Source
-     dx[i__ir_offset] = 0.0
-     dx[i__ii_offset] = 0.0
+     dx[i__ir_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
+     dx[i__ii_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
 
      #ALEGRAIC STATE - OUTPUT CURRENT
      dx[i__ir_out] =  ir_out - ir_nn - ir_filter
