@@ -84,6 +84,7 @@ p_ode = vcat(p_inv, refs, p_fixed)
 ######INITIALIZE THE GFM+NN SURROGATE AND BUILD THE TRAINING PROBLEM############
 nn = FastChain(FastDense(2, nn_width, nn_activation),
                 FastDense(nn_width, nn_width, nn_activation),
+                FastDense(nn_width, nn_width, nn_activation),
                 FastDense(nn_width, 2))
 
 p_nn = initial_params(nn)

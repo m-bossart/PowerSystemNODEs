@@ -173,6 +173,8 @@ function gfm_nn(dx,x,p,t)
     Qref = p_ode[27]    #Reference treated as parameter, but should NOT get updated during training
     Xtrans = p_ode[28]
     Rtrans = p_ode[29]
+    ir_offset = p_ode[30]
+    ii_offset = p_ode[31]
 
     #STATE INDEX AND STATES
     i__vi_filter, vi_filter = 1, x[1]
@@ -196,10 +198,10 @@ function gfm_nn(dx,x,p,t)
     i__ii_filter, ii_filter = 19, x[19]
     i__ir_nn, ir_nn = 20, x[20]
     i__ii_nn, ii_nn = 21, x[21]
-    i__ir_offset, ir_offset = 22, x[22]
-    i__ii_offset, ii_offset =  23, x[23]
-    i__ir_out, ir_out =  24, x[24]
-    i__ii_out, ii_out =  25, x[25]
+    #i__ir_offset, ir_offset = 22, x[22]
+    #i__ii_offset, ii_offset =  23, x[23]
+    i__ir_out, ir_out =  22, x[22]
+    i__ii_out, ii_out =  23, x[23]
 
     ω_base = 60.0*2*pi
     ω_sys = 1.0
@@ -290,8 +292,8 @@ function gfm_nn(dx,x,p,t)
      dx[i__ii_nn] =ii_offset -  nn([V(t), θ(t)],p_nn)[2] * nn_scale
 
      #Current offset for the NN Current Source
-     dx[i__ir_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
-     dx[i__ii_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
+     #dx[i__ir_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
+     #dx[i__ii_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
 
      #ALEGRAIC STATE - OUTPUT CURRENT
      dx[i__ir_out] =  ir_out - ir_nn - ir_filter

@@ -10,8 +10,8 @@ const PSY = PowerSystems
 using Plots
 using FFTW
 using Statistics
-include("../models/DynamicComponents.jl")
-include("../models/InverterModels.jl")
+include("../../models/DynamicComponents.jl")
+include("../../models/InverterModels.jl")
 
 #SIMULATION PARAMETERS
 dtmax = 0.02

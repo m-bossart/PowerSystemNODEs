@@ -1,0 +1,52 @@
+########################PARAMETERS##############################################
+ #base label for training figures
+const train_split = 0.99
+optimizer = ADAM(0.01)
+solver = Rodas4() #KenCarp4() #QBDF()# TRBDF2() #Rodas4() #Rodas5() TRBDF2() 
+abstol = 1e-6
+reltol = 1e-3
+tfault =  0.01
+tspan = (0.0, 1.0)
+steps = 100
+tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps))
+nn_width = 2
+#CHANGE NN DEPTH MANUALLY (default = 1 hidden)!
+nn_activation = relu  #tanh #gelu
+nn_scale = 1.0  #1e-1, 1e-2
+
+
+label = "hidden=1,width=2"
+nn_width = 2 
+include("train_nn.jl")
+
+label = "hidden=1,width=3"
+nn_width = 3
+include("train_nn.jl")
+
+label = "hidden=1,width=4"
+nn_width = 4
+include("train_nn.jl")
+
+label = "hidden=1,width=5"
+nn_width = 5
+include("train_nn.jl")
+
+
+label = "hidden=2,width=2"
+nn_width = 2 
+include("train_nn_2hidden.jl")
+
+label = "hidden=2,width=3"
+nn_width = 3
+include("train_nn_2hidden.jl")
+
+label = "hidden=2,width=4"
+nn_width = 4
+include("train_nn_2hidden.jl")
+
+label = "hidden=2,width=5"
+nn_width = 5
+include("train_nn_2hidden.jl")
+
+
+

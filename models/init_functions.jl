@@ -16,10 +16,10 @@ end
 
 function get_init_gfm_nn(p, ir_filter, ii_filter)
     return (dx, x) -> begin
-                dx[24] = 0
-                x[24] = ir_filter
-                dx[25] = 0
-                x[25] = ii_filter
+                dx[22] = 0
+                x[22] = ir_filter
+                dx[23] = 0
+                x[23] = ii_filter
                 gfm_nn(dx,x,p,0.0)
                 nothing
         end

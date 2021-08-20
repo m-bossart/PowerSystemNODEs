@@ -4,7 +4,7 @@ using Revise
 using OrdinaryDiffEq
 using PowerSystems
 using PowerSimulationsDynamics
-include("../models/DynamicComponents.jl")
+include("../../models/DynamicComponents.jl")
 
 sys = System("cases/IEEE 14 bus_modified_33.raw")
 sys2 = System("cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw")

@@ -10,8 +10,8 @@ using PowerSimulationsDynamics
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 using Plots
-include("../models/DynamicComponents.jl")
-include("../models/InverterModels.jl")
+include("../../models/DynamicComponents.jl")
+include("../../models/InverterModels.jl")
 
 #SIMULATION PARAMETERS
 dtmax = 0.02

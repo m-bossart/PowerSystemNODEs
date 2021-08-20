@@ -324,9 +324,9 @@ function cb_gfm_plot(sol)
 end
 
 function cb_gfm_nn_plot(sol)
-    p1 = scatter(tsteps, sol[24,:], markersize=2, xaxis=:log, label = "real current prediction")
+    p1 = scatter(tsteps, sol[22,:], markersize=2, xaxis=:log, label = "real current prediction")
     plot!(p1, ir_truth, label = "real current true")
-    p2 = scatter(tsteps, sol[25,:], markersize=2, xaxis=:log, label = "imag current prediction")
+    p2 = scatter(tsteps, sol[23,:], markersize=2, xaxis=:log, label = "imag current prediction")
     plot!(p2, ii_truth, label = "imag current true")
     plt = plot(p1,p2,layout=(2,1))
     push!(list_plots, plt)
