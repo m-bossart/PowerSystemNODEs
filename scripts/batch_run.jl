@@ -44,6 +44,7 @@ label = "hidden=2,width=4"
 nn_width = 4
 include("train_nn_2hidden.jl")
 
+
 label = "hidden=2,width=5"
 nn_width = 5
 include("train_nn_2hidden.jl")
