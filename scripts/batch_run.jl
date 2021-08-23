@@ -1,6 +1,29 @@
 ########################PARAMETERS##############################################
  #base label for training figures
-const train_split = 0.99
+#TODO Improve the plotting of power system results (PowerGraphics?)
+using Pkg
+Pkg.activate(".")
+using Revise
+using Distributions
+using OrdinaryDiffEq
+using DifferentialEquations
+using DiffEqSensitivity
+using PowerSystems
+using Logging
+using PowerSimulationsDynamics
+const PSID = PowerSimulationsDynamics
+const PSY = PowerSystems
+using Plots
+using FFTW
+using Statistics
+using NLsolve
+using DiffEqFlux
+using Flux.Losses: mae, mse
+using ForwardDiff
+using Statistics
+using GalacticOptim
+
+const train_split = 0.9999
 optimizer = ADAM(0.01)
 solver = Rodas4() #KenCarp4() #QBDF()# TRBDF2() #Rodas4() #Rodas5() TRBDF2() 
 abstol = 1e-6
@@ -43,7 +66,6 @@ include("train_nn_2hidden.jl")
 label = "hidden=2,width=4"
 nn_width = 4
 include("train_nn_2hidden.jl")
-
 
 label = "hidden=2,width=5"
 nn_width = 5
