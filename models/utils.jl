@@ -273,14 +273,17 @@ function get_total_current_series(sim::Simulation)
     ii_total = []
     for (i,g) in enumerate(get_components(DynamicInjection, sys_train, x->typeof(x)!== PeriodicVariableSource))
         if i == 1
-            ir_total = get_real_current_series(sim, get_name(g))
-            ii_total = get_imaginary_current_series(sim, get_name(g))
+            ir_total = get_real_current_series(sim, get_name(g))[2]
+            ii_total = get_imaginary_current_series(sim, get_name(g))[2]
         else
-            ir_total[2] .+= get_real_current_series(sim, get_name(g))[2]
-            ii_total[2] .+= get_imaginary_current_series(sim, get_name(g))[2]
+            ir_total .+= get_real_current_series(sim, get_name(g))[2]
+            ii_total .+= get_imaginary_current_series(sim, get_name(g))[2]
         end
     end
-    return [ir_total, ii_total]
+    data_array =  zeros(Float64, (2, length(ir_total)))
+    data_array[1,:] .= ir_total
+    data_array[2,:] .= ii_total
+    return data_array
 end
 
 function plot_pvs(tsteps, pvs::PeriodicVariableSource)
@@ -324,11 +327,22 @@ function cb_gfm_plot(sol)
 end
 
 function cb_gfm_nn_plot(sol)
-    p1 = scatter(tsteps, sol[22,:], markersize=2, xaxis=:log, label = "real current prediction")
-    plot!(p1, ir_truth, label = "real current true")
-    p2 = scatter(tsteps, sol[23,:], markersize=2, xaxis=:log, label = "imag current prediction")
-    plot!(p2, ii_truth, label = "imag current true")
+    p1 = scatter(tsteps[rng], sol[1,:], markersize=2, xaxis=:log, label = "real current prediction")
+    plot!(p1, tsteps, ode_data[1,:], label = "real current true")
+    p2 = scatter(tsteps[rng], sol[2,:], markersize=2, xaxis=:log, label = "imag current prediction")
+    plot!(p2, tsteps, ode_data[2,:], label = "imag current true")
     plt = plot(p1,p2,layout=(2,1))
     push!(list_plots, plt)
     display(plt)
+end
+
+
+function extending_ranges(datasize::Integer, groupsize::Integer)
+    1 <= groupsize <= datasize || throw(
+        DomainError(
+            groupsize,
+            "datasize must be positive and groupsize must to be within [1, datasize]",
+        ),
+    )
+    return [1:min(datasize, i + groupsize - 1) for i in 1:groupsize:datasize]
 end
