@@ -1,4 +1,5 @@
 using DiffEqFlux, GalacticOptim, OrdinaryDiffEq
+using Plots
 
 function newtons_cooling(du, u, p, t)
     temp = u[1]
@@ -15,7 +16,7 @@ function dudt_(u,p,t)
     ann(u, p).* u
 end
 
-cb = function (p,l,pred;doplot=false) #callback function to observe training
+cb = function (p,l,pred;doplot=true) #callback function to observe training
     display(l)
     # plot current prediction against data
     if doplot
@@ -58,4 +59,4 @@ optfun = OptimizationFunction((θ, p, batch, time_batch) -> loss_adjoint(θ, bat
 optprob = OptimizationProblem(optfun, pp)
 using IterTools: ncycle
 res1 = GalacticOptim.solve(optprob, ADAM(0.05), ncycle(train_loader, numEpochs), cb = cb)
-@test 10res1.minimum < l1
+@assert 10res1.minimum < l1

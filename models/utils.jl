@@ -317,7 +317,7 @@ end
 #function Initialize(V,θ,Ir,Ii)
 
 function cb_gfm_plot(sol)
-    p1 = scatter(tsteps, sol[5,:], markersize = 2,  xaxis=:log, label = "real current prediction")
+    p1 = scatter(tsteps, sol[5,:], markersize = 2,  xaxis=:log,  label = "real current prediction")
     plot!(p1, ir_truth, label = "real current true")
     p2 = scatter(tsteps, sol[19,:], markersize = 2, xaxis=:log, label = "imag current prediction")
     plot!(p2, ii_truth, label = "imag current true")
@@ -326,11 +326,11 @@ function cb_gfm_plot(sol)
     display(plt)
 end
 
-function cb_gfm_nn_plot(sol)
-    p1 = scatter(tsteps[rng], sol[1,:], markersize=2, xaxis=:log, label = "real current prediction")
-    plot!(p1, tsteps, ode_data[1,:], label = "real current true")
-    p2 = scatter(tsteps[rng], sol[2,:], markersize=2, xaxis=:log, label = "imag current prediction")
-    plot!(p2, tsteps, ode_data[2,:], label = "imag current true")
+function cb_gfm_nn_plot(pred, batch, time_batch)
+    p1 = scatter(time_batch, pred[1,:], markersize=2, label = "real current prediction")
+    plot!(p1, time_batch, batch[1,:],  xaxis=:log,  label = "real current true")
+    p2 = scatter(time_batch, pred[2,:], markersize=2, label = "imag current prediction")
+    plot!(p2, time_batch, batch[2,:],  xaxis=:log, label = "imag current true")
     plt = plot(p1,p2,layout=(2,1))
     push!(list_plots, plt)
     display(plt)
@@ -346,3 +346,46 @@ function extending_ranges(datasize::Integer, groupsize::Integer)
     )
     return [1:min(datasize, i + groupsize - 1) for i in 1:groupsize:datasize]
 end
+
+
+function build_nn(input_dim, output_dim, nn_width, nn_hidden, nn_activation)
+    if nn_hidden == 1 
+        nn = FastChain(FastDense(input_dim, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, output_dim))
+        return nn 
+    elseif nn_hidden == 2 
+        nn = FastChain(FastDense(input_dim, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, output_dim))
+        return nn 
+    elseif nn_hidden == 3 
+        nn = FastChain(FastDense(input_dim, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, output_dim))
+        return nn 
+    elseif nn_hidden == 4
+        nn = FastChain(FastDense(input_dim, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, output_dim))
+        return nn 
+    elseif nn_hidden == 5
+        nn = FastChain(FastDense(input_dim, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, nn_width, nn_activation),
+        FastDense(nn_width, output_dim))
+        return nn 
+    else 
+        @error "build_nn does not support the provided nn depth"
+        return false 
+    end 
+end 
