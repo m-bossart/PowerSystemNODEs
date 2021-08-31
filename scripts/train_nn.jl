@@ -133,6 +133,12 @@ end
 ranges = extending_ranges(steps, group_size)
 
 
+global p_start = p_nn 
+for (i, range) in enumerate(ranges) 
+    global rng = range 
+    res_gfm = @time DiffEqFlux.sciml_train(loss_gfm_nn, p_start, optimizer, GalacticOptim.AutoForwardDiff(), cb = cb_gfm_nn, maxiters = 10) 
+    global p_start = res_gfm.minimizer
+end 
 anim = Animation()
 for plt in list_plots
     frame(anim, plt)
