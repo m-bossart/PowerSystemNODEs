@@ -91,19 +91,24 @@ display(plot(p1,p2,p3,p4, layout = (2,2)))
 
 global u₀ = res_nn.zero
 global refs
-global rng = UnitRange(1, steps)
+#global rng = UnitRange(1, steps)
 
 function predict_gfm_nn(θθ) 
     p = vcat(θθ, p_inv, refs, p_fixed, nn([V(0.0), θ(0.0)],θθ)[1],  nn([V(0.0), θ(0.0)],θθ)[2] )
     _prob = remake(gfm_nn_prob, p=p,  u0=u₀)
-    return Array(solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=tsteps[rng], save_idxs = [22, 23], sensealg = ForwardDiffSensitivity()))
+    return Array(solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=tsteps[rng], save_idxs=[22, 23], sensealg = ForwardDiffSensitivity()))
 end
 
 function loss_gfm_nn(θ)
     pred = predict_gfm_nn(θ)
-    loss = (mae(pred[1,:], ode_data[1,rng]) / Ir_scale + mae( pred[2,:],  ode_data[2,rng]) / Ii_scale) /2 
+    loss = (mae(pred[1,:], ode_data[1,rng]) / Ir_scale + mae( pred[2,:],  ode_data[2,rng]) / Ii_scale) / 2 
     loss, pred
 end
+a = similar(p_nn)
+loss_gfm_nn(p_nn*2)
+loss_gfm_nn(a)
+loss_gfm_nn(p_nn)
+
 
 list_plots = []
 list_losses = Float64[]
@@ -132,7 +137,9 @@ end
 
 ranges = extending_ranges(steps, group_size)
 
-
+#what does the global keyword actually do when used inside and ourside of for loop? 
+#if we get rid of sciml_Train, can we pass arguments to the solve function? 
+#that would be ideal to get rid of all of the globals... 
 global p_start = p_nn 
 for (i, range) in enumerate(ranges) 
     global rng = range 
@@ -146,7 +153,7 @@ end
 
 gif(anim, string("figs/", label ,"_train.gif"), fps = 20)
 png(plot(list_losses), string("figs/",label,"_loss.png"))
-png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png"))
+png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png")) =#
 
 #ForwardDiff.gradient(x -> first(loss_gfm_nn(x)), p_nn)
 #t_F = @elapsed ForwardDiff.gradient(x -> first(loss_gfm_nn(x)), p_nn)
