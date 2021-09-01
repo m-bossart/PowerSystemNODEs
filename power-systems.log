@@ -1,0 +1,615 @@
+┌ Warning: 2021-09-01T12:43:42.145 [19048:1]: There are no Generator Components in the System
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\system_checks.jl:56
+┌ Warning: 2021-09-01T12:43:42.146 [19048:1]: There are no ElectricLoad Components in the System
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\system_checks.jl:56
+┌ Warning: 2021-09-01T12:43:42.408 [19048:1]: Rate 2739.08 MW for BUS 4       -BUS 5       -i_7 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.410 [19048:1]: Rate 527.26 MW for BUS 1       -BUS 5       -i_2 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.413 [19048:1]: Rate 661.32 MW for BUS 2       -BUS 5       -i_5 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.416 [19048:1]: Rate 828.18 MW for BUS 6       -BUS 13      -i_10 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.417 [19048:1]: Rate 658.72 MW for BUS 3       -BUS 4       -i_6 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.500 [19048:1]: Rate 406.15 MW for BUS 12      -BUS 13      -i_16 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.503 [19048:1]: Rate 312.07 MW for BUS 13      -BUS 14      -i_17 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.505 [19048:1]: Rate 651.77 MW for BUS 2       -BUS 4       -i_4 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.508 [19048:1]: Rate 1943.38 MW for BUS 1       -BUS 2       -i_1 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.510 [19048:1]: Rate 594.68 MW for BUS 2       -BUS 3       -i_3 is larger than the max expected in the range of (min = 134.0, max = 145.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.513 [19048:1]: Rate 1340.14 MW for BUS 9       -BUS 10      -i_13 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.516 [19048:1]: Rate 548.97 MW for BUS 6       -BUS 11      -i_8 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.519 [19048:1]: Rate 579.33 MW for BUS 10      -BUS 11      -i_15 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.521 [19048:1]: Rate 426.35 MW for BUS 6       -BUS 12      -i_9 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.523 [19048:1]: Rate 1099.9 MW for BUS 7       -BUS 9       -i_12 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.525 [19048:1]: Rate 686.92 MW for BUS 7       -BUS 8       -i_11 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.527 [19048:1]: Rate 405.0 MW for BUS 9       -BUS 14      -i_14 is larger than the max expected in the range of (min = 47.0, max = 52.0).
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\IO\branchdata_checks.jl:148
+┌ Warning: 2021-09-01T12:43:42.548 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Warning: 2021-09-01T12:43:42.568 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Warning: 2021-09-01T12:43:42.587 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Warning: 2021-09-01T12:43:42.606 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Warning: 2021-09-01T12:43:42.631 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Warning: 2021-09-01T12:43:42.636 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Warning: 2021-09-01T12:43:42.656 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Warning: 2021-09-01T12:43:42.662 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Info: 2021-09-01T12:43:43.095 [19048:1]: 2
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:25
+┌ Warning: 2021-09-01T12:43:43.192 [19048:1]: SystemUnitSetting not defined, using NATURAL_UNITS for displaying device specification.
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\print.jl:72
+┌ Info: 2021-09-01T12:43:43.210 [19048:1]: ("training set size:", 1)
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:12
+┌ Info: 2021-09-01T12:43:43.213 [19048:1]: ("test set size:", 0)
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:13
+┌ Info: 2021-09-01T12:43:43.973 [19048:1]: Serialized System to systems/sys_train.json
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:274
+┌ Info: 2021-09-01T12:43:44.781 [19048:1]: Serialized System to systems/sys_test.json
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:274
+┌ Info: 2021-09-01T12:43:44.907 [19048:1]: no active sources in the system, activating the first source
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:168
+┌ Info: 2021-09-01T12:43:44.916 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:43:44.916 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:43:44.916 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:43:44.965 [19048:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:43:44.965 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:43:44.966 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:43:44.966 [19048:1]: PowerFlow solve converged, the results are exported in DataFrames
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\power_flow.jl:343
+┌ Info: 2021-09-01T12:43:44.966 [19048:1]: Voltages are exported in pu. Powers are exported in MW/MVAr.
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\power_flow.jl:179
+┌ Info: 2021-09-01T12:43:44.967 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:345
+┌ Info: 2021-09-01T12:43:44.967 [19048:1]: ("train system power flow", 1×9 DataFrame
+│  Row │ line_name                       bus_from  bus_to  P_from_to  Q_from_to  P_to_from  Q_to_from  P_losses     Q_losses
+│      │ String                          Int64     Int64   Float64    Float64    Float64    Float64    Float64      Float64
+│ ─────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│    1 │ BUS 2       -BUS 16      -i_19         2      16      -40.0   -23.3605       40.0    25.4173  7.10543e-15   2.05677)
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:29
+┌ Info: 2021-09-01T12:43:44.970 [19048:1]: Unit System changed to UnitSystem.SYSTEM_BASE = 0
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:43:44.970 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:43:44.970 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:43:44.971 [19048:1]: PowerFlow solve converged, the results are exported in DataFrames
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\power_flow.jl:343
+┌ Info: 2021-09-01T12:43:44.971 [19048:1]: Voltages are exported in pu. Powers are exported in MW/MVAr.
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\power_flow.jl:179
+┌ Info: 2021-09-01T12:43:44.971 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:345
+┌ Info: 2021-09-01T12:43:44.971 [19048:1]: ("train system power flow", 2×9 DataFrame
+│  Row │ bus_number  Vm       θ          P_gen    P_load   P_net    Q_gen     Q_load   Q_net
+│      │ Int64       Float64  Float64    Float64  Float64  Float64  Float64   Float64  Float64
+│ ─────┼────────────────────────────────────────────────────────────────────────────────────────
+│    1 │          2  1.02139  -0.300633    -40.0      0.0    -40.0  -23.3605      0.0  -23.3605
+│    2 │         16  1.045    -0.263148     40.0      0.0     40.0   25.4173      0.0   25.4173)
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:30
+┌ Info: 2021-09-01T12:43:44.971 [19048:1]: Rebuilding the simulation after reset
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\7CKSz\src\base\simulation.jl:156
+┌ Info: 2021-09-01T12:43:44.972 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:43:44.972 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:43:45.034 [19048:1]: Simulation reset to status BUILT
+└ @ PowerSimulationsDynamics C:\Users\Matt Bossart\.julia\packages\PowerSimulationsDynamics\7CKSz\src\base\simulation.jl:159
+┌ Info: 2021-09-01T12:43:49.358 [19048:1]: [1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487, 1.0113474485285487]
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:292
+┌ Info: 2021-09-01T12:43:49.360 [19048:1]: [-0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704, -0.31068083867288704]
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:302
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 25.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 10.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 50.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 20.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 75.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 30.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 100.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:221
+┌ Info: 2021-09-01T12:43:49.697 [19048:1]: 40.0
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\models\utils.jl:222
+┌ Warning: 2021-09-01T12:43:49.730 [19048:1]: struct DynamicInverter does not exist in validation configuration file, validation skipped
+└ @ InfrastructureSystems C:\Users\Matt Bossart\.julia\packages\InfrastructureSystems\VvJiL\src\validation.jl:51
+┌ Info: 2021-09-01T12:43:49.891 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:43:49.891 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:43:49.891 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:43:55.937 [19048:1]: ("loss with original paramters", 0.10579546955047789)
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:106
+┌ Info: 2021-09-01T12:43:57.124 [19048:1]: ("loss with doubled original paramters", 0.5637667048963323)
+└ @ Main c:\Users\Matt Bossart\Desktop\Transient Stability\Repositories\PowerSystemUDEs\scripts\train_nn.jl:107
+┌ Warning: 2021-09-01T12:45:17.767 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:17.775 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:17.783 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:17.800 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:17.844 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:17.845 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:17.845 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:22.299 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:22.310 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:22.328 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:22.355 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:22.400 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:22.400 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:22.401 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:26.526 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:26.562 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:26.583 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:26.616 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:26.666 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:26.666 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:26.666 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:30.625 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:30.640 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:30.655 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:30.701 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:30.754 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:30.754 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:30.754 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:34.594 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:34.614 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:34.624 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:34.657 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:34.701 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:34.701 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:34.701 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:38.877 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:38.889 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:38.902 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:38.926 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:38.971 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:38.971 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:38.971 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:40.732 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:40.756 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:40.791 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:40.834 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:40.885 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:40.885 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:40.885 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:44.938 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:44.949 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:44.964 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:44.996 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:45.047 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:45.047 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:45.047 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:49.686 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:49.705 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:49.722 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:49.769 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:49.816 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:49.816 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:49.816 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:54.288 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:54.308 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:54.323 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:54.366 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:54.409 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:54.409 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:54.409 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:45:59.873 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:59.887 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:59.901 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:45:59.927 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:45:59.972 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:45:59.973 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:45:59.973 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:03.881 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:03.925 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:03.959 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:04.018 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:04.100 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:04.100 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:04.100 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:06.015 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:06.033 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:06.047 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:06.084 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:06.132 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:06.132 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:06.132 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:09.895 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:09.906 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:09.922 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:09.950 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:09.991 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:09.991 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:09.991 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:13.702 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:13.712 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:13.723 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:13.744 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:13.788 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:13.789 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:13.789 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:17.348 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:17.366 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:17.378 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:17.408 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:17.453 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:17.453 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:17.454 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:21.295 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:21.310 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:21.326 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:21.356 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:21.393 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:21.393 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:21.393 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:25.374 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:25.385 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:25.398 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:25.419 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:25.458 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:25.458 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:25.458 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Warning: 2021-09-01T12:46:27.004 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:27.026 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:27.049 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Warning: 2021-09-01T12:46:27.073 [19048:1]: No strict ticks found
+└ @ PlotUtils C:\Users\Matt Bossart\.julia\packages\PlotUtils\n4I4Q\src\ticks.jl:295
+┌ Info: 2021-09-01T12:46:27.118 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:27.118 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:27.118 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:31.344 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:31.345 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:31.345 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:35.118 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:35.118 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:35.118 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:38.868 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:38.868 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:38.869 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:42.935 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:42.935 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:42.935 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:47.055 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:47.056 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:47.056 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:48.614 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:48.614 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:48.614 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:53.099 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:53.099 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:53.099 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:46:57.084 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:46:57.085 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:46:57.085 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:01.520 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:01.520 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:01.520 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:05.969 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:05.969 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:05.969 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:10.155 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:10.155 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:10.155 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:11.963 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:11.964 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:11.964 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:16.083 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:16.083 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:16.083 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:19.738 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:19.739 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:19.739 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:23.573 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:23.573 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:23.573 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:27.219 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:27.220 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:27.220 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:31.817 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:31.817 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:31.818 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:33.493 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:33.494 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:33.494 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:38.616 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:38.616 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:38.616 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:43.210 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:43.210 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:43.210 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:47.437 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:47.437 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:47.437 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:51.418 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:51.418 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:51.418 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:55.463 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:55.464 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:55.464 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:47:56.980 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:47:56.981 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:47:56.981 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:00.992 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:00.992 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:00.992 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:05.325 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:05.325 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:05.325 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:09.574 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:09.574 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:09.574 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:13.585 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:13.585 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:13.586 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:17.374 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:17.374 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:17.374 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:19.088 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:19.089 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:19.089 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:22.988 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:22.988 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:22.988 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:26.433 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:26.433 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:26.433 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242
+┌ Info: 2021-09-01T12:48:30.201 [19048:1]: Unit System changed to UnitSystem.DEVICE_BASE = 1
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\base.jl:339
+┌ Info: 2021-09-01T12:48:30.201 [19048:1]: Validating connectivity with Goderya algorithm
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:296
+┌ Info: 2021-09-01T12:48:30.201 [19048:1]: The System has no islands
+└ @ PowerSystems C:\Users\Matt Bossart\.julia\packages\PowerSystems\Rjz37\src\utils\network_calculations\ybus_calculations.jl:242

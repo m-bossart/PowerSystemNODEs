@@ -85,7 +85,6 @@ scatter!(p4, sol, vars = [23], markersize=2, label = "imag current gfm+nn surrog
 display(plot(p1,p2,p3,p4, layout = (2,2)))
 
 ################################# TRAINING #########################################
-
 u₀ = res_nn.zero
 
 
@@ -116,7 +115,8 @@ cb_gfm_nn = function(θθ, l, pred, batch, time_batch) #TODO Deal with  θθ non
     grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x, batch, time_batch)),θθ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
     push!(list_gradnorm, grad_norm)
     push!(list_losses,l)
-    display(l)
+    println("loss: ", l, "    nn(t=0): ", nn([V(0.0), θ(0.0)], θθ)[1], "   ",  nn([V(0.0), θ(0.0)],θθ )[2])
+
     cb_gfm_nn_plot(pred, batch, time_batch)
 
     #UPDATE REFERENCES AND INITIAL CONDITIONS
