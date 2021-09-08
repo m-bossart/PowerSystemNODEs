@@ -119,8 +119,8 @@ function gfm(dx,x,p,t)
     Vr_cnv =   sin(θ_oc + pi/2)*Vd_cnv_ref + cos(θ_oc + pi/2)*Vq_cnv_ref
     Vi_cnv =  -cos(θ_oc + pi/2)*Vd_cnv_ref + sin(θ_oc + pi/2)*Vq_cnv_ref
 
-    Vr_pcc = V(t)*cos(θ(t)) + (ir_filter*Rtrans - ii_filter*Xtrans)
-    Vi_pcc = V(t)*sin(θ(t)) + (ir_filter*Xtrans + ii_filter*Rtrans)
+    Vr_pcc = Vm(t)*cos(Vθ(t)) + (ir_filter*Rtrans - ii_filter*Xtrans)
+    Vi_pcc = Vm(t)*sin(Vθ(t)) + (ir_filter*Xtrans + ii_filter*Rtrans)
 
     dx[i__ir_cnv]= (ω_base/lf) *                            #docs:(5a)
       (Vr_cnv - vr_filter - rf*ir_cnv + ω_sys*lf*ii_cnv)
@@ -271,8 +271,8 @@ function gfm_nn(dx,x,p,t)
     Vr_cnv =   sin(θ_oc + pi/2)*Vd_cnv_ref + cos(θ_oc + pi/2)*Vq_cnv_ref
     Vi_cnv =  -cos(θ_oc + pi/2)*Vd_cnv_ref + sin(θ_oc + pi/2)*Vq_cnv_ref
 
-    Vr_pcc = V(t)*cos(θ(t)) + (ir_out*Rtrans - ii_out*Xtrans)
-    Vi_pcc = V(t)*sin(θ(t)) + (ir_out*Xtrans + ii_out*Rtrans)
+    Vr_pcc = Vm(t)*cos(Vθ(t)) + (ir_out*Rtrans - ii_out*Xtrans)
+    Vi_pcc = Vm(t)*sin(Vθ(t)) + (ir_out*Xtrans + ii_out*Rtrans)
 
     dx[i__ir_cnv]= (ω_base/lf) *                                                #docs:(5a)
       (Vr_cnv - vr_filter - rf*ir_cnv + ω_sys*lf*ii_cnv)
@@ -288,12 +288,12 @@ function gfm_nn(dx,x,p,t)
       (vi_filter - Vi_pcc - rg*ii_filter - ω_sys*lg*ir_filter)
 
      #NN CURRENT SOURCE (NN input includes terminal voltage only)
-     dx[i__ir_nn] =ir_offset -  nn([Vr_pcc, Vi_pcc], p_nn)[1] * nn_scale
-     dx[i__ii_nn] =ii_offset -  nn([Vr_pcc, Vi_pcc], p_nn)[2] * nn_scale
+     dx[i__ir_nn] =ir_offset -  nn([Vm(t), Vθ(t)], p_nn)[1] * nn_scale
+     dx[i__ii_nn] =ii_offset -  nn([Vm(t), Vθ(t)], p_nn)[2] * nn_scale
 
      #Current offset for the NN Current Source
-     #dx[i__ir_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
-     #dx[i__ii_offset] = bb    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
+     #dx[i__ir_offset] = 0.0    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
+     #dx[i__ii_offset] = 0.0    #NOTE: Got an error using Zygote (reverse mode ad) if derivative is set to 0.0
 
      #ALEGRAIC STATE - OUTPUT CURRENT
      dx[i__ir_out] =  ir_out - ir_nn - ir_filter
@@ -437,8 +437,8 @@ function gfm_nn_states(dx,x,p,t)
     Vr_cnv =   sin(θ_oc + pi/2)*Vd_cnv_ref + cos(θ_oc + pi/2)*Vq_cnv_ref
     Vi_cnv =  -cos(θ_oc + pi/2)*Vd_cnv_ref + sin(θ_oc + pi/2)*Vq_cnv_ref
 
-    Vr_pcc = V(t)*cos(θ(t)) + (ir_out*Rtrans - ii_out*Xtrans)
-    Vi_pcc = V(t)*sin(θ(t)) + (ir_out*Xtrans + ii_out*Rtrans)
+    Vr_pcc = Vm(t)*cos(Vθ(t)) + (ir_out*Rtrans - ii_out*Xtrans)
+    Vi_pcc = Vm(t)*sin(Vθ(t)) + (ir_out*Xtrans + ii_out*Rtrans)
 
     dx[i__ir_cnv]= (ω_base/lf) *                                                #docs:(5a)
       (Vr_cnv - vr_filter - rf*ir_cnv + ω_sys*lf*ii_cnv)

@@ -67,7 +67,7 @@ p_ode = vcat(p_inv, refs, p_fixed)
 nn = build_nn(2, 2, nn_width, nn_hidden, nn_activation)
 p_nn = initial_params(nn)
 n_weights_nn = length(p_nn)
-p_all = vcat(p_nn, p_inv, refs, p_fixed, nn([Vm(0.0), θm(0.0)],p_nn)[1], nn([Vm(0.0), θm(0.0)],p_nn)[2])
+p_all = vcat(p_nn, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],p_nn)[1], nn([Vm(0.0), Vθ(0.0)],p_nn)[2])
 x₀_nn = vcat(x₀, 0.0, 0.0, x₀[5], x₀[19])
 h = get_init_gfm_nn(p_all, x₀[5], x₀[19])
 res_nn= nlsolve(h, x₀_nn)
@@ -89,7 +89,7 @@ u₀ = res_nn.zero
 
 
 function predict_gfm_nn(θ, time_batch) 
-    p = vcat(θ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θθ)[1],  nn([Vm(0.0), Vθ(0.0)],θ)[2] )
+    p = vcat(θ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θ)[1],  nn([Vm(0.0), Vθ(0.0)],θ)[2] )
     _prob = remake(gfm_nn_prob, p=p,  u0=u₀)
     sol2 = solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=time_batch, save_idxs=[22, 23], sensealg = ForwardDiffSensitivity())  
     return Array(sol2)
@@ -111,17 +111,17 @@ list_losses = Float64[]
 list_gradnorm = Float64[]
 cb_gfm_nn = function(θ, l, pred, batch, time_batch)
     #DISPLAY LOSS AND PLOT
-    grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x, batch, time_batch)),θθ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
+    grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x, batch, time_batch)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
     push!(list_gradnorm, grad_norm)
     push!(list_losses,l)
-    println("loss: ", l, "    nn(t=0): ", nn([Vm(0.0), θm(0.0)], θθ)[1], "   ",  nn([Vm(0.0), θm(0.0)],θθ )[2])
+    println("loss: ", l, "    nn(t=0): ", nn([Vm(0.0), Vθ(0.0)], θ)[1], "   ",  nn([Vm(0.0), Vθ(0.0)],θ )[2])
 
     cb_gfm_nn_plot(pred, batch, time_batch)
 
     #UPDATE REFERENCES AND INITIAL CONDITIONS
     x₀, refs_int = initialize_sys!(sys_init, "gen1", p_inv) #TODO don't need this each time
     global refs = refs_int
-    p = vcat(θθ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θθ)[1], nn([Vm(0.0), Vθ(0.0)],θθ)[2] )
+    p = vcat(θ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θ)[1], nn([Vm(0.0), Vθ(0.0)],θ)[2] )
     x₀_nn = vcat(x₀, 0.0, 0.0,  x₀[5], x₀[19])
     f = get_init_gfm_nn(p, x₀[5], x₀[19])
     res = nlsolve(f, x₀_nn)

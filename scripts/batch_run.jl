@@ -41,7 +41,6 @@ lb_loss = 0.03
 nn_width = 2
 maxiters = 5
 nn_hidden = 1 
-#CHANGE NN DEPTH MANUALLY (default = 1 hidden)! - build a function that can build 1-5 depth nns! 
 nn_activation = relu  #tanh #gelu
 nn_scale = 1.0  #1e-1, 1e-2
 
