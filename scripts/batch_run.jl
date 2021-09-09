@@ -4,6 +4,7 @@
 using Pkg
 Pkg.activate(".")
 using Revise
+using BSON: @save, @load
 using Distributions
 using OrdinaryDiffEq
 using DifferentialEquations
@@ -43,12 +44,14 @@ maxiters = 5
 nn_hidden = 1 
 nn_activation = relu  #tanh #gelu
 nn_scale = 1.0  #1e-1, 1e-2
+n_checkpoint = 10 
+is_restart = false
 
 label = "hidden=1,width=3,group=10"
 nn_hidden = 1 
 nn_width = 3    #do NOT use nn_width<3, see: https://github.com/m-bossart/PowerSystemUDEs/issues/11
 include("train_nn.jl")
-##
+#= ##
 label = "hidden=1,width=4,group=10"
 nn_hidden = 1 
 nn_width = 4
@@ -73,4 +76,4 @@ include("train_nn.jl")
 label = "hidden=2,width=5,group=10"
 nn_hidden = 2 
 nn_width = 5
-include("train_nn.jl")
+include("train_nn.jl") =#

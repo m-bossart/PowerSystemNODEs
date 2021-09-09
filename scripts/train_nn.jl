@@ -54,6 +54,7 @@ Ii_scale = maximum(ode_data[2,:]) - minimum(ode_data[2,:])
 
 
 #################### BUILD INITIALIZATION SYSTEM ###############################
+#TODO: make p_inv the average parameter from sys_train
 p_inv = [500.0, 0.084, 4.69, 2.0, 400.0, 20.0,0.2,1000.0,0.59,  736.0, 0.0, 0.0, 0.2,  1.27, 14.3, 0.0, 50.0,  0.2,  0.08, 0.003, 0.074, 0.2,0.01]
 sys_init = build_sys_init(sys_train)
 transformer = collect(get_components(Transformer2W,sys_init))[1]
@@ -62,6 +63,9 @@ p_fixed =  [get_x(transformer) + get_X_th(pvs), get_r(transformer)+ get_R_th(pvs
 x₀, refs = initialize_sys!(sys_init, "gen1", p_inv)
 Vm, Vθ = Source_to_function_of_time(get_dynamic_injector(active_source))
 p_ode = vcat(p_inv, refs, p_fixed)
+
+#Todo: solve the initialization problem with Vm(t) and Vθ(t). Save as baseline_data. 
+#Include this in your "final" training plot (baseline_data, ode_data, prediction)
 
 ##### INITIALIZE THE GFM+NN SURROGATE AND BUILD THE TRAINING PROBLEM ###########
 nn = build_nn(2, 2, nn_width, nn_hidden, nn_activation)
@@ -97,7 +101,11 @@ end
 
 function loss_gfm_nn(θ, batch, time_batch)
     pred = predict_gfm_nn(θ, time_batch)
-    loss = (mae(pred[1,:], batch[1,:]) / Ir_scale + mae( pred[2,:],  batch[2,:]) / Ii_scale) / 2 
+    loss = (mae(pred[1,:], batch[1,:]) / Ir_scale)/2 +
+           (mae(pred[2,:], batch[2,:]) / Ii_scale)/2 + 
+           abs(nn([Vm(0.0), Vθ(0.0)],θ)[1]) + 
+           abs(nn([Vm(0.0), Vθ(0.0)],θ)[2])
+
     loss, pred, batch, time_batch
 end
 
@@ -109,6 +117,7 @@ end
 list_plots = []
 list_losses = Float64[]
 list_gradnorm = Float64[]
+#iteration = 1 
 cb_gfm_nn = function(θ, l, pred, batch, time_batch)
     #DISPLAY LOSS AND PLOT
     grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x, batch, time_batch)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
@@ -128,9 +137,19 @@ cb_gfm_nn = function(θ, l, pred, batch, time_batch)
     @assert converged(res)
     global u₀ = res.zero
 
+#=      if iteration % n_checkpoint == 0
+        @save "checkpoint/mymodel.bson" θ opt list_losses list_gradnorm iter
+    end 
+    iter += 1  =#
+
     (l > lb_loss) && return false  
     return true 
 end
+
+#= if is_restart  #need to deal with re-starting in the correct range. 
+    @load "checkpoint/mymodel.bson" p_nn opt list_loss list_grad iter
+    iter += 1
+end =#
 
 ranges = extending_ranges(steps, group_size)
 
