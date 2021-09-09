@@ -46,6 +46,7 @@ nn_activation = relu  #tanh #gelu
 nn_scale = 1.0  #1e-1, 1e-2
 n_checkpoint = 10 
 is_restart = false
+display_plots = false 
 
 label = "hidden=1,width=3,group=10"
 nn_hidden = 1 

@@ -323,7 +323,7 @@ function cb_gfm_plot(sol)
     plot!(p2, ii_truth, label = "imag current true")
     plt = plot(p1,p2,  layout=(2,1))
     push!(list_plots, plt)
-    display(plt)
+    display_plots && display(plt)
 end
 
 function cb_gfm_nn_plot(pred, batch, time_batch)
@@ -333,7 +333,7 @@ function cb_gfm_nn_plot(pred, batch, time_batch)
     plot!(p2, time_batch, batch[2,:],  xaxis=:log, label = "imag current true")
     plt = plot(p1,p2,layout=(2,1))
     push!(list_plots, plt)
-    display(plt)
+    display_plots && display(plt)
 end
 
 

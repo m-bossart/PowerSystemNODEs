@@ -86,7 +86,8 @@ gfm_nn_prob = ODEProblem(gfm_nn_func, res_nn.zero, tspan, p_all)
 sol = solve(gfm_nn_prob, solver,  abstol=abstol, reltol=reltol,  saveat=tsteps )
 scatter!(p3, sol, vars = [22], markersize=2, label = "real current gfm+nn surrogate")
 scatter!(p4, sol, vars = [23], markersize=2, label = "imag current gfm+nn surrogate")
-display(plot(p1,p2,p3,p4, layout = (2,2)))
+p5 = plot(p1,p2,p3,p4, layout = (2,2))
+display_plots && display(p5)
 
 ################################# TRAINING #########################################
 u₀ = res_nn.zero
@@ -116,6 +117,8 @@ end
 
 list_plots = []
 list_losses = Float64[]
+list_nn1 =  Float64[]
+list_nn2 = Float64[]
 list_gradnorm = Float64[]
 #iteration = 1 
 cb_gfm_nn = function(θ, l, pred, batch, time_batch)
@@ -123,6 +126,8 @@ cb_gfm_nn = function(θ, l, pred, batch, time_batch)
     grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x, batch, time_batch)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
     push!(list_gradnorm, grad_norm)
     push!(list_losses,l)
+    push!(list_nn1,  nn([Vm(0.0), Vθ(0.0)], θ)[1] )
+    push!(list_nn2,  nn([Vm(0.0), Vθ(0.0)], θ)[2] )
     println("loss: ", l, "    nn(t=0): ", nn([Vm(0.0), Vθ(0.0)], θ)[1], "   ",  nn([Vm(0.0), Vθ(0.0)],θ )[2])
 
     cb_gfm_nn_plot(pred, batch, time_batch)
@@ -174,8 +179,8 @@ end
 gif(anim, string("figs/", label ,"_train.gif"), fps = 20)
 png(plot(list_losses), string("figs/",label,"_loss.png"))
 png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png")) 
-
-
+png(plot(list_nn1), string("figs/", label,"_nn1.png")) 
+png(plot(list_nn2), string("figs/", label,"_nn2.png")) 
 
 
 #Example of timing gradient calculations 
