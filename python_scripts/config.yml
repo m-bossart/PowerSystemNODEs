@@ -1,0 +1,42 @@
+training_type: "DL" # ["ML", "DL"]
+network_type: "fully_connected" # if DL ["fully_connected", "lstm", "cnn"] if ML ["SVM", "logistic_regression", "KNN", "NB"]
+batch_size: 8192
+input_size: 46 # number of inputs
+epochs: 2
+loss: "mean_squared_error"
+output_activation: "sigmoid"
+learning_rate: 0.001
+train_eval_period: 20
+dev_eval_period: 5
+num_classes: 1
+shuffle: False
+
+network_config:
+  lstm:
+    layers: [[32, 2], [16, 1]]
+    dropout: 0.1
+    activation: 'relu'
+  cnn:
+    layers: [[32,3],[32,3],[32,3]]
+    dropout: 0.1
+    activation: 'relu'
+    input_shape: [28, 28, 3]
+  fully_connected:
+    hidden_nodes: [512, 512, 512, 512]
+    dropout: 0.2
+    activation: 'relu'
+  SVM:
+    kernel: 'linear'
+    c: 1
+  logistic_regression:
+    c: 1
+  KNN:
+    k: 5
+  NB:
+    type: 'Gaussian' # ["Gaussian", "Multinomial", "Complement", "Bernoulli"]
+
+csv_file: "results/accuracy.csv" # path of file to log the reusutls
+save_model: False # to save the model or not
+model_path: "models/model" # path to save the model
+data_path: "/code/fury/data_set/N-CMAPSS_DS04.h5"
+preprocess: "scalar" # ["scalar", "minmax"]
