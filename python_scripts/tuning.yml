@@ -1,0 +1,1 @@
+network_config|fully_connected|hidden_nodes: [[64, 64, 64], [32, 32, 32], [16,16]]
