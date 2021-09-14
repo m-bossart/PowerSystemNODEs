@@ -328,9 +328,9 @@ end
 
 function cb_gfm_nn_plot(pred, batch, time_batch)
     p1 = scatter(time_batch, pred[1,:], markersize=2, label = "real current prediction")
-    plot!(p1, time_batch, batch[1,:],  xaxis=:log,  label = "real current true")
+    plot!(p1, tsteps, ode_data[1,:],  xaxis=:log,  label = "real current true")
     p2 = scatter(time_batch, pred[2,:], markersize=2, label = "imag current prediction")
-    plot!(p2, time_batch, batch[2,:],  xaxis=:log, label = "imag current true")
+    plot!(p2, tsteps, ode_data[2,:],  xaxis=:log, label = "imag current true")
     plt = plot(p1,p2,layout=(2,1))
     push!(list_plots, plt)
     display_plots && display(plt)

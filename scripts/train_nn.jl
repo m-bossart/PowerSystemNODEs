@@ -166,7 +166,8 @@ p_start = p_nn
 for range in ranges
     data = ode_data[:,range]
     t = tsteps[range]
-    train_loader = Flux.Data.DataLoader((data,t), batchsize=length(data[1,:]))  #no stochasticity because batchsize = length(data)
+    batchsize = Int(floor(length(data[1,:])/batching_factor))
+    train_loader = Flux.Data.DataLoader((data,t), batchsize=batchsize )   #no stochasticity because batchsize = length(data)
     optprob = OptimizationProblem(optfun, p_start)
     res_gfm = GalacticOptim.solve(optprob, optimizer,  ncycle(train_loader, maxiters), cb = cb_gfm_nn)  
     global p_start = res_gfm.minimizer

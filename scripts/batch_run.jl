@@ -37,23 +37,24 @@ tfault =  0.01
 tspan = (0.0, 1.0)
 steps = 100
 tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps))
-group_size = 10 
+group_size = 20 
+batching_factor = 5
 lb_loss = 0.03 
 nn_width = 2
-maxiters = 5
+maxiters = 3
 nn_hidden = 1 
-nn_activation = relu  #tanh #gelu
+nn_activation = gelu  #tanh #
 nn_scale = 1.0  #1e-1, 1e-2
 n_checkpoint = 10 
 is_restart = false
-display_plots = false 
+display_plots = true 
 
 label = "hidden=1,width=3,group=10"
 nn_hidden = 1 
 nn_width = 3    #do NOT use nn_width<3, see: https://github.com/m-bossart/PowerSystemUDEs/issues/11
 include("train_nn.jl")
-#= ##
-label = "hidden=1,width=4,group=10"
+
+#= label = "hidden=1,width=4,group=10"
 nn_hidden = 1 
 nn_width = 4
 include("train_nn.jl")
@@ -77,4 +78,5 @@ include("train_nn.jl")
 label = "hidden=2,width=5,group=10"
 nn_hidden = 2 
 nn_width = 5
-include("train_nn.jl") =#
+include("train_nn.jl") 
+ =#
