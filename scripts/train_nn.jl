@@ -91,8 +91,10 @@ display_plots && display(p5)
 
 ################################# TRAINING #########################################
 u₀ = res_nn.zero
-
-
+real_maxmin = find_maxmin_indices(ode_data[1,:])
+imag_maxmin = find_maxmin_indices(ode_data[2,:])
+batch_real_maxmin = []
+batch_imag_maxmin = [] 
 function predict_gfm_nn(θ, time_batch) 
     p = vcat(θ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θ)[1],  nn([Vm(0.0), Vθ(0.0)],θ)[2] )
     _prob = remake(gfm_nn_prob, p=p,  u0=u₀)
@@ -102,11 +104,13 @@ end
 
 function loss_gfm_nn(θ, batch, time_batch)
     pred = predict_gfm_nn(θ, time_batch)
+
     loss = (mae(pred[1,:], batch[1,:]) / Ir_scale)/2 +
            (mae(pred[2,:], batch[2,:]) / Ii_scale)/2 + 
            abs(nn([Vm(0.0), Vθ(0.0)],θ)[1]) + 
-           abs(nn([Vm(0.0), Vθ(0.0)],θ)[2])
-
+           abs(nn([Vm(0.0), Vθ(0.0)],θ)[2]) + 
+           ((mae(pred[1,batch_real_maxmin], batch[1,batch_real_maxmin]) / Ir_scale)/2) * scale_maxmin + 
+           ((mae(pred[2,batch_imag_maxmin], batch[2,batch_imag_maxmin]) / Ir_scale)/2) * scale_maxmin
     loss, pred, batch, time_batch
 end
 
@@ -166,8 +170,10 @@ p_start = p_nn
 for range in ranges
     data = ode_data[:,range]
     t = tsteps[range]
-    batchsize = Int(floor(length(data[1,:])/batching_factor))
-    train_loader = Flux.Data.DataLoader((data,t), batchsize=batchsize )   #no stochasticity because batchsize = length(data)
+    global batch_real_maxmin = [i for i in real_maxmin if i in range]
+    global batch_imag_maxmin = [i for i in imag_maxmin if i in range]
+    #println(batch_imag_maxmin)
+    train_loader = Flux.Data.DataLoader((data,t), batchsize=length(data[1,:]))  #no stochasticity because batchsize = length(data)
     optprob = OptimizationProblem(optfun, p_start)
     res_gfm = GalacticOptim.solve(optprob, optimizer,  ncycle(train_loader, maxiters), cb = cb_gfm_nn)  
     global p_start = res_gfm.minimizer

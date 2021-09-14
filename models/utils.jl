@@ -329,8 +329,10 @@ end
 function cb_gfm_nn_plot(pred, batch, time_batch)
     p1 = scatter(time_batch, pred[1,:], markersize=2, label = "real current prediction")
     plot!(p1, tsteps, ode_data[1,:],  xaxis=:log,  label = "real current true")
+    scatter!(p1, tsteps[batch_real_maxmin],ode_data[1,batch_real_maxmin], markersize=3,label = "weighted points")
     p2 = scatter(time_batch, pred[2,:], markersize=2, label = "imag current prediction")
     plot!(p2, tsteps, ode_data[2,:],  xaxis=:log, label = "imag current true")
+    scatter!(p2, tsteps[batch_imag_maxmin],ode_data[2,batch_imag_maxmin], markersize=3, label = "weighted points")
     plt = plot(p1,p2,layout=(2,1))
     push!(list_plots, plt)
     display_plots && display(plt)
@@ -388,4 +390,19 @@ function build_nn(input_dim, output_dim, nn_width, nn_hidden, nn_activation)
         @error "build_nn does not support the provided nn depth"
         return false 
     end 
+end 
+
+function find_maxmin_indices(time_series)
+    indices = Int64[]
+    previous = 0.0
+    for (i, y) in enumerate(time_series) 
+        if (i != 1) && i != length(time_series) 
+            s1 = y - time_series[i-1]
+            s2 = time_series[i+1] - y
+            if sign(s1) != sign(s2)
+                push!(indices,i)
+            end 
+        end 
+    end 
+    return indices 
 end 
