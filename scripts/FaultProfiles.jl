@@ -17,9 +17,10 @@ include("../models/init_functions.jl")
 include("../models/parameter_utils.jl")
 
 #SIMULATION PARAMETERS
-dtmax = 1e-2
 tspan = (0.0, 1.0)
-step = 1e-3
+abstol = 1e-11
+reltol = 1e-8
+step = 1e-4
 tsteps = tspan[1]:step:tspan[2]
 N = length(tsteps) #for dft
 fs = (N-1)/(tspan[2]-tspan[1])
@@ -85,7 +86,9 @@ for a in devices
                     Q = get_reactive_power_flow(source_surrogate_branch)
                     execute!(sim,
                             solver,
-                            reset_simulation=true,dtmax=dtmax,saveat=tsteps);
+                            abstol=abstol,
+                            reltol=reltol,
+                            reset_simulation=true,saveat=tsteps);
 
                     V = get_voltage_magnitude_series(sim,source_bus)[2]
                     θ = get_voltage_angle_series(sim,source_bus)[2]
