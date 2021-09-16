@@ -18,9 +18,9 @@ include("../models/parameter_utils.jl")
 
 #SIMULATION PARAMETERS
 tspan = (0.0, 1.0)
-abstol = 1e-11
-reltol = 1e-8
-step = 1e-4
+abstol = 1e-6
+reltol = 1e-3
+step = 5e-4
 tsteps = tspan[1]:step:tspan[2]
 N = length(tsteps) #for dft
 fs = (N-1)/(tspan[2]-tspan[1])
