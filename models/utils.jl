@@ -248,6 +248,7 @@ end
 #Doesn't make physical sense, but as long as the full system solves, it should be fine.
 function initialize_sys!(sys::System, name::String, p)
     device = get_component(DynamicInverter, sys, name)
+    bus = get_bus(get_component(StaticInjection, sys, name)).number
     set_parameters!(device, p)
     sim = Simulation!(
         MassMatrixModel,
@@ -258,7 +259,9 @@ function initialize_sys!(sys::System, name::String, p)
     x₀_dict = get_initial_conditions(sim)[get_name(device)]
     x₀ = [value for (key,value) in x₀_dict]
     refs = get_ext(device)["control_refs"]
-    return x₀, refs
+    Vr0 = get_initial_conditions(sim)["V_R"][bus]
+    Vi0 = get_initial_conditions(sim)["V_I"][bus]
+    return x₀, refs, Vr0, Vi0
 end
 
 function set_bus_from_source(available_source::Source)

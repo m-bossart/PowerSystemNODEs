@@ -68,7 +68,7 @@ sys_init = build_sys_init(sys_train)
 transformer = collect(get_components(Transformer2W,sys_init))[1]
 pvs = collect(get_components(PeriodicVariableSource, sys_init))[1]
 p_fixed =  [get_x(transformer) + get_X_th(pvs), get_r(transformer)+ get_R_th(pvs)]
-x₀, refs = initialize_sys!(sys_init, "gen1", p_inv)
+x₀, refs, Vr0, Vi0 = initialize_sys!(sys_init, "gen1", p_inv)
 Vm, Vθ = Source_to_function_of_time(get_dynamic_injector(active_source))
 p_ode = vcat(p_inv, refs, p_fixed)
 
@@ -79,7 +79,7 @@ p_ode = vcat(p_inv, refs, p_fixed)
 nn = build_nn(2, 2, nn_width, nn_hidden, nn_activation)
 p_nn = initial_params(nn)
 n_weights_nn = length(p_nn)
-p_all = vcat(p_nn, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],p_nn)[1], nn([Vm(0.0), Vθ(0.0)],p_nn)[2])
+p_all = vcat(p_nn, p_inv, refs, p_fixed, Vr0, Vi0)
 x₀_nn = vcat(x₀, 0.0, 0.0, x₀[5], x₀[19])
 h = get_init_gfm_nn(p_all, x₀[5], x₀[19])
 res_nn= nlsolve(h, x₀_nn)
@@ -106,7 +106,7 @@ imag_maxmin = find_maxmin_indices(ode_data[2,:])
 batch_real_maxmin = []
 batch_imag_maxmin = [] 
 function predict_gfm_nn(θ, time_batch) 
-    p = vcat(θ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θ)[1],  nn([Vm(0.0), Vθ(0.0)],θ)[2] )
+    p = vcat(θ, p_inv, refs, p_fixed,  Vr0, Vi0) 
     _prob = remake(gfm_nn_prob, p=p,  u0=u₀)
     sol2 = solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=time_batch, 
                 save_idxs=[i__ir_out, i__ii_out, i__ir_filter, i__ii_filter, i__ir_nn, i__ii_nn], #first two for loss function, rest for plotting
@@ -118,11 +118,11 @@ function loss_gfm_nn(θ, batch, time_batch)
     pred = predict_gfm_nn(θ, time_batch)
 
     loss = (mae(pred[1,:], batch[1,:]) / Ir_scale)/2 +
-           (mae(pred[2,:], batch[2,:]) / Ii_scale)/2 + 
-           abs(nn([Vm(0.0), Vθ(0.0)],θ)[1]) + 
-           abs(nn([Vm(0.0), Vθ(0.0)],θ)[2]) + 
-           ((mae(pred[1,batch_real_maxmin], batch[1,batch_real_maxmin]) / Ir_scale)/2) * scale_maxmin + 
-           ((mae(pred[2,batch_imag_maxmin], batch[2,batch_imag_maxmin]) / Ir_scale)/2) * scale_maxmin
+           (mae(pred[2,:], batch[2,:]) / Ii_scale)/2  
+           #abs(nn([Vm(0.0), Vθ(0.0)],θ)[1]) + 
+           #abs(nn([Vm(0.0), Vθ(0.0)],θ)[2]) + 
+           #((mae(pred[1,batch_real_maxmin], batch[1,batch_real_maxmin]) / Ir_scale)/2) * scale_maxmin + 
+           #((mae(pred[2,batch_imag_maxmin], batch[2,batch_imag_maxmin]) / Ir_scale)/2) * scale_maxmin
     loss, pred, batch, time_batch
 end
 
@@ -133,8 +133,8 @@ end
 
 list_plots = []
 list_losses = Float64[]
-list_nn1 =  Float64[]
-list_nn2 = Float64[]
+#list_nn1 =  Float64[]
+#list_nn2 = Float64[]
 list_gradnorm = Float64[]
 #iteration = 1 
 cb_gfm_nn = function(θ, l, pred, batch, time_batch)
@@ -142,22 +142,29 @@ cb_gfm_nn = function(θ, l, pred, batch, time_batch)
     grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x, batch, time_batch)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
     push!(list_gradnorm, grad_norm)
     push!(list_losses,l)
-    push!(list_nn1,  nn([Vm(0.0), Vθ(0.0)], θ)[1] )
-    push!(list_nn2,  nn([Vm(0.0), Vθ(0.0)], θ)[2] )
-    println("loss: ", l, "    nn(t=0): ", nn([Vm(0.0), Vθ(0.0)], θ)[1], "   ",  nn([Vm(0.0), Vθ(0.0)],θ )[2])
+    #push!(list_nn1,  nn([Vm(0.0), Vθ(0.0)], θ)[1] )
+    #push!(list_nn2,  nn([Vm(0.0), Vθ(0.0)], θ)[2] )
+    println("loss: ", l)#, "    nn(t=0): ", nn([Vm(0.0), Vθ(0.0)], θ)[1], "   ",  nn([Vm(0.0), Vθ(0.0)],θ )[2])
 
     cb_gfm_nn_plot(pred, batch, time_batch)
 
     #UPDATE REFERENCES AND INITIAL CONDITIONS
-    x₀, refs_int = initialize_sys!(sys_init, "gen1", p_inv) #TODO don't need this each time
+    x₀, refs_int, Vr0_int, Vi0_int = initialize_sys!(sys_init, "gen1", p_inv) #TODO don't need this each time
     global refs = refs_int
-    p = vcat(θ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θ)[1], nn([Vm(0.0), Vθ(0.0)],θ)[2] )
+    global Vr0 = Vr0_int
+    global Vi0 = Vi0_int
+    p = vcat(θ, p_inv, refs, p_fixed, Vr0, Vi0)  # nn([Vm(0.0), Vθ(0.0)],θ)[1], nn([Vm(0.0), Vθ(0.0)],θ)[2] )
+    #println(Vr0,Vi0)
+    #println(Vm(0.0)*cos(Vθ(0.0)) + (x₀[5]*p_fixed[2] -x₀[19]*p_fixed[1]))
+    #println(Vm(0.0)*sin(Vθ(0.0)) + (x₀[5]*p_fixed[1] +x₀[19]*p_fixed[2]))
+    #println(p)
+    #println(Vr0-(Vm(0.0)*cos(Vθ(0.0)) + (x₀[5]*p_fixed[2] -x₀[19]*p_fixed[1])))
     x₀_nn = vcat(x₀, 0.0, 0.0,  x₀[5], x₀[19])
     f = get_init_gfm_nn(p, x₀[5], x₀[19])
-    res = nlsolve(f, x₀_nn)
-    @assert converged(res)
-    global u₀ = res.zero
-
+    #global res = nlsolve(f, x₀_nn)
+    #@assert converged(res)
+    #global u₀ = res.zero
+    global u₀ = x₀_nn
 #=      if iteration % n_checkpoint == 0
         @save "checkpoint/mymodel.bson" θ opt list_losses list_gradnorm iter
     end 

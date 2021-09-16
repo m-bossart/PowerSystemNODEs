@@ -38,18 +38,18 @@ tfault =  0.01
 tspan = (0.0, 1.0)
 steps = 50
 tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps))
-group_size = 25
+group_size = 5
 batching_factor = 1
 scale_maxmin = 10
 lb_loss = 0.03 
 nn_width = 2
-maxiters = 2
+maxiters = 500
 nn_hidden = 1 
 nn_activation = gelu  #tanh #
 nn_scale = 1.0  #1e-1, 1e-2
 n_checkpoint = 10 
 is_restart = false
-display_plots = true 
+display_plots = false 
 
 #Indices of states in the surrogate for saving/ploting/calculating loss
 i__ir_filter = 5
@@ -65,8 +65,8 @@ nn_hidden = 1
 nn_width = 4
 include("train_nn.jl")
 ##
-label = "hidden=1,width=5,group=10"
-nn_hidden = 1 
-nn_width = 5
+label = "hidden=3,width=6,group=10"
+nn_hidden = 3 
+nn_width = 6
 include("train_nn.jl")
 
