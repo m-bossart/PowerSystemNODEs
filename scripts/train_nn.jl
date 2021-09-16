@@ -28,7 +28,8 @@ sim = Simulation!(
 
 @info "train system power flow", solve_powerflow(sys_train)["flow_results"]
 @info "train system power flow", solve_powerflow(sys_train)["bus_results"]
-execute!(sim,
+println("time to solve train system for generating truth data:")
+@time execute!(sim,
         solver,
         abstol = abstol,
         reltol = reltol,
@@ -39,19 +40,26 @@ Vmag_bus = get_voltage_magnitude_series(sim, 2)
 θ_bus = get_voltage_angle_series(sim, 2)
 Vmag_internal = get_state_series(sim, ("source1",:Vt))
 θ_internal = get_state_series(sim, ("source1",:θt))
-p1 , p2 = plot_pvs(tsteps, get_dynamic_injector(active_source))
+p1 , p2 = plot_pvs(tsteps, get_dynamic_injector(active_source), :lin)
+p1_log, p2_log = plot_pvs(tsteps, get_dynamic_injector(active_source), :log)
 plot!(p1, Vmag_bus, label="bus voltage")
 plot!(p1,Vmag_internal,  label="internal voltage")
-p2 = plot!(p2, θ_bus, label="bus angle")
+plot!(p1_log, Vmag_bus, label="bus voltage")
+plot!(p1_log,Vmag_internal,  label="internal voltage")
+plot!(p2, θ_bus, label="bus angle")
 plot!(p2, θ_internal, label="internal angle")
+plot!(p2_log, θ_bus, label="bus angle")
+plot!(p2_log, θ_internal, label="internal angle")
+#plot the other bus voltage too? to see if it is significantly different?? 
 ode_data = get_total_current_series(sim) #TODO Better to measure current at the PVS (implement method after PVS is complete)
-p3 = plot(ode_data[1,:], label = "real current true")
-p4 = plot(ode_data[2,:], label = "imag current true")
+p3 = plot(tsteps, ode_data[1,:], label = "real current true")
+p4 = plot(tsteps, ode_data[2,:], label = "imag current true")
+p3_log = plot(tsteps,ode_data[1,:], label = "real current true", xaxis=:log)
+p4_log = plot(tsteps,ode_data[2,:], label = "imag current true", xaxis=:log)
 
 #Calculate scale factors for loss function based on true data
 Ir_scale = maximum(ode_data[1,:]) - minimum(ode_data[1,:])
 Ii_scale = maximum(ode_data[2,:]) - minimum(ode_data[2,:])
-
 
 #################### BUILD INITIALIZATION SYSTEM ###############################
 #TODO: make p_inv the average parameter from sys_train
@@ -84,11 +92,13 @@ gfm_nn_func = ODEFunction(gfm_nn, mass_matrix = M)
 gfm_nn_prob = ODEProblem(gfm_nn_func, res_nn.zero, tspan, p_all)
 
 sol = solve(gfm_nn_prob, solver,  abstol=abstol, reltol=reltol,  saveat=tsteps )
-scatter!(p3, sol, vars = [22], markersize=2, label = "real current gfm+nn surrogate")
-scatter!(p4, sol, vars = [23], markersize=2, label = "imag current gfm+nn surrogate")
-p5 = plot(p1,p2,p3,p4, layout = (2,2))
+scatter!(p3, sol, vars = [22], markersize=1, label = "real current gfm+nn surrogate")
+scatter!(p4, sol, vars = [23], markersize=1, label = "imag current gfm+nn surrogate")
+scatter!(p3_log, sol, vars = [22], markersize=1, label = "real current gfm+nn surrogate")
+scatter!(p4_log, sol, vars = [23], markersize=1, label = "imag current gfm+nn surrogate")
+p5 = plot(p1,p2,p1_log,p2_log,p3,p4,p3_log,p4_log, layout = (4,2), size = (1000,1000))
 display_plots && display(p5)
-
+##
 ################################# TRAINING #########################################
 u₀ = res_nn.zero
 real_maxmin = find_maxmin_indices(ode_data[1,:])
@@ -98,10 +108,12 @@ batch_imag_maxmin = []
 function predict_gfm_nn(θ, time_batch) 
     p = vcat(θ, p_inv, refs, p_fixed, nn([Vm(0.0), Vθ(0.0)],θ)[1],  nn([Vm(0.0), Vθ(0.0)],θ)[2] )
     _prob = remake(gfm_nn_prob, p=p,  u0=u₀)
-    sol2 = solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=time_batch, save_idxs=[22, 23], sensealg = ForwardDiffSensitivity())  
+    sol2 = solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=time_batch, 
+                save_idxs=[i__ir_out, i__ii_out, i__ir_filter, i__ii_filter, i__ir_nn, i__ii_nn], #first two for loss function, rest for plotting
+                 sensealg = ForwardDiffSensitivity())  
     return Array(sol2)
 end
-
+  
 function loss_gfm_nn(θ, batch, time_batch)
     pred = predict_gfm_nn(θ, time_batch)
 
@@ -183,7 +195,7 @@ for plt in list_plots
     frame(anim, plt)
 end
 
-gif(anim, string("figs/", label ,"_train.gif"), fps = 20)
+gif(anim, string("figs/", label ,"_train.gif"), fps = 100)
 png(plot(list_losses), string("figs/",label,"_loss.png"))
 png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png")) 
 png(plot(list_nn1), string("figs/", label,"_nn1.png")) 

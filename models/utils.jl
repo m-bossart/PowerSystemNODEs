@@ -286,7 +286,7 @@ function get_total_current_series(sim::Simulation)
     return data_array
 end
 
-function plot_pvs(tsteps, pvs::PeriodicVariableSource)
+function plot_pvs(tsteps, pvs::PeriodicVariableSource, xaxis)
     V = zeros(length(tsteps))
     V = V .+ get_internal_voltage_bias(pvs)
     @info V
@@ -306,8 +306,8 @@ function plot_pvs(tsteps, pvs::PeriodicVariableSource)
         θ += coeffs[i][1]* sin.(ω .* tsteps)
         θ += coeffs[i][2]* cos.(ω.* tsteps)
     end
-    p1 = plot(tsteps,V, label = "plot from pvs coefficients")
-    p2 = plot(tsteps,θ, label = "plot from pvs coefficients")
+    p1 = plot(tsteps,V, label = "plot from pvs coefficients", xaxis=xaxis)
+    p2 = plot(tsteps,θ, label = "plot from pvs coefficients", xaxis=xaxis)
     return p1, p2
 end
 
@@ -328,14 +328,33 @@ end
 
 function cb_gfm_nn_plot(pred, batch, time_batch)
     p1 = scatter(time_batch, pred[1,:], markersize=2, label = "real current prediction")
-    plot!(p1, tsteps, ode_data[1,:],  xaxis=:log,  label = "real current true")
+    plot!(p1, tsteps, ode_data[1,:],   label = "real current true")
     scatter!(p1, tsteps[batch_real_maxmin],ode_data[1,batch_real_maxmin], markersize=3,label = "weighted points")
+    p1_log =  scatter(time_batch, pred[1,:], markersize=2, label = "real current prediction", xaxis=:log)
+    plot!(p1_log, tsteps, ode_data[1,:],   label = "real current true")
+    scatter!(p1_log, tsteps[batch_real_maxmin],ode_data[1,batch_real_maxmin], markersize=3,label = "weighted points")
     p2 = scatter(time_batch, pred[2,:], markersize=2, label = "imag current prediction")
-    plot!(p2, tsteps, ode_data[2,:],  xaxis=:log, label = "imag current true")
+    plot!(p2, tsteps, ode_data[2,:],  label = "imag current true")
     scatter!(p2, tsteps[batch_imag_maxmin],ode_data[2,batch_imag_maxmin], markersize=3, label = "weighted points")
-    plt = plot(p1,p2,layout=(2,1))
+    p2_log = scatter(time_batch, pred[2,:], markersize=2, label = "imag current prediction")
+    plot!(p2_log, tsteps, ode_data[2,:],  xaxis=:log, label = "imag current true")
+    scatter!(p2_log, tsteps[batch_imag_maxmin],ode_data[2,batch_imag_maxmin], markersize=3, label = "weighted points")
+    
+
+    p3 = scatter(time_batch, pred[3,:], markersize=2, label = "real current from inverter")
+    p3_log = scatter(time_batch, pred[3,:], markersize=2, label = "real current from inverter", xaxis=:log)
+    p4 = scatter(time_batch, pred[4,:], markersize=2, label = "imag current from inverter")
+    p4_log = scatter(time_batch, pred[4,:], markersize=2, label = "imag current from inverter", xaxis=:log)
+
+    p5 = scatter(time_batch, pred[5,:], markersize=2, label = "real current from nn source")
+    p5_log = scatter(time_batch, pred[5,:], markersize=2, label = "real current from nn source", xaxis=:log)
+    p6 = scatter(time_batch, pred[6,:], markersize=2, label = "imag current from nn source")
+    p6_log = scatter(time_batch, pred[6,:], markersize=2, label = "imag current from nn source", xaxis=:log)
+    
+    plt = plot(p1,p2,p1_log,p2_log,p3,p4, p3_log,p4_log,p5,p6,p5_log,p6_log, layout=(6,2), size = (1000,1000))
     push!(list_plots, plt)
     display_plots && display(plt)
+   
 end
 
 
