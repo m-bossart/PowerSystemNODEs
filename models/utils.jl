@@ -210,16 +210,21 @@ function find_acbranch(from_bus_number::Int, to_bus_number::Int)
     end
 end
 
-
+"""
+Test function description 
+"""
 function build_sys_init(sys_train::System)
     sys_init = deepcopy(sys_train)
     base_power_total = 0.0
     power_total = 0.0
-    for gfm in get_components(ThermalStandard,sys_init, x->typeof(get_dynamic_injector(x)) == DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter})
+    gfms  = collect(get_components(ThermalStandard,sys_init, x->typeof(get_dynamic_injector(x)) == DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}))
+    p_avg =zeros(length(get_parameters(get_dynamic_injector(gfms[1]))))
+    for gfm in gfms 
         base_power_total += get_base_power(gfm)
         power_total +=  get_base_power(gfm) * get_active_power(gfm)
         @info base_power_total
         @info power_total
+        p_avg += get_parameters(get_dynamic_injector(gfm))
         remove_component!(sys_init, get_dynamic_injector(gfm))
         remove_component!(sys_init, gfm)
     end
@@ -241,15 +246,17 @@ function build_sys_init(sys_train::System)
     inv_typ = inv_case78(get_name(g))
 
     add_component!(sys_init, inv_typ, g)
-    return sys_init
+    p_inv =  p_avg/length(gfms)
+    set_parameters!(inv_typ, p_inv) 
+    return sys_init, p_inv
 end
 
 #NOTE The warning that the initialization fails in the source is because we just use the source to set the bus voltage.
 #Doesn't make physical sense, but as long as the full system solves, it should be fine.
-function initialize_sys!(sys::System, name::String, p)
+function initialize_sys!(sys::System, name::String)
     device = get_component(DynamicInverter, sys, name)
     bus = get_bus(get_component(StaticInjection, sys, name)).number
-    set_parameters!(device, p)
+   # set_parameters!(device, p)
     sim = Simulation!(
         MassMatrixModel,
         sys,
@@ -274,7 +281,7 @@ end
 function get_total_current_series(sim::Simulation)
     ir_total = []
     ii_total = []
-    for (i,g) in enumerate(get_components(DynamicInjection, sys_train, x->typeof(x)!== PeriodicVariableSource))
+    for (i,g) in enumerate(get_components(DynamicInjection, sim.sys, x->typeof(x)!== PeriodicVariableSource))
         if i == 1
             ir_total = get_real_current_series(sim, get_name(g))[2]
             ii_total = get_imaginary_current_series(sim, get_name(g))[2]
@@ -329,36 +336,49 @@ function cb_gfm_plot(sol)
     display_plots && display(plt)
 end
 
-function cb_gfm_nn_plot(pred, batch, time_batch)
-    p1 = scatter(time_batch, pred[1,:], markersize=2, label = "real current prediction")
+function cb_gfm_nn_plot(pred)
+    p1 = scatter(tsteps_train, pred[1,:], markersize=2, label = "real current prediction")
     plot!(p1, tsteps, ode_data[1,:],   label = "real current true")
-    scatter!(p1, tsteps[batch_real_maxmin],ode_data[1,batch_real_maxmin], markersize=3,label = "weighted points")
-    p1_log =  scatter(time_batch, pred[1,:], markersize=2, label = "real current prediction", xaxis=:log)
+    plot!(p1, tsteps, avgmodel_data[1,:], label = "real current avg. model")
+    p1_log =  scatter(tsteps_train, pred[1,:], markersize=2, label = "real current prediction", xaxis=:log)
     plot!(p1_log, tsteps, ode_data[1,:],   label = "real current true")
-    scatter!(p1_log, tsteps[batch_real_maxmin],ode_data[1,batch_real_maxmin], markersize=3,label = "weighted points")
-    p2 = scatter(time_batch, pred[2,:], markersize=2, label = "imag current prediction")
+    plot!(p1_log, tsteps, avgmodel_data[1,:], label = "real current avg. model")
+    p2 = scatter(tsteps_train, pred[2,:], markersize=2, label = "imag current prediction")
     plot!(p2, tsteps, ode_data[2,:],  label = "imag current true")
-    scatter!(p2, tsteps[batch_imag_maxmin],ode_data[2,batch_imag_maxmin], markersize=3, label = "weighted points")
-    p2_log = scatter(time_batch, pred[2,:], markersize=2, label = "imag current prediction")
+    plot!(p2, tsteps, avgmodel_data[2,:], label = "imag current avg. model")
+    p2_log = scatter(tsteps_train, pred[2,:], markersize=2, label = "imag current prediction")
     plot!(p2_log, tsteps, ode_data[2,:],  xaxis=:log, label = "imag current true")
-    scatter!(p2_log, tsteps[batch_imag_maxmin],ode_data[2,batch_imag_maxmin], markersize=3, label = "weighted points")
+    plot!(p2_log, tsteps, avgmodel_data[2,:], label = "imag current avg. model")
     
 
-    p3 = scatter(time_batch, pred[3,:], markersize=2, label = "real current from inverter")
-    p3_log = scatter(time_batch, pred[3,:], markersize=2, label = "real current from inverter", xaxis=:log)
-    p4 = scatter(time_batch, pred[4,:], markersize=2, label = "imag current from inverter")
-    p4_log = scatter(time_batch, pred[4,:], markersize=2, label = "imag current from inverter", xaxis=:log)
+    p3 = scatter(tsteps_train, pred[3,:], markersize=2, label = "real current from inverter")
+    p3_log = scatter(tsteps_train, pred[3,:], markersize=2, label = "real current from inverter", xaxis=:log)
+    p4 = scatter(tsteps_train, pred[4,:], markersize=2, label = "imag current from inverter")
+    p4_log = scatter(tsteps_train, pred[4,:], markersize=2, label = "imag current from inverter", xaxis=:log)
 
-    p5 = scatter(time_batch, pred[5,:], markersize=2, label = "real current from nn source")
-    p5_log = scatter(time_batch, pred[5,:], markersize=2, label = "real current from nn source", xaxis=:log)
-    p6 = scatter(time_batch, pred[6,:], markersize=2, label = "imag current from nn source")
-    p6_log = scatter(time_batch, pred[6,:], markersize=2, label = "imag current from nn source", xaxis=:log)
+    p5 = scatter(tsteps_train, pred[5,:], markersize=2, label = "real current from nn source")
+    p5_log = scatter(tsteps_train, pred[5,:], markersize=2, label = "real current from nn source", xaxis=:log)
+    p6 = scatter(tsteps_train, pred[6,:], markersize=2, label = "imag current from nn source")
+    p6_log = scatter(tsteps_train, pred[6,:], markersize=2, label = "imag current from nn source", xaxis=:log)
     
     plt = plot(p1,p2,p1_log,p2_log,p3,p4, p3_log,p4_log,p5,p6,p5_log,p6_log, layout=(6,2), size = (1000,1000))
     push!(list_plots, plt)
     display_plots && display(plt)
    
 end
+
+function plot_compare(ode_data, avgmodel_data, surr_data)
+    pcomp_1 = plot(ode_data[1,:], label = "full order")
+    plot!(pcomp_1, avgmodel_data[1,:], label = "avg param model")
+    plot!(pcomp_1, surr_data[1,:], label ="uode surrogate model")
+    plot!(pcomp_1, surr_data[3,:], label = "inv part of surrogate model")
+    pcomp_2 = plot(ode_data[2,:], label = "full order")
+    plot!(pcomp_2, avgmodel_data[2,:], label = "avg param model")
+    plot!(pcomp_2, surr_data[2,:], label ="uode surrogate model")
+    plot!(pcomp_2, surr_data[4,:], label = "inv part of surrogate model")
+    pcomp = plot(pcomp_1,pcomp_2, layout=(1,2)) 
+    return pcomp
+end 
 
 
 function extending_ranges(datasize::Integer, groupsize::Integer)

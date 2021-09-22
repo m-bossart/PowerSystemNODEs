@@ -5,7 +5,7 @@ include("../models/parameter_utils.jl")
 include("../models/init_functions.jl")
 configure_logging(console_level = Logging.Error)
 
-################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DAT#############
+################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DATA#############
 sys_faults = System("systems/fault_library.json")
 sys_full = System("systems/base_system.json")
 sys_train, sys_test = build_train_test(sys_faults, sys_full, 2, train_split, add_pvs = true)
@@ -62,18 +62,25 @@ Ir_scale = maximum(ode_data[1,:]) - minimum(ode_data[1,:])
 Ii_scale = maximum(ode_data[2,:]) - minimum(ode_data[2,:])
 
 #################### BUILD INITIALIZATION SYSTEM ###############################
-#TODO: make p_inv the average parameter from sys_train
-p_inv = [500.0, 0.084, 4.69, 2.0, 400.0, 20.0,0.2,1000.0,0.59,  736.0, 0.0, 0.0, 0.2,  1.27, 14.3, 0.0, 50.0,  0.2,  0.08, 0.003, 0.074, 0.2,0.01]
-sys_init = build_sys_init(sys_train)
+sys_init, p_inv = build_sys_init(sys_train) #returns p_inv, the set of average parameters 
 transformer = collect(get_components(Transformer2W,sys_init))[1]
 pvs = collect(get_components(PeriodicVariableSource, sys_init))[1]
 p_fixed =  [get_x(transformer) + get_X_th(pvs), get_r(transformer)+ get_R_th(pvs)]
-x₀, refs, Vr0, Vi0 = initialize_sys!(sys_init, "gen1", p_inv)
+x₀, refs, Vr0, Vi0 = initialize_sys!(sys_init, "gen1")
 Vm, Vθ = Source_to_function_of_time(get_dynamic_injector(active_source))
 p_ode = vcat(p_inv, refs, p_fixed)
-
-#Todo: solve the initialization problem with Vm(t) and Vθ(t). Save as baseline_data. 
-#Include this in your "final" training plot (baseline_data, ode_data, prediction)
+sim = Simulation!(
+    MassMatrixModel,
+    sys_init,
+    pwd(),
+    tspan,
+)
+@time execute!(sim,
+        solver,
+        abstol = abstol,
+        reltol = reltol,
+        reset_simulation=true, saveat=tsteps);
+avgmodel_data = get_total_current_series(sim)
 
 ##### INITIALIZE THE GFM+NN SURROGATE AND BUILD THE TRAINING PROBLEM ###########
 nn = build_nn(2, 2, nn_width, nn_hidden, nn_activation)
@@ -81,15 +88,16 @@ p_nn = initial_params(nn)
 n_weights_nn = length(p_nn)
 p_all = vcat(p_nn, p_inv, refs, p_fixed, Vr0, Vi0)
 x₀_nn = vcat(x₀, 0.0, 0.0, x₀[5], x₀[19])
-h = get_init_gfm_nn(p_all, x₀[5], x₀[19])
-res_nn= nlsolve(h, x₀_nn)
-@assert converged(res_nn)
-dx = similar(x₀_nn)
-gfm_nn(dx,res_nn.zero,p_all,0.0)
-@assert all(isapprox.(dx, 0.0; atol=1e-8))
+
+#h = get_init_gfm_nn(p_all, x₀[5], x₀[19])
+#res_nn= nlsolve(h, x₀_nn)
+#@assert converged(res_nn)
+#dx = similar(x₀_nn)
+#gfm_nn(dx,res_nn.zero,p_all,0.0)
+#@assert all(isapprox.(dx, 0.0; atol=1e-8))
 M = MassMatrix(21, 2)
 gfm_nn_func = ODEFunction(gfm_nn, mass_matrix = M)
-gfm_nn_prob = ODEProblem(gfm_nn_func, res_nn.zero, tspan, p_all)
+gfm_nn_prob = ODEProblem(gfm_nn_func, x₀_nn, tspan, p_all)
 
 sol = solve(gfm_nn_prob, solver,  abstol=abstol, reltol=reltol,  saveat=tsteps )
 scatter!(p3, sol, vars = [22], markersize=1, label = "real current gfm+nn surrogate")
@@ -100,75 +108,60 @@ p5 = plot(p1,p2,p1_log,p2_log,p3,p4,p3_log,p4_log, layout = (4,2), size = (1000,
 display_plots && display(p5)
 ##
 ################################# TRAINING #########################################
-u₀ = res_nn.zero
-real_maxmin = find_maxmin_indices(ode_data[1,:])
-imag_maxmin = find_maxmin_indices(ode_data[2,:])
-batch_real_maxmin = []
-batch_imag_maxmin = [] 
-function predict_gfm_nn(θ, time_batch) 
+u₀ = x₀_nn  #stays same for a full training disturbance. 
+
+function predict_gfm_nn(θ) 
     p = vcat(θ, p_inv, refs, p_fixed,  Vr0, Vi0) 
-    _prob = remake(gfm_nn_prob, p=p,  u0=u₀)
-    sol2 = solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=time_batch, 
+    _prob = remake(gfm_nn_prob, p=p, u0=u₀)    
+    sol2 = solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=tsteps_train, 
                 save_idxs=[i__ir_out, i__ii_out, i__ir_filter, i__ii_filter, i__ir_nn, i__ii_nn], #first two for loss function, rest for plotting
                  sensealg = ForwardDiffSensitivity())  
     return Array(sol2)
 end
   
-function loss_gfm_nn(θ, batch, time_batch)
-    pred = predict_gfm_nn(θ, time_batch)
-
-    loss = (mae(pred[1,:], batch[1,:]) / Ir_scale)/2 +
-           (mae(pred[2,:], batch[2,:]) / Ii_scale)/2  
-           #abs(nn([Vm(0.0), Vθ(0.0)],θ)[1]) + 
-           #abs(nn([Vm(0.0), Vθ(0.0)],θ)[2]) + 
-           #((mae(pred[1,batch_real_maxmin], batch[1,batch_real_maxmin]) / Ir_scale)/2) * scale_maxmin + 
-           #((mae(pred[2,batch_imag_maxmin], batch[2,batch_imag_maxmin]) / Ir_scale)/2) * scale_maxmin
-    loss, pred, batch, time_batch
+function loss_gfm_nn(θ)
+    pred = predict_gfm_nn(θ)
+    #To introduce batching, randomly select indices to calculate loss for?
+    loss = (mae(pred[1,:], ode_data_train[1,:]) / Ir_scale)/2 +
+           (mae(pred[2,:], ode_data_train[2,:]) / Ii_scale)/2  
+    return loss, pred, θ
 end
 
-@info "loss with original paramters", loss_gfm_nn(p_nn, ode_data, tsteps)[1]
-@info "loss with doubled original paramters", loss_gfm_nn(p_nn*2.0, ode_data, tsteps)[1]
-
-##
+function loss_fromdata(real_solution, predicted_solution)
+    loss = (mae(predicted_solution[1,:], real_solution[1,:]) / Ir_scale)/2 + 
+           (mae(predicted_solution[2,:], real_solution[2,:]) / Ii_scale)/2  
+end 
+    
 
 list_plots = []
 list_losses = Float64[]
-#list_nn1 =  Float64[]
-#list_nn2 = Float64[]
+list_θ = []
+surr_data = []
 list_gradnorm = Float64[]
-#iteration = 1 
-cb_gfm_nn = function(θ, l, pred, batch, time_batch)
+iteration = 0
+
+#Callback run extra time at end if you reach maxiters 
+cb_gfm_nn = function(p, l, pred, θ) 
     #DISPLAY LOSS AND PLOT
-    grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x, batch, time_batch)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
+    global iteration += 1 
+    grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
     push!(list_gradnorm, grad_norm)
     push!(list_losses,l)
-    #push!(list_nn1,  nn([Vm(0.0), Vθ(0.0)], θ)[1] )
-    #push!(list_nn2,  nn([Vm(0.0), Vθ(0.0)], θ)[2] )
-    println("loss: ", l)#, "    nn(t=0): ", nn([Vm(0.0), Vθ(0.0)], θ)[1], "   ",  nn([Vm(0.0), Vθ(0.0)],θ )[2])
+    push!(list_θ, θ[1:end]) #need[1:end], not sure why
+    println("iteration:  ", iteration, "  loss: ", l)
+    cb_gfm_nn_plot(pred)
 
-    cb_gfm_nn_plot(pred, batch, time_batch)
-
-    #UPDATE REFERENCES AND INITIAL CONDITIONS
-    x₀, refs_int, Vr0_int, Vi0_int = initialize_sys!(sys_init, "gen1", p_inv) #TODO don't need this each time
+    #UPDATE REFERENCES AND INITIAL CONDITIONS - if we don't do the NL solve, might not need any of this? 
+#=     x₀, refs_int, Vr0_int, Vi0_int = initialize_sys!(sys_init, "gen1") #TODO don't need this each time
     global refs = refs_int
     global Vr0 = Vr0_int
     global Vi0 = Vi0_int
-    p = vcat(θ, p_inv, refs, p_fixed, Vr0, Vi0)  # nn([Vm(0.0), Vθ(0.0)],θ)[1], nn([Vm(0.0), Vθ(0.0)],θ)[2] )
-    #println(Vr0,Vi0)
-    #println(Vm(0.0)*cos(Vθ(0.0)) + (x₀[5]*p_fixed[2] -x₀[19]*p_fixed[1]))
-    #println(Vm(0.0)*sin(Vθ(0.0)) + (x₀[5]*p_fixed[1] +x₀[19]*p_fixed[2]))
-    #println(p)
-    #println(Vr0-(Vm(0.0)*cos(Vθ(0.0)) + (x₀[5]*p_fixed[2] -x₀[19]*p_fixed[1])))
+    p = vcat(θ, p_inv, refs, p_fixed, Vr0, Vi0)  
     x₀_nn = vcat(x₀, 0.0, 0.0,  x₀[5], x₀[19])
     f = get_init_gfm_nn(p, x₀[5], x₀[19])
-    #global res = nlsolve(f, x₀_nn)
-    #@assert converged(res)
-    #global u₀ = res.zero
-    global u₀ = x₀_nn
-#=      if iteration % n_checkpoint == 0
-        @save "checkpoint/mymodel.bson" θ opt list_losses list_gradnorm iter
-    end 
-    iter += 1  =#
+    global res = nlsolve(f, x₀_nn)
+    @assert converged(res)
+    global u₀ = res.zero =#
 
     (l > lb_loss) && return false  
     return true 
@@ -181,22 +174,28 @@ end =#
 
 ranges = extending_ranges(steps, group_size)
 
-
-optfun = OptimizationFunction((θ, p, batch, time_batch) -> loss_gfm_nn(θ, batch, time_batch), GalacticOptim.AutoForwardDiff())
+list_losses_best = []
+list_θ_best = []
 p_start = p_nn
- 
-
 for range in ranges
-    data = ode_data[:,range]
-    t = tsteps[range]
-    global batch_real_maxmin = [i for i in real_maxmin if i in range]
-    global batch_imag_maxmin = [i for i in imag_maxmin if i in range]
-    #println(batch_imag_maxmin)
-    train_loader = Flux.Data.DataLoader((data,t), batchsize=length(data[1,:]))  #no stochasticity because batchsize = length(data)
-    optprob = OptimizationProblem(optfun, p_start)
-    res_gfm = GalacticOptim.solve(optprob, optimizer,  ncycle(train_loader, maxiters), cb = cb_gfm_nn)  
-    global p_start = res_gfm.minimizer
+    global ode_data_train = ode_data[:,range]
+    global tsteps_train = tsteps[range]
+    res_gfm = DiffEqFlux.sciml_train(loss_gfm_nn, p_start, optimizer, GalacticOptim.AutoForwardDiff(), cb=cb_gfm_nn, maxiters=maxiters )
+    global p_start = res_gfm.u  
+    push!(list_θ_best, p_start) 
+    push!(list_losses_best, res_gfm.minimum) 
+    println("finished with range:", range)
+    global iteration = 0 
 end 
+
+println("avg model achieves loss of ", loss_fromdata(ode_data, avgmodel_data))
+println("surr model achieves loss of ", loss_gfm_nn(list_θ[end])[1]) #if maxiters is hit, last entry might not be lowest loss
+surr_data = predict_gfm_nn(list_θ[end])
+println("surr model achieves loss of ", loss_fromdata(ode_data, surr_data))
+pcomp = plot_compare( avgmodel_data,ode_data, surr_data)
+display(pcomp)
+
+############################ SAVING PLOTS AND DATA ####################################
 anim = Animation()
 for plt in list_plots
     frame(anim, plt)
@@ -204,12 +203,8 @@ end
 
 gif(anim, string("figs/", label ,"_train.gif"), fps = 100)
 png(plot(list_losses), string("figs/",label,"_loss.png"))
+writedlm( string("figs/", label ,"_loss.txt"), list_losses, ',')
 png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png")) 
-png(plot(list_nn1), string("figs/", label,"_nn1.png")) 
-png(plot(list_nn2), string("figs/", label,"_nn2.png")) 
-
-
-#Example of timing gradient calculations 
-#ForwardDiff.gradient(x -> first(loss_gfm_nn(x)), p_nn)
-#t_F = @elapsed ForwardDiff.gradient(x -> first(loss_gfm_nn(x)), p_nn)
-#@info "ForwardDiff time", t_F
+png(list_plots[end], string("figs/", label ,"_final.png"))
+png(pcomp, string("figs/", label ,"_comp.png"))
+writedlm( string("figs/", label ,"_comp.txt"),  [tsteps'; ode_data; surr_data;avgmodel_data]', ',')
