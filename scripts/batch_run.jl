@@ -28,7 +28,7 @@ using Statistics
 using Optim
 using GalacticOptim
 using DelimitedFiles
-
+##
 #const 
 train_split = 0.9999
 optimizer = ADAM(0.01)#BFGS() #Optim.KrylovTrustRegion() #ADAM(0.01) #BFGS()
@@ -52,13 +52,7 @@ n_checkpoint = 10
 is_restart = false
 display_plots = false  
 
-#Indices of states in the surrogate for saving/ploting/calculating loss
-i__ir_filter = 5
-i__ii_filter = 19
-i__ir_nn = 20
-i__ii_nn = 21
-i__ir_out = 22
-i__ii_out = 23
+
 
 
 label = "run1"

@@ -1,3 +1,4 @@
+include("../models/constants.jl")
 include("../models/DynamicComponents.jl")
 include("../models/InverterModels.jl")
 include("../models/utils.jl")
@@ -121,7 +122,7 @@ end
   
 function loss_gfm_nn(θ)
     pred = predict_gfm_nn(θ)
-    #To introduce batching, randomly select indices to calculate loss for?
+    #To introduce batching, randomly select indices to calculate loss for
     loss = (mae(pred[1,:], ode_data_train[1,:]) / Ir_scale)/2 +
            (mae(pred[2,:], ode_data_train[2,:]) / Ii_scale)/2  
     return loss, pred, θ
