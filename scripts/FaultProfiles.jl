@@ -38,7 +38,7 @@ source_bus = 2  #TODO Must have single line between source_bus and surrogate_bus
 surrogate_bus = 16
 devices = [inv_case78] # TODO add in the GFL, SM, VSM, etc.
 Prefchange = [1.0]
-n_devices = 4
+n_devices = 3
 
 
 add_devices_to_surrogatize!(sys, n_devices, surrogate_bus, source_bus)

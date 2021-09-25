@@ -193,7 +193,7 @@ println("avg model achieves loss of ", loss_fromdata(ode_data, avgmodel_data))
 println("surr model achieves loss of ", loss_gfm_nn(list_θ[end])[1]) #if maxiters is hit, last entry might not be lowest loss
 surr_data = predict_gfm_nn(list_θ[end])
 println("surr model achieves loss of ", loss_fromdata(ode_data, surr_data))
-pcomp = plot_compare( avgmodel_data,ode_data, surr_data)
+pcomp = plot_compare(ode_data, avgmodel_data, surr_data)
 display(pcomp)
 
 ############################ SAVING PLOTS AND DATA ####################################

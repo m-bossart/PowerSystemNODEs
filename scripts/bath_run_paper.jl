@@ -36,10 +36,9 @@ solver = Rodas4() #KenCarp4() #QBDF()# TRBDF2() #Rodas4() #Rodas5() TRBDF2()
 abstol = 1e-6
 reltol = 1e-3
 tfault =  0.01
-tspan = (0.0, 0.99)
+tspan = (0.0, 1.0)
 steps = 200
-tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps)) #-1 if we add 0 after  
-#tsteps = vcat(0.0,tsteps) #add 0 for better plots, check ss 
+tsteps =  [0,10 .^ (range(log10(tfault), log10(tspan[2]),length= steps))] #add 0 for better plots, check ss 
 group_size = 200 #5
 batching_factor = 1
 scale_maxmin = 10
@@ -53,7 +52,16 @@ n_checkpoint = 10
 is_restart = false
 display_plots = false  
 
-label = "test_mixedinverters"
+
+#What runs do we need for paper?
+#Group size: 5, 20, 50, 200 (keep maxiters constant)
+#nn_width = 3, 5, 7 
+#nn_depth = 3, 5, 7 
+
+label = "run1"
 nn_hidden = 3 
-nn_width = 5
+nn_width = 3
+group_size = 200
+maxiters = 500
+optimizer = ADAM(0.01)
 include("train_nn.jl")

@@ -147,10 +147,25 @@ function add_devices_to_surrogatize!(sys::System, n_devices::Integer, surrogate_
            operation_cost=ThreePartCost(nothing),
            base_power =  total_base_power/n_devices,
            )
-       add_component!(sys, g)
-       inv_typ = inv_case78(get_name(g))
-       randomize_parameters!(inv_typ, param_range)
-       add_component!(sys, inv_typ, g)
+    add_component!(sys, g)
+    if (i==1)
+        inv_typ = inv_case78(get_name(g))
+        add_component!(sys, inv_typ, g)
+    end 
+    if (i==2)
+        inv_typ = inv_darco_droop(get_name(g))
+        add_component!(sys, inv_typ, g)
+    end 
+    if (i==3)
+        inv_typ = inv_gfoll(get_name(g))
+        add_component!(sys, inv_typ, g)
+    end 
+
+
+    #randomize_parameters!(inv_typ, param_range)
+    #set_lg!(inv_typ.filter, get_lg(inv_typ.filter)*rand(Uniform(10.0,20))) #HACK to get larger impedance differences 
+    #set_rg!(inv_typ.filter, get_rg(inv_typ.filter)*rand(Uniform(10.0,20))) #HACK to get larger impedance differences 
+    #add_component!(sys, inv_typ, g)
    end
 end
 
@@ -217,14 +232,16 @@ function build_sys_init(sys_train::System)
     sys_init = deepcopy(sys_train)
     base_power_total = 0.0
     power_total = 0.0
-    gfms  = collect(get_components(ThermalStandard,sys_init, x->typeof(get_dynamic_injector(x)) == DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}))
-    p_avg =zeros(length(get_parameters(get_dynamic_injector(gfms[1]))))
+    #gfms  = collect(get_components(ThermalStandard,sys_init, x->typeof(get_dynamic_injector(x)) == DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}))
+    #p_avg =zeros(length(get_parameters(get_dynamic_injector(gfms[1]))))
+    gfms  = collect(get_components(ThermalStandard,sys_init))
+    println("length of gfms for sys init", length(gfms))
     for gfm in gfms 
         base_power_total += get_base_power(gfm)
         power_total +=  get_base_power(gfm) * get_active_power(gfm)
         @info base_power_total
         @info power_total
-        p_avg += get_parameters(get_dynamic_injector(gfm))
+        #p_avg += get_parameters(get_dynamic_injector(gfm))
         remove_component!(sys_init, get_dynamic_injector(gfm))
         remove_component!(sys_init, gfm)
     end
@@ -244,11 +261,11 @@ function build_sys_init(sys_train::System)
        )
     add_component!(sys_init, g)
     inv_typ = inv_case78(get_name(g))
-
     add_component!(sys_init, inv_typ, g)
-    p_inv =  p_avg/length(gfms)
-    set_parameters!(inv_typ, p_inv) 
-    return sys_init, p_inv
+
+    #p_inv =  p_avg/length(gfms)
+    #set_parameters!(inv_typ, p_inv) 
+    return sys_init, p_inv 
 end
 
 #NOTE The warning that the initialization fails in the source is because we just use the source to set the bus voltage.
@@ -367,15 +384,15 @@ function cb_gfm_nn_plot(pred)
    
 end
 
-function plot_compare(ode_data, avgmodel_data, surr_data)
-    pcomp_1 = plot(ode_data[1,:], label = "full order")
-    plot!(pcomp_1, avgmodel_data[1,:], label = "avg param model")
-    plot!(pcomp_1, surr_data[1,:], label ="uode surrogate model")
-    plot!(pcomp_1, surr_data[3,:], label = "inv part of surrogate model")
-    pcomp_2 = plot(ode_data[2,:], label = "full order")
-    plot!(pcomp_2, avgmodel_data[2,:], label = "avg param model")
-    plot!(pcomp_2, surr_data[2,:], label ="uode surrogate model")
-    plot!(pcomp_2, surr_data[4,:], label = "inv part of surrogate model")
+function plot_compare(full_model, simple_model, surr_model)
+    pcomp_1 = plot(full_model[1,:], label = "full order")
+    plot!(pcomp_1, simple_model[1,:], label = "avg param model")
+    plot!(pcomp_1, surr_model[1,:], label ="uode surrogate model")
+    plot!(pcomp_1, surr_model[3,:], label = "inv part of surrogate model")
+    pcomp_2 = plot(full_model[2,:], label = "full order")
+    plot!(pcomp_2, simple_model[2,:], label = "avg param model")
+    plot!(pcomp_2, surr_model[2,:], label ="uode surrogate model")
+    plot!(pcomp_2, surr_model[4,:], label = "inv part of surrogate model")
     pcomp = plot(pcomp_1,pcomp_2, layout=(1,2)) 
     return pcomp
 end 
