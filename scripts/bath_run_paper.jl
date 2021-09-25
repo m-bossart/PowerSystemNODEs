@@ -43,7 +43,7 @@ tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps)) #-1 if we 
 group_size = 200 #5
 batching_factor = 1
 scale_maxmin = 10
-lb_loss = 0.005
+lb_loss = 0.00005
 nn_width = 2
 maxiters = 2
 nn_hidden = 1 
@@ -60,9 +60,40 @@ display_plots = false
 #nn_depth = 3, 5, 7 
 
 label = "run1"
-nn_hidden = 3 
-nn_width = 3
+nn_hidden = 5 
+nn_width = 5
 group_size = 200
-maxiters = 5#500
+maxiters = 1000
 optimizer = ADAM(0.01)
 include("train_nn.jl")
+
+
+label = "run1"
+nn_hidden = 5 
+nn_width = 5
+group_size = 50
+maxiters = 250
+optimizer = ADAM(0.01)
+include("train_nn.jl")
+
+
+label = "run1"
+nn_hidden = 5 
+nn_width = 5
+group_size = 20
+maxiters = 100
+optimizer = ADAM(0.01)
+include("train_nn.jl")
+
+
+label = "run1"
+nn_hidden = 5 
+nn_width = 5
+group_size = 5
+maxiters = 25
+optimizer = ADAM(0.01)
+include("train_nn.jl")
+
+
+
+
