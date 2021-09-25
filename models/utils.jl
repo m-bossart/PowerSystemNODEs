@@ -235,7 +235,7 @@ function build_sys_init(sys_train::System)
     #gfms  = collect(get_components(ThermalStandard,sys_init, x->typeof(get_dynamic_injector(x)) == DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}))
     #p_avg =zeros(length(get_parameters(get_dynamic_injector(gfms[1]))))
     gfms  = collect(get_components(ThermalStandard,sys_init))
-    println("length of gfms for sys init", length(gfms))
+   
     for gfm in gfms 
         base_power_total += get_base_power(gfm)
         power_total +=  get_base_power(gfm) * get_active_power(gfm)
@@ -262,7 +262,7 @@ function build_sys_init(sys_train::System)
     add_component!(sys_init, g)
     inv_typ = inv_case78(get_name(g))
     add_component!(sys_init, inv_typ, g)
-
+    p_inv = get_parameters(inv_typ)
     #p_inv =  p_avg/length(gfms)
     #set_parameters!(inv_typ, p_inv) 
     return sys_init, p_inv 
