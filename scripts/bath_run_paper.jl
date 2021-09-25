@@ -38,7 +38,8 @@ reltol = 1e-3
 tfault =  0.01
 tspan = (0.0, 1.0)
 steps = 200
-tsteps =  [0,10 .^ (range(log10(tfault), log10(tspan[2]),length= steps))] #add 0 for better plots, check ss 
+tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps)) #-1 if we add 0 after  
+#tsteps = vcat(0.0,tsteps) #add 0 for better plots, check ss 
 group_size = 200 #5
 batching_factor = 1
 scale_maxmin = 10
