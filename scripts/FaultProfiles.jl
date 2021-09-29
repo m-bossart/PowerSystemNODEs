@@ -36,7 +36,7 @@ sys = System("cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw")
 source_bus = 2  #TODO Must have single line between source_bus and surrogate_bus?
 surrogate_bus = 16
 devices =    [inv_case78]  # [inv_gfoll]# [inv_darco_droop]# [inv_case78] #  #     inv_darco_droop doesn't work, can't find the frequency?? 
-Prefchange = [0.5]
+Prefchange = [0.8]
 n_devices = 3
 
 add_devices_to_surrogatize!(sys, n_devices, surrogate_bus, source_bus)

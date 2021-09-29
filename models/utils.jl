@@ -79,8 +79,8 @@ function Source_to_function_of_time(source::PeriodicVariableSource)
            val += θ_coeffs[i][1]* sin.(ω * t)
            val += θ_coeffs[i][2]* cos.(ω * t)
        end
-       return val
-   end
+        return val
+    end 
     return (V, θ)
 end
 
@@ -96,19 +96,43 @@ function Source_to_function_of_time(source::Source)
 end
 
 
+
+
+function add_tanh(t, y)
+    first = y[1]
+    last = y[end]
+    Δt = t[2]-t[1] #assume linear spacing
+    n = length(t)
+    A = (y[1]-y[end])/2
+    C = y[end] + A
+
+    B =20/ (t[end]-t[1])
+    @show A,B, C 
+    @show y[end]
+    @show y[1]
+    t_add = t[end]+Δt:Δt:t[end] + (t[end]-t[1])
+    y_add = A*tanh.((t_add .- t_add[Int(length(t_add)/2)]   ).* B) .+ C
+    t_new = vcat(t,t_add)
+    y_new = vcat(y, y_add)
+    return (t_new, y_new)
+end 
+
+
 function build_disturbances(sys)  #TODO make this more flexible, add options for which faults to include
     disturbances = []
     #BRANCH FAULTS
-    lines = deepcopy(collect(get_components(Line, sys, x-> get_name(x) == "BUS 4       -BUS 5       -i_7"))) #TODO - change back to include all lines
+    lines = deepcopy(collect(get_components(Line, sys, x-> get_name(x) == "BUS 13-BUS 14-i_17"))) #"BUS 4-BUS 5-i_7"
+    println(lines)
     for l in lines
-        push!(disturbances, BranchTrip(tfault,get_name(l)))
+        #push!(disturbances, BranchTrip(tfault,Line,get_name(l)))
     end
     #REFERENCE CHANGE FAULTS
     injs = collect(get_components(DynamicInjection, sys,  x -> !(get_name(x) in get_name.(surrogate_gens))))
     for fault_inj in injs
         for Pref in Prefchange
-            disturbance_ControlReferenceChange = ControlReferenceChange(tfault, fault_inj , PowerSimulationsDynamics.P_ref_index,  get_ext(fault_inj)["control_refs"][PowerSimulationsDynamics.P_ref_index] * Pref)
-            #push!(disturbances, disturbance_ControlReferenceChange)
+            disturbance_ControlReferenceChange = ControlReferenceChange(tfault, fault_inj , :P_ref,  get_P_ref(fault_inj)* Pref)
+            
+            (get_name(fault_inj)=="generator-15-1") && push!(disturbances, disturbance_ControlReferenceChange)
         end
     end
     return disturbances
@@ -153,19 +177,14 @@ function add_devices_to_surrogatize!(sys::System, n_devices::Integer, surrogate_
         add_component!(sys, inv_typ, g)
     end 
     if (i==2)
-        inv_typ = inv_darco_droop(get_name(g))
-        add_component!(sys, inv_typ, g)
-    end 
-    if (i==3)
         inv_typ = inv_gfoll(get_name(g))
         add_component!(sys, inv_typ, g)
     end 
+    if (i==3)
+        inv_typ = inv_darco_droop(get_name(g))
+        add_component!(sys, inv_typ, g)
+    end  
 
-
-    #randomize_parameters!(inv_typ, param_range)
-    #set_lg!(inv_typ.filter, get_lg(inv_typ.filter)*rand(Uniform(10.0,20))) #HACK to get larger impedance differences 
-    #set_rg!(inv_typ.filter, get_rg(inv_typ.filter)*rand(Uniform(10.0,20))) #HACK to get larger impedance differences 
-    #add_component!(sys, inv_typ, g)
    end
 end
 
@@ -212,7 +231,7 @@ Makes a Float64 Mass Matrix of ones for the ODEProblem. Takes # of differential 
 function MassMatrix(n_differential::Integer, n_algebraic::Integer)
     n_states = n_differential + n_algebraic
     M = Float64.(zeros(n_states,n_states))
-    for i = 1:n_differential   #-2     Include if using the IB version (last two equations are algebraic)
+    for i = 1:n_differential 
       M[i,i] = 1.0
     end
     return M
@@ -232,8 +251,6 @@ function build_sys_init(sys_train::System)
     sys_init = deepcopy(sys_train)
     base_power_total = 0.0
     power_total = 0.0
-    #gfms  = collect(get_components(ThermalStandard,sys_init, x->typeof(get_dynamic_injector(x)) == DynamicInverter{AverageConverter, OuterControl{VirtualInertia, ReactivePowerDroop}, VoltageModeControl, FixedDCSource, KauraPLL, LCLFilter}))
-    #p_avg =zeros(length(get_parameters(get_dynamic_injector(gfms[1]))))
     gfms  = collect(get_components(ThermalStandard,sys_init))
    
     for gfm in gfms 
@@ -241,7 +258,6 @@ function build_sys_init(sys_train::System)
         power_total +=  get_base_power(gfm) * get_active_power(gfm)
         @info base_power_total
         @info power_total
-        #p_avg += get_parameters(get_dynamic_injector(gfm))
         remove_component!(sys_init, get_dynamic_injector(gfm))
         remove_component!(sys_init, gfm)
     end
@@ -263,11 +279,17 @@ function build_sys_init(sys_train::System)
     inv_typ = inv_case78(get_name(g))
     add_component!(sys_init, inv_typ, g)
     p_inv = get_parameters(inv_typ)
-    #p_inv =  p_avg/length(gfms)
-    #set_parameters!(inv_typ, p_inv) 
     return sys_init, p_inv 
 end
 
+
+function get_wrapper(wrappers, name)
+    for w in wrappers
+            if PSY.get_name(w) == name
+                return w
+            end 
+    end 
+end 
 #NOTE The warning that the initialization fails in the source is because we just use the source to set the bus voltage.
 #Doesn't make physical sense, but as long as the full system solves, it should be fine.
 function initialize_sys!(sys::System, name::String)
@@ -280,11 +302,13 @@ function initialize_sys!(sys::System, name::String)
         pwd(),
         (0.0, 1.0),
     )
-    x₀_dict = get_initial_conditions(sim)[get_name(device)]
+    x₀_dict = read_initial_conditions(sim)[get_name(device)]
     x₀ = [value for (key,value) in x₀_dict]
-    refs = get_ext(device)["control_refs"]
-    Vr0 = get_initial_conditions(sim)["V_R"][bus]
-    Vi0 = get_initial_conditions(sim)["V_I"][bus]
+    wrappers = sim.inputs.dynamic_injectors
+    w =  get_wrapper(wrappers, "gen1")
+    refs = [w.V_ref.x, w.ω_ref.x, w.P_ref.x, w.Q_ref.x]
+    Vr0 = read_initial_conditions(sim)["V_R"][bus]
+    Vi0 = read_initial_conditions(sim)["V_I"][bus]
     return x₀, refs, Vr0, Vi0
 end
 
@@ -295,16 +319,17 @@ function set_bus_from_source(available_source::Source)
     set_angle!(get_bus(available_source),θsource)
 end
 
-function get_total_current_series(sim::Simulation)
+function get_total_current_series(sim)
     ir_total = []
     ii_total = []
     for (i,g) in enumerate(get_components(DynamicInjection, sim.sys, x->typeof(x)!== PeriodicVariableSource))
+        results = read_results(sim)
         if i == 1
-            ir_total = get_real_current_series(sim, get_name(g))[2]
-            ii_total = get_imaginary_current_series(sim, get_name(g))[2]
+            ir_total = get_real_current_series(results, get_name(g))[2]
+            ii_total = get_imaginary_current_series(results, get_name(g))[2]
         else
-            ir_total .+= get_real_current_series(sim, get_name(g))[2]
-            ii_total .+= get_imaginary_current_series(sim, get_name(g))[2]
+            ir_total .+= get_real_current_series(results, get_name(g))[2]
+            ii_total .+= get_imaginary_current_series(results, get_name(g))[2]
         end
     end
     data_array =  zeros(Float64, (2, length(ir_total)))
@@ -316,7 +341,6 @@ end
 function plot_pvs(tsteps, pvs::PeriodicVariableSource, xaxis)
     V = zeros(length(tsteps))
     V = V .+ get_internal_voltage_bias(pvs)
-    @info V
     retrieved_freqs = get_internal_voltage_frequencies(pvs)
     coeffs = get_internal_voltage_coefficients(pvs)
     for (i,ω) in enumerate(retrieved_freqs)
@@ -326,14 +350,13 @@ function plot_pvs(tsteps, pvs::PeriodicVariableSource, xaxis)
 
     θ = zeros(length(tsteps))
     θ = θ .+ get_internal_angle_bias(pvs)
-    @info θ
     retrieved_freqs = get_internal_angle_frequencies(pvs)
     coeffs = get_internal_angle_coefficients(pvs)
     for (i,ω) in enumerate(retrieved_freqs)
         θ += coeffs[i][1]* sin.(ω .* tsteps)
         θ += coeffs[i][2]* cos.(ω.* tsteps)
     end
-    p1 = plot(tsteps,V, label = "plot from pvs coefficients", xaxis=xaxis)
+    p1 = plot(tsteps,V, label = "plot from pvs coefficients", xaxis=xaxis, legend=false)
     p2 = plot(tsteps,θ, label = "plot from pvs coefficients", xaxis=xaxis)
     return p1, p2
 end
@@ -353,34 +376,50 @@ function cb_gfm_plot(sol)
     display_plots && display(plt)
 end
 
-function cb_gfm_nn_plot(pred)
-    p1 = scatter(tsteps_train, pred[1,:], markersize=2, label = "real current prediction")
-    plot!(p1, tsteps, ode_data[1,:],   label = "real current true")
-    plot!(p1, tsteps, avgmodel_data[1,:], label = "real current avg. model")
-    p1_log =  scatter(tsteps_train, pred[1,:], markersize=2, label = "real current prediction", xaxis=:log)
-    plot!(p1_log, tsteps, ode_data[1,:],   label = "real current true")
-    plot!(p1_log, tsteps, avgmodel_data[1,:], label = "real current avg. model")
-    p2 = scatter(tsteps_train, pred[2,:], markersize=2, label = "imag current prediction")
-    plot!(p2, tsteps, ode_data[2,:],  label = "imag current true")
-    plot!(p2, tsteps, avgmodel_data[2,:], label = "imag current avg. model")
-    p2_log = scatter(tsteps_train, pred[2,:], markersize=2, label = "imag current prediction")
-    plot!(p2_log, tsteps, ode_data[2,:],  xaxis=:log, label = "imag current true")
-    plot!(p2_log, tsteps, avgmodel_data[2,:], label = "imag current avg. model")
-    
+function cb_gfm_nn_plot(pred, plot_log::Bool)
+    if plot_log
+        p1 = scatter(tsteps_train, pred[1,:], markersize=2, label = "real current prediction")
+        plot!(p1, tsteps, ode_data[1,:],   label = "real current true")
+        plot!(p1, tsteps, avgmodel_data[1,:], label = "real current avg. model")
+        p1_log =  scatter(tsteps_train, pred[1,:], markersize=2, label = "real current prediction", xaxis=:log)
+        plot!(p1_log, tsteps, ode_data[1,:],   label = "real current true")
+        plot!(p1_log, tsteps, avgmodel_data[1,:], label = "real current avg. model")
+        p2 = scatter(tsteps_train, pred[2,:], markersize=2, label = "imag current prediction")
+        plot!(p2, tsteps, ode_data[2,:],  label = "imag current true")
+        plot!(p2, tsteps, avgmodel_data[2,:], label = "imag current avg. model")
+        p2_log = scatter(tsteps_train, pred[2,:], markersize=2, label = "imag current prediction")
+        plot!(p2_log, tsteps, ode_data[2,:],  xaxis=:log, label = "imag current true")
+        plot!(p2_log, tsteps, avgmodel_data[2,:], label = "imag current avg. model")
+        
 
-    p3 = scatter(tsteps_train, pred[3,:], markersize=2, label = "real current from inverter")
-    p3_log = scatter(tsteps_train, pred[3,:], markersize=2, label = "real current from inverter", xaxis=:log)
-    p4 = scatter(tsteps_train, pred[4,:], markersize=2, label = "imag current from inverter")
-    p4_log = scatter(tsteps_train, pred[4,:], markersize=2, label = "imag current from inverter", xaxis=:log)
+        p3 = scatter(tsteps_train, pred[3,:], markersize=2, label = "real current from inverter")
+        p3_log = scatter(tsteps_train, pred[3,:], markersize=2, label = "real current from inverter", xaxis=:log)
+        p4 = scatter(tsteps_train, pred[4,:], markersize=2, label = "imag current from inverter")
+        p4_log = scatter(tsteps_train, pred[4,:], markersize=2, label = "imag current from inverter", xaxis=:log)
 
-    p5 = scatter(tsteps_train, pred[5,:], markersize=2, label = "real current from nn source")
-    p5_log = scatter(tsteps_train, pred[5,:], markersize=2, label = "real current from nn source", xaxis=:log)
-    p6 = scatter(tsteps_train, pred[6,:], markersize=2, label = "imag current from nn source")
-    p6_log = scatter(tsteps_train, pred[6,:], markersize=2, label = "imag current from nn source", xaxis=:log)
-    
-    plt = plot(p1,p2,p1_log,p2_log,p3,p4, p3_log,p4_log,p5,p6,p5_log,p6_log, layout=(6,2), size = (1000,1000))
-    push!(list_plots, plt)
-    display_plots && display(plt)
+        p5 = scatter(tsteps_train, pred[5,:], markersize=2, label = "real current from nn source")
+        p5_log = scatter(tsteps_train, pred[5,:], markersize=2, label = "real current from nn source", xaxis=:log)
+        p6 = scatter(tsteps_train, pred[6,:], markersize=2, label = "imag current from nn source")
+        p6_log = scatter(tsteps_train, pred[6,:], markersize=2, label = "imag current from nn source", xaxis=:log)
+        
+        plt = plot(p1,p2,p1_log,p2_log,p3,p4, p3_log,p4_log,p5,p6,p5_log,p6_log, layout=(6,2), size = (1000,1000))
+        push!(list_plots, plt)
+        display_plots && display(plt)
+    else
+        p1 = scatter(tsteps_train, pred[1,:], markersize=2, label = "real current prediction")
+        plot!(p1, tsteps, ode_data[1,:],   label = "real current true")
+        plot!(p1, tsteps, avgmodel_data[1,:], label = "real current avg. model")
+        p2 = scatter(tsteps_train, pred[2,:], markersize=2, label = "imag current prediction")
+        plot!(p2, tsteps, ode_data[2,:],  label = "imag current true")
+        plot!(p2, tsteps, avgmodel_data[2,:], label = "imag current avg. model")
+        p3 = scatter(tsteps_train, pred[3,:], markersize=2, label = "real current from inverter")
+        p4 = scatter(tsteps_train, pred[4,:], markersize=2, label = "imag current from inverter")
+        p5 = scatter(tsteps_train, pred[5,:], markersize=2, label = "real current from nn source")
+        p6 = scatter(tsteps_train, pred[6,:], markersize=2, label = "imag current from nn source")
+        plt = plot(p1,p2,p3,p4,p5,p6, layout=(3,2), size = (1000,1000))
+        push!(list_plots, plt)
+        display_plots && display(plt)
+    end 
    
 end
 
@@ -451,17 +490,3 @@ function build_nn(input_dim, output_dim, nn_width, nn_hidden, nn_activation)
     end 
 end 
 
-function find_maxmin_indices(time_series)
-    indices = Int64[]
-    previous = 0.0
-    for (i, y) in enumerate(time_series) 
-        if (i != 1) && i != length(time_series) 
-            s1 = y - time_series[i-1]
-            s2 = time_series[i+1] - y
-            if sign(s1) != sign(s2)
-                push!(indices,i)
-            end 
-        end 
-    end 
-    return indices 
-end 
