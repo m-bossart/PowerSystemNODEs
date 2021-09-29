@@ -17,18 +17,17 @@ include("../models/init_functions.jl")
 include("../models/parameter_utils.jl")
 
 #SIMULATION PARAMETERS
-tspan = (0.0, 1.0)
+tspan = (0.0, 2.0)  #changed from (0.0,2.0)
 abstol = 1e-6
 reltol = 1e-3
-step = 5e-4
-tsteps = tspan[1]:step:tspan[2]
-N = length(tsteps) #for dft
-fs = (N-1)/(tspan[2]-tspan[1])
-freqs = fftfreq(N, fs)
-freqs_pos = freqs[freqs .>= 0] * (2*pi)
-tfault = 0.01
+stepsize = 1e-3
+tsteps = tspan[1]:stepsize:tspan[2]
+tfault = 0.1 
 solver = Rodas4()
-base_system_path = "systems\\base_system.json"
+
+base_system_path = "systems\\base_system_3invs_vsms_20%lossP.json"
+fault_system_path  = "systems\\fault_library_3invs_vsms_20%lossP.json"
+smooth_signal = true  
 
 #SYSTEM PARAMETERS
 #BUG possible power flow issues using 14-bus system due to Fixed Admittance
@@ -36,14 +35,12 @@ base_system_path = "systems\\base_system.json"
 sys = System("cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw")
 source_bus = 2  #TODO Must have single line between source_bus and surrogate_bus?
 surrogate_bus = 16
-devices = [inv_case78] # TODO add in the GFL, SM, VSM, etc.
-Prefchange = [1.0]
+devices =    [inv_case78]  # [inv_gfoll]# [inv_darco_droop]# [inv_case78] #  #     inv_darco_droop doesn't work, can't find the frequency?? 
+Prefchange = [0.5]
 n_devices = 3
-
 
 add_devices_to_surrogatize!(sys, n_devices, surrogate_bus, source_bus)
 to_json(sys,base_system_path , force=true)
-
 
 global sys = System(base_system_path)
 base_sys = System(base_system_path)
@@ -69,13 +66,14 @@ for a in devices
                 dyn_models = [a, b, c, d]
                 for (i,gen) in enumerate(gens)
                     gen_name = get_name(gen)
+                    println("GENERATOR NAMES",gen_name)
                     add_component!(sys, dyn_models[i](gen_name),gen)
                 end
 
                 sim = Simulation!(MassMatrixModel, sys, pwd(), tspan) #Need to initialize before building disturbances
                 disturbances = []
                 disturbances = build_disturbances(sys)
-
+                println(disturbances)
                 for (n,e) in enumerate(disturbances)
                     sim = Simulation!(MassMatrixModel, sys, pwd(), tspan, e)
                     to_json(sys,"systems/full_system.json", force=true)
@@ -88,18 +86,31 @@ for a in devices
                             solver,
                             abstol=abstol,
                             reltol=reltol,
-                            reset_simulation=true,saveat=tsteps);
+                            reset_simulation=false,saveat=tsteps);
+                    sol = read_results(sim)
+                    V_org = get_voltage_magnitude_series(sol,source_bus)[2]
+                    θ_org = get_voltage_angle_series(sol,source_bus)[2]
 
-                    V = get_voltage_magnitude_series(sim,source_bus)[2]
-                    θ = get_voltage_angle_series(sim,source_bus)[2]
-
-                    t = sim.solution.t[1:end-1]
-                    if (sim.solution.retcode == :Success)
+                    tsteps_org = tsteps 
+                    tsteps, V = add_tanh(tsteps_org, V_org)
+                    tsteps, θ = add_tanh(tsteps_org, θ_org)
+                    @show length(tsteps)
+                    t = sol.solution.t[1:end-1]
+                    if (sol.solution.retcode == :Success)
                         global count_stable += 1
-                        plot!(p1, t, V, title = "Voltage magnitude time series source bus",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1)
-                        plot!(p2, t, θ, title = "Voltage angle time series source bus",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1)
-
+                        N = length(tsteps) #for dft
+                        fs = (N-1)/(tsteps[end]-tsteps[1])
+                        freqs = fftfreq(N, fs)
+                        freqs_pos = freqs[freqs .>= 0] * (2*pi)
+                        plot!(p1, t, V_org, title = "Voltage magnitude time series source bus",xlabel="time(s)",ylabel="V(pu)",color=:black, linewidth=1)
+                        plot!(p2, t, θ_org, title = "Voltage angle time series source bus",xlabel="time(s)",ylabel="θ(rad)",color=:black, linewidth=1)
+                        @show fs
+                        @show freqs
+                        @show length(freqs_pos)
                         F_V = fft(V)
+                        @show length(F_V)
+                        @show length([freqs .>= 0][1])
+                        @show length(V)
                         F_V = F_V[freqs .>= 0]
                         F_V = F_V/N
                         F_V[2:end]= F_V[2:end]*2  #/ (2*pi)
@@ -109,7 +120,7 @@ for a in devices
                         F_θ = F_θ[freqs .>= 0]
                         F_θ = F_θ/N
                         F_θ[2:end]= F_θ[2:end]*2 #/ (2*pi)
-                        internal_angle_coefficients = [(-imag(f), real(f)) for f in F_V[2:end]]
+                        internal_angle_coefficients = [(-imag(f), real(f)) for f in F_θ[2:end]]
 
                         inf_source = Source(
                             name = string("source",string(count_stable)),
@@ -122,15 +133,16 @@ for a in devices
                             internal_voltage = V[1],
                             internal_angle =   θ[1],
                         )
-
+                        println("dc voltage offset:", F_V[1])
+                        println("dc angle offset:", F_θ[1])
                         fault_source = PeriodicVariableSource(
                             name = get_name(inf_source),
                             R_th = get_R_th(inf_source),
                             X_th = get_X_th(inf_source),
-                            internal_voltage_bias = abs(F_V[1]),
+                            internal_voltage_bias = real(F_V[1]),
                             internal_voltage_frequencies = freqs_pos[2:end],
                             internal_voltage_coefficients = internal_voltage_coefficients,
-                            internal_angle_bias = abs(F_θ[1]),
+                            internal_angle_bias = real(F_θ[1]),
                             internal_angle_frequencies =  freqs_pos[2:end],
                             internal_angle_coefficients =internal_angle_coefficients ,
                         )
@@ -150,7 +162,6 @@ for a in devices
     end
 end
 
-
 #Display and Summarize Time Domain Signals
 p = plot(p1,p2, layout= (2,1))
 display(p)
@@ -162,20 +173,27 @@ print(count_stable, " stable runs\n")
 print(count_unstable, " unstable runs\n")
 
 if false  #Check that reconstructed time domain signal matches
+    #t_reconstruct= 0:stepsize:(tspan[2]-tfault)   #CHANGED
     p3 = plot()
+    p4 = plot()
     fault_sources = get_components(PeriodicVariableSource, sys_faults)
     for fault_source in fault_sources
-        V_reconstruct = zeros(length(tsteps))
+        t_reconstruct = tsteps#tspan[1]:(stepsize*10):tspan[2]
+        V_reconstruct = zeros(length(t_reconstruct))
+        dV_reconstruct = zeros(length(t_reconstruct))
         V_reconstruct = V_reconstruct .+ get_internal_voltage_bias(fault_source)
         retrieved_freqs = get_internal_voltage_frequencies(fault_source)
         coeffs = get_internal_voltage_coefficients(fault_source)
-        for (i,f) in enumerate(retrieved_freqs)
-            V_reconstruct += coeffs[i][1]* sin.(f .*2 .* pi .* tsteps)
-            V_reconstruct += coeffs[i][2]* cos.(f .*2 .* pi .* tsteps)
+        for (i,ω) in enumerate(retrieved_freqs)
+            V_reconstruct += coeffs[i][1]* sin.(ω.* t_reconstruct)
+            V_reconstruct += coeffs[i][2]* cos.(ω.* t_reconstruct)
+            dV_reconstruct += ω * coeffs[i][1]*cos.(ω.* t_reconstruct) -  ω * coeffs[i][2]*sin.(ω.* t_reconstruct)
         end
-        plot!(p3,tsteps, V_reconstruct, title="reconstructed voltage mag")
+        plot!(p3,t_reconstruct, V_reconstruct, title="reconstructed voltage mag")
+        plot!(p4, t_reconstruct, dV_reconstruct, title = "voltage mag derivative",ylim=(-1,1))
+
     end
-    display(p3)
+    display(plot(p3,p4, layout=(2,1)))
 end
 
-to_json(sys_faults,"systems/fault_library.json", force=true)
+to_json(sys_faults,fault_system_path, force=true)
