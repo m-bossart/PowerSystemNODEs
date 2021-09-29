@@ -47,6 +47,9 @@ Vmag_bus = get_voltage_magnitude_series(sol_full, 2)
 Vmag_internal = get_state_series(sol_full, ("source1",:Vt))
 θ_internal = get_state_series(sol_full, ("source1",:θt))
 
+Vr_scale = 1/(maximum(Vmag_bus[2].*cos.(θ_bus[2])) - minimum(Vmag_bus[2].*cos.(θ_bus[2])))
+Vi_scale = 1/(maximum(Vmag_bus[2].*sin.(θ_bus[2])) - minimum(Vmag_bus[2].*sin.(θ_bus[2])))
+
 p1 , p2 = plot_pvs(tsteps, get_dynamic_injector(active_source), :lin)
 p1_log, p2_log = plot_pvs(tsteps, get_dynamic_injector(active_source), :log)
 plot!(p1, Vmag_bus, label="bus voltage")

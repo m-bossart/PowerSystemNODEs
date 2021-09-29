@@ -284,9 +284,13 @@ function gfm_nn(dx,x,p,t)
       (vi_filter - Vi_pcc - rg*ii_filter - ω_sys*lg*ir_filter)
 
      #NN CURRENT SOURCE (NN input includes ΔV at terminal only)
-     dx[i__ir_nn] = nn([Vr_pcc - Vr0, Vi_pcc - Vi0  ], p_nn)[1] * nn_scale
-     dx[i__ii_nn] = nn([Vr_pcc - Vr0, Vi_pcc - Vi0  ], p_nn)[2] * nn_scale
-
+     if(t<0.1)
+      dx[i__ir_nn] = 0.0
+      dx[i__ii_nn] = 0.0
+     else 
+      dx[i__ir_nn] = nn([(Vr_pcc - Vr0)*Vr_scale, (Vi_pcc - Vi0)*Vi_scale], p_nn)[1] * nn_scale
+      dx[i__ii_nn] = nn([(Vr_pcc - Vr0)*Vr_scale, (Vi_pcc - Vi0)*Vi_scale], p_nn)[2] * nn_scale
+     end 
      #ALEGRAIC STATE - OUTPUT CURRENT
      dx[i__ir_out] =  ir_out - ir_nn - ir_filter
      dx[i__ii_out] =  ii_out - ii_nn - ii_filter
