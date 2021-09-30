@@ -36,8 +36,8 @@ println("time to solve train system for generating truth data:")
         solver,
         abstol = abstol,
         reltol = reltol,
-        reset_simulation=false, saveat=tsteps );  #saveat=tsteps
-#tsteps = sim.solution.t
+        reset_simulation=false, saveat=tsteps );
+#tsteps = sim.solution.t  #to use the solver time steps, uncomment this line and get rid of saveat above 
 
 sol_full = read_results(sim_full)
 
@@ -107,7 +107,8 @@ plot!(p4_log, tsteps, avgmodel_data[2,:], markersize=1, label = "Ii simple model
 
 
 ##### INITIALIZE THE GFM+NN SURROGATE AND BUILD THE TRAINING PROBLEM ###########
-nn_scale = 1
+nn_org = nn_scale 
+nn_scale = 0
 
 nn = build_nn(2, 2, nn_width, nn_hidden, nn_activation)
 p_nn = initial_params(nn)
@@ -125,15 +126,24 @@ gfm_nn(dx,res_nn.zero,p_all,0.0)
 M = MassMatrix(21, 2)
 gfm_nn_func = ODEFunction(gfm_nn, mass_matrix = M)
 gfm_nn_prob = ODEProblem(gfm_nn_func, x₀_nn, tspan, p_all)
-sol = solve(gfm_nn_prob, solver, vars =[22], abstol=abstol, reltol=reltol,  saveat=tsteps )
+sol = solve(gfm_nn_prob, solver, abstol=abstol, reltol=reltol,  saveat=tsteps )
 plot!(p3, sol.t,sol[22,:], label = "Ir simple model - hand")
 plot!(p4, sol.t, sol[23,:], label = "Ii simple model - hand")
 
-p5 = plot(p1,p2,p1_log,p2_log,p3,p4,p3_log,p4_log, layout = (4,2), size = (1000,1000))
+nn_scale = nn_org
+
+#UNCOMMENT TO INCLUDE THE UNTRAINED SURROGATE IN THE COMPARISON
+sol = solve(gfm_nn_prob, solver, abstol=abstol, reltol=reltol,  saveat=tsteps )
+#plot!(p3, sol.t,sol[22,:], label = "Ir surrogate (untrained)")
+#plot!(p4, sol.t, sol[23,:], label = "Ii surrogate (untrained)")
+
+if (plot_log)
+    p5 = plot(p1,p2,p1_log,p2_log,p3,p4,p3_log,p4_log, layout = (4,2))
+else 
+    p5 = plot(p1,p2,p3,p4, layout = (2,2))
+end
 display_plots && display(p5)
 
-@show nn_scale
-nn_scale = 1.0
 ##
 ################################# TRAINING #########################################
 u₀ = x₀_nn  #stays same for a full training disturbance. 
@@ -151,9 +161,9 @@ function loss_gfm_nn(θ)
     pred = predict_gfm_nn(θ)
     #To introduce batching, randomly select indices to calculate loss for
     if(loss_function == "mae")
-        loss = (mae(pred[1,batch], ode_data_train[1,batch]) / Ir_scale)/2 +
-            (mae(pred[2,batch], ode_data_train[2,batch]) / Ii_scale)/2  
-    println("number of points considered in loss function:", length(pred[1,batch]))
+        loss = (mae(pred[1,:], ode_data_train[1,:]) / Ir_scale)/2 +
+            (mae(pred[2,:], ode_data_train[2,:]) / Ii_scale)/2  
+
     elseif(loss_function == "mse")
         loss = (mse(pred[1,:], ode_data_train[1,:]) / Ir_scale)/2 +
         (mse(pred[2,:], ode_data_train[2,:]) / Ii_scale)/2  
@@ -163,8 +173,8 @@ end
 
 function loss_fromdata(real_solution, predicted_solution)
     if(loss_function == "mae")
-        loss = (mae(predicted_solution[1,batch], real_solution[1,batch]) / Ir_scale)/2 + 
-            (mae(predicted_solution[2,batch], real_solution[2,batch]) / Ii_scale)/2  
+        loss = (mae(predicted_solution[1,:], real_solution[1,:]) / Ir_scale)/2 + 
+            (mae(predicted_solution[2,:], real_solution[2,:]) / Ii_scale)/2  
     elseif(loss_function == "mse")
         loss = (mse(predicted_solution[1,:], real_solution[1,:]) / Ir_scale)/2 + 
             (mse(predicted_solution[2,:], real_solution[2,:]) / Ii_scale)/2 
@@ -176,21 +186,21 @@ list_plots = []
 list_losses = Float64[]
 list_θ = []
 surr_data = []
-list_gradnorm = Float64[]
+#list_gradnorm = Float64[]
 iteration = 0
 
 #Callback run extra time at end if you reach maxiters 
 cb_gfm_nn = function(p, l, pred, θ) 
     #DISPLAY LOSS AND PLOT
     global iteration += 1 
-    grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
-    push!(list_gradnorm, grad_norm)
+    #grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
+    #push!(list_gradnorm, grad_norm)
     push!(list_losses,l)
     push!(list_θ, θ[1:end]) #need[1:end], not sure why
     println("iteration:  ", iteration, "  loss: ", l)
-    cb_gfm_nn_plot(pred, false)
+    cb_gfm_nn_plot(pred, plot_log)
 
-    #UPDATE REFERENCES AND INITIAL CONDITIONS - if we don't do the NL solve, might not need any of this? 
+    #UPDATE REFERENCES AND INITIAL CONDITIONS - 
 #=     x₀, refs_int, Vr0_int, Vi0_int = initialize_sys!(sys_init, "gen1") #TODO don't need this each time
     global refs = refs_int
     global Vr0 = Vr0_int
@@ -202,7 +212,11 @@ cb_gfm_nn = function(p, l, pred, θ)
     @assert converged(res)
     global u₀ = res.zero =#
     length_curr = length(ode_data_train[1,:])
-    global batch = rand(range(1,length=length_curr),Int(length_curr/5))
+    if (batching_factor == 1)
+        global batch = range(1,length=length_curr)
+    else
+        global batch = rand(range(1,length=length_curr),Int(length_curr/batching_factor))
+    end 
     (l > lb_loss) && return false  
     return true 
 end
@@ -224,12 +238,12 @@ for range in ranges
     global iteration = 0 
 
 end 
-#Use the full range for results 
+
+#Use the full range for reporting results 
 ode_data_train = ode_data
 tsteps_train = tsteps
 
 println("avg model achieves loss of ", loss_fromdata(ode_data, avgmodel_data))
-
 println("surr model achieves loss of ", loss_gfm_nn(list_θ[argmin(list_losses)])[1]) #if maxiters is hit, last entry might not be lowest loss
 surr_data = predict_gfm_nn(list_θ[argmin(list_losses)])
 println("surr model achieves loss of ", loss_fromdata(ode_data, surr_data))
@@ -245,7 +259,7 @@ end
 gif(anim, string("figs/", label ,"_train.gif"), fps = 100)
 png(plot(list_losses), string("figs/",label,"_loss.png"))
 writedlm( string("figs/", label ,"_loss.txt"), list_losses, ',')
-png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png")) 
+#png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png")) 
 png(list_plots[end], string("figs/", label ,"_final.png"))
 png(pcomp, string("figs/", label ,"_comp.png"))
 writedlm( string("figs/", label ,"_comp.txt"),  [tsteps'; ode_data; surr_data;avgmodel_data]', ',')
