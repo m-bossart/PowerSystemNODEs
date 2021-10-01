@@ -288,8 +288,8 @@ function gfm_nn(dx,x,p,t)
       dx[i__ir_nn] = 0.0
       dx[i__ii_nn] = 0.0
      else 
-      dx[i__ir_nn] = nn([(Vr_pcc - Vr0)*Vr_scale, (Vi_pcc - Vi0)*Vi_scale], p_nn)[1] * nn_scale
-      dx[i__ii_nn] = nn([(Vr_pcc - Vr0)*Vr_scale, (Vi_pcc - Vi0)*Vi_scale], p_nn)[2] * nn_scale
+      dx[i__ir_nn] = nn([(Vr_pcc - Vr0)*Vr_scale, (Vi_pcc - Vi0)*Vi_scale, ir_nn, ii_nn ], p_nn)[1] * nn_scale
+      dx[i__ii_nn] = nn([(Vr_pcc - Vr0)*Vr_scale, (Vi_pcc - Vi0)*Vi_scale, ir_nn, ii_nn ], p_nn)[2] * nn_scale
      end 
      #ALEGRAIC STATE - OUTPUT CURRENT
      dx[i__ir_out] =  ir_out - ir_nn - ir_filter

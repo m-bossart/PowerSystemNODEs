@@ -110,7 +110,7 @@ plot!(p4_log, tsteps, avgmodel_data[2,:], markersize=1, label = "Ii simple model
 nn_org = nn_scale 
 nn_scale = 0
 
-nn = build_nn(2, 2, nn_width, nn_hidden, nn_activation)
+nn = build_nn(4, 2, nn_width, nn_hidden, nn_activation) #include currents 
 p_nn = initial_params(nn)
 n_weights_nn = length(p_nn)
 p_all = vcat(p_nn, p_inv, refs, p_fixed, Vr0, Vi0)
