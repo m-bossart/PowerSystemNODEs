@@ -147,6 +147,7 @@ display_plots && display(p5)
 ##
 ################################# TRAINING #########################################
 u₀ = x₀_nn  #stays same for a full training disturbance. 
+batch = range(1,length = group_size)
 
 function predict_gfm_nn(θ) 
     p = vcat(θ, p_inv, refs, p_fixed,  Vr0, Vi0) 
@@ -160,13 +161,14 @@ end
 function loss_gfm_nn(θ)
     pred = predict_gfm_nn(θ)
     #To introduce batching, randomly select indices to calculate loss for
+    @show batch
     if(loss_function == "mae")
-        loss = (mae(pred[1,:], ode_data_train[1,:]) / Ir_scale)/2 +
-            (mae(pred[2,:], ode_data_train[2,:]) / Ii_scale)/2  
+        loss = (mae(pred[1,batch], ode_data_train[1,batch]) / Ir_scale)/2 +
+            (mae(pred[2,batch], ode_data_train[2,batch]) / Ii_scale)/2  
 
     elseif(loss_function == "mse")
-        loss = (mse(pred[1,:], ode_data_train[1,:]) / Ir_scale)/2 +
-        (mse(pred[2,:], ode_data_train[2,:]) / Ii_scale)/2  
+        loss = (mse(pred[1,batch], ode_data_train[1,batch]) / Ir_scale)/2 +
+        (mse(pred[2,batch], ode_data_train[2,batch]) / Ii_scale)/2  
     end
     return loss, pred, θ
 end
@@ -242,24 +244,35 @@ end
 #Use the full range for reporting results 
 ode_data_train = ode_data
 tsteps_train = tsteps
+batch = range(1,length=length(ode_data_train[1,:]))
+
+@show batch
 
 println("avg model achieves loss of ", loss_fromdata(ode_data, avgmodel_data))
-println("surr model achieves loss of ", loss_gfm_nn(list_θ[argmin(list_losses)])[1]) #if maxiters is hit, last entry might not be lowest loss
-surr_data = predict_gfm_nn(list_θ[argmin(list_losses)])
-println("surr model achieves loss of ", loss_fromdata(ode_data, surr_data))
+#if maxiters is hit, last entry might not be lowest loss
+#surr_data = predict_gfm_nn(list_θ[argmin(list_losses)])
+sublist_θ = list_θ[end-maxiters+1:end-1]
+sublist_losses = list_losses[end-maxiters+1:end-1] 
+best_θ = sublist_θ[argmin(sublist_losses)]
+surr_data = predict_gfm_nn(best_θ)
+println("surr model achieves loss of ", loss_gfm_nn(best_θ)[1])
 pcomp = plot_compare(ode_data, avgmodel_data, surr_data)
 display(pcomp)
 
 ############################ SAVING PLOTS AND DATA ####################################
-anim = Animation()
-for plt in list_plots
-    frame(anim, plt)
-end
 
-gif(anim, string("figs/", label ,"_train.gif"), fps = 100)
 png(plot(list_losses), string("figs/",label,"_loss.png"))
 writedlm( string("figs/", label ,"_loss.txt"), list_losses, ',')
 #png(plot(list_gradnorm), string("figs/", label,"_gradnorm.png")) 
 png(list_plots[end], string("figs/", label ,"_final.png"))
 png(pcomp, string("figs/", label ,"_comp.png"))
 writedlm( string("figs/", label ,"_comp.txt"),  [tsteps'; ode_data; surr_data;avgmodel_data]', ',')
+#SAVE BEST θ!
+@save string("figs/",label) best_θ
+
+anim = Animation()
+for plt in list_plots
+    frame(anim, plt)
+end
+
+gif(anim, string("figs/", label ,"_train.gif"), fps = 100)
