@@ -1,38 +1,55 @@
-include("InverterModels.jl")
+include("SurrogateModels.jl")
 
 
 
 
-function get_init_gfm(p, ir_filter, ii_filter)
-    return  (dx, x) -> begin
-            dx[5] = 0
-            x[5] = ir_filter
-            dx[19] = 0
-            x[19] = ii_filter
-            gfm(dx,x,p,0.0)
-            nothing
-        end
-end
-
-function get_init_gfm_nn(p, ir_filter, ii_filter)
+function get_init_vsm_nn_v_2(p, ir_filter, ii_filter)
     return (dx, x) -> begin
                 dx[22] = 0
                 x[22] = ir_filter
                 dx[23] = 0
                 x[23] = ii_filter
-                gfm_nn(dx,x,p,0.0)
+                vsm_nn_v_2(dx,x,p,0.0)
                 nothing
         end
 end
 
-
-function get_init_gfm_nn_states(p, ir_filter, ii_filter)
-    return (dx, x) -> begin
-                dx[24] = 0
-                x[24] = ir_filter
-                dx[25] = 0
-                x[25] = ii_filter
-                gfm_nn_states(dx,x,p,0.0)
-                nothing
+function get_init_vsm_nn_v_3(p, ir_filter, ii_filter)
+        return (dx, x) -> begin
+                    dx[22] = 0
+                    x[22] = ir_filter
+                    dx[23] = 0
+                    x[23] = ii_filter
+                    vsm_nn_v_3(dx,x,p,0.0)
+                    nothing
         end
 end
+    
+
+function get_init_vsm_nn_v_4(p, ir_filter, ii_filter)
+        return (dx, x) -> begin
+                    dx[22] = 0
+                    x[22] = ir_filter
+                    dx[23] = 0
+                    x[23] = ii_filter
+                    vsm_nn_v_4(dx,x,p,0.0)
+                    nothing
+        end
+end
+
+function get_init_vsm_nn_v_5(p, ir_filter, ii_filter)
+        return (dx, x) -> begin
+                    dx[22] = 0
+                    x[22] = ir_filter
+                    dx[23] = 0
+                    x[23] = ii_filter
+                    vsm_nn_v_5(dx,x,p,0.0)
+                    nothing
+        end
+end
+    
+
+
+    
+
+    

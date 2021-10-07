@@ -228,12 +228,15 @@ end
 Makes a Float64 Mass Matrix of ones for the ODEProblem. Takes # of differential and algebraic states
 
 """
-function MassMatrix(n_differential::Integer, n_algebraic::Integer)
-    n_states = n_differential + n_algebraic
+function MassMatrix(n_differential::Integer, n_algebraic::Integer, n_nn_dummy::Integer)
+    n_states = n_differential + n_algebraic + n_nn_dummy
     M = Float64.(zeros(n_states,n_states))
     for i = 1:n_differential 
       M[i,i] = 1.0
     end
+    for i = n_differential+n_algebraic+1:n_states 
+        M[i,i] = 1.0
+      end
     return M
 end
 
@@ -366,17 +369,9 @@ end
 
 #function Initialize(V,θ,Ir,Ii)
 
-function cb_gfm_plot(sol)
-    p1 = scatter(tsteps, sol[5,:], markersize = 2,  xaxis=:log,  label = "real current prediction")
-    plot!(p1, ir_truth, label = "real current true")
-    p2 = scatter(tsteps, sol[19,:], markersize = 2, xaxis=:log, label = "imag current prediction")
-    plot!(p2, ii_truth, label = "imag current true")
-    plt = plot(p1,p2,  layout=(2,1))
-    push!(list_plots, plt)
-    display_plots && display(plt)
-end
 
-function cb_gfm_nn_plot(pred, plot_log::Bool)
+
+function cb_plot(pred, plot_log::Bool)
     if plot_log
         p1 = plot(tsteps_train, pred[1,:], markersize=2, label = "real current prediction")
         plot!(p1, tsteps, ode_data[1,:],   label = "real current true")

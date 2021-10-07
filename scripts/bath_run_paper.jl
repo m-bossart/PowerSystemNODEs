@@ -29,6 +29,16 @@ using Optim
 using GalacticOptim
 using DelimitedFiles
 
+include("../models/constants.jl")
+include("../models/DynamicComponents.jl")
+include("../models/SurrogateModels.jl")
+include("../models/utils.jl")
+include("../models/parameter_utils.jl")
+include("../models/init_functions.jl")
+configure_logging(console_level = Logging.Error)
+
+
+
 train_split = 0.9999
 optimizer = ADAM(0.01)  #BFGS(), Optim.KrylovTrustRegion(),
 solver = Rodas4()       #KenCarp4(), QBDF(), TRBDF2() 
@@ -37,48 +47,77 @@ reltol = 1e-3
 tfault =  0.1
 tspan = (0.0, 2.0)
 steps = 150
+group_size = 150 
 tsteps =  10 .^ (range(log10(tfault), log10(tspan[2]),length= steps))  
 tsteps = tspan[1]:((tspan[2]-tspan[1])/steps):tspan[2]
-group_size = 150 
-batching_factor = 1 #NOT IMPLEMENTED YET 
-lb_loss = 0.000000005
+lb_loss = 0
 nn_width = 5
-maxiters = 5
-nn_hidden = 1 
-nn_activation = gelu  #tanh 
-nn_scale = 1.0  #1e-1, 1e-2
+nn_hidden = 5 
+maxiters = 1000  #Change 
+nn_activation = gelu  
+nn_scale = 1.0 
 plot_log = false 
 display_plots = false   
-loss_function = "mae"  # "mae" 
+loss_function = "mae" 
 
-##
-label = "run1"
-loss_function = "mae"
-nn_hidden = 5 
-nn_width = 5
-group_size = 150
-maxiters = 2000
-optimizer = ADAM(0.01)
+#Voltage is the only external input to the NN, Increase the # of feedback states 
+label = "nn_v_2"
+surr = vsm_nn_v_2
+surr_init = get_init_vsm_nn_v_2
+n_extra = 2 #number of nn outputs 
+M = MassMatrix(21, 2, 0)
+nn = build_nn(4, 2, nn_width, nn_hidden, nn_activation)
 include("train_nn.jl")
 
-label = "run2"
-loss_function = "mae"
-nn_hidden = 5 
-nn_width = 5
-group_size = 75
-maxiters = 1000
-optimizer = ADAM(0.01)
+label = "nn_v_3"
+surr = vsm_nn_v_3
+surr_init = get_init_vsm_nn_v_3
+n_extra = 3 
+M = MassMatrix(21, 2, 1)
+nn = build_nn(5, 3, nn_width, nn_hidden, nn_activation)
 include("train_nn.jl")
 
-label = "run3"
-loss_function = "mae"
-nn_hidden = 5 
-nn_width = 5
-group_size = 25
-maxiters = 333
-optimizer = ADAM(0.01)
+label = "nn_v_4"
+surr = vsm_nn_v_4
+surr_init = get_init_vsm_nn_v_4
+n_extra = 4 
+M = MassMatrix(21, 2, 2)
+nn = build_nn(6, 4, nn_width, nn_hidden, nn_activation)
 include("train_nn.jl")
 
-##
+label = "nn_v_5"
+surr = vsm_nn_v_5
+surr_init = get_init_vsm_nn_v_5
+n_extra = 5
+M = MassMatrix(21, 2, 3)
+nn = build_nn(7, 5, nn_width, nn_hidden, nn_activation) 
+include("train_nn.jl")
 
 
+#= 
+#Voltage and Iode current are external input to the NN, Increase the # of feedback states 
+label = "nn_vi_2"
+surr = vsm_nn_vi_2
+M = MassMatrix(21, 2, 0)
+nn = build_nn(6, 2, nn_width, nn_hidden, nn_activation)
+include("train_nn.jl")
+
+label = "nn_v_3"
+surr = vsm_nn_vi_3
+M = MassMatrix(21, 2, 1)
+nn = build_nn(7, 3, nn_width, nn_hidden, nn_activation) 
+include("train_nn.jl")
+
+label = "nn_v_4"
+surr = vsm_nn_vi_2
+M = MassMatrix(21, 2, 2)
+nn = build_nn(8, 4, nn_width, nn_hidden, nn_activation) 
+include("train_nn.jl")
+
+label = "nn_v_5"
+surr = vsm_nn_vi_2
+M = MassMatrix(21, 2, 3)
+nn = build_nn(9, 5, nn_width, nn_hidden, nn_activation)  
+include("train_nn.jl")
+ =#
+ 

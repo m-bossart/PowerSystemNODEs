@@ -1,10 +1,4 @@
-include("../models/constants.jl")
-include("../models/DynamicComponents.jl")
-include("../models/InverterModels.jl")
-include("../models/utils.jl")
-include("../models/parameter_utils.jl")
-include("../models/init_functions.jl")
-configure_logging(console_level = Logging.Error)
+
 
 ################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DATA#############
 sys_faults = System("systems/fault_library_3invs_vsms_20%lossP.json")
@@ -110,32 +104,33 @@ plot!(p4_log, tsteps, avgmodel_data[2,:], markersize=1, label = "Ii simple model
 nn_org = nn_scale 
 nn_scale = 0
 
-nn = build_nn(4, 2, nn_width, nn_hidden, nn_activation) #include currents 
 p_nn = initial_params(nn)
 n_weights_nn = length(p_nn)
 p_all = vcat(p_nn, p_inv, refs, p_fixed, Vr0, Vi0)
-x₀_nn = vcat(x₀, 0.0, 0.0, x₀[5], x₀[19])
+x₀_surr = zeros(21 + n_extra)
+x₀_surr[1:19] = x₀
+x₀_surr[22:23] =[ x₀[5], x₀[19] ]
 
-h = get_init_gfm_nn(p_all, x₀[5], x₀[19])
-res_nn= nlsolve(h, x₀_nn)
-@assert converged(res_nn)
-dx = similar(x₀_nn)
-gfm_nn(dx,res_nn.zero,p_all,0.0)
+h = surr_init(p_all, x₀[5], x₀[19])
+res_surr= nlsolve(h, x₀_surr)
+@assert converged(res_surr)
+dx = similar(x₀_surr)
+surr(dx,res_surr.zero,p_all,0.0)
 @assert all(isapprox.(dx, 0.0; atol=1e-8))
 
-M = MassMatrix(21, 2)
-gfm_nn_func = ODEFunction(gfm_nn, mass_matrix = M)
-gfm_nn_prob = ODEProblem(gfm_nn_func, x₀_nn, tspan, p_all)
-sol = solve(gfm_nn_prob, solver, abstol=abstol, reltol=reltol,  saveat=tsteps )
+
+surr_func = ODEFunction(surr, mass_matrix = M)
+surr_prob = ODEProblem(surr_func, x₀_surr, tspan, p_all)
+sol = solve(surr_prob, solver, abstol=abstol, reltol=reltol,  saveat=tsteps )
 plot!(p3, sol.t,sol[22,:], label = "Ir simple model - hand")
 plot!(p4, sol.t, sol[23,:], label = "Ii simple model - hand")
 
 nn_scale = nn_org
 
 #UNCOMMENT TO INCLUDE THE UNTRAINED SURROGATE IN THE COMPARISON
-sol = solve(gfm_nn_prob, solver, abstol=abstol, reltol=reltol,  saveat=tsteps )
-#plot!(p3, sol.t,sol[22,:], label = "Ir surrogate (untrained)")
-#plot!(p4, sol.t, sol[23,:], label = "Ii surrogate (untrained)")
+sol = solve(surr_prob, solver, abstol=abstol, reltol=reltol,  saveat=tsteps )
+plot!(p3, sol.t,sol[22,:], label = "Ir surrogate (untrained)")
+plot!(p4, sol.t, sol[23,:], label = "Ii surrogate (untrained)")
 
 if (plot_log)
     p5 = plot(p1,p2,p1_log,p2_log,p3,p4,p3_log,p4_log, layout = (4,2))
@@ -146,43 +141,28 @@ display_plots && display(p5)
 
 ##
 ################################# TRAINING #########################################
-u₀ = x₀_nn  #stays same for a full training disturbance. 
-batch = range(1,length = group_size)
+u₀ = res_surr.zero   #stays same for a full training disturbance. 
 
-function predict_gfm_nn(θ) 
+function predict_surr(θ) 
     p = vcat(θ, p_inv, refs, p_fixed,  Vr0, Vi0) 
-    _prob = remake(gfm_nn_prob, p=p, u0=u₀)    
+    _prob = remake(surr_prob, p=p, u0=u₀)    
     sol2 = solve(_prob, solver,  abstol=abstol, reltol=reltol, saveat=tsteps_train, 
                 save_idxs=[i__ir_out, i__ii_out, i__ir_filter, i__ii_filter, i__ir_nn, i__ii_nn], #first two for loss function, rest for plotting
                  sensealg = ForwardDiffSensitivity())  
     return Array(sol2)
 end
 
-function loss_gfm_nn(θ)
-    pred = predict_gfm_nn(θ)
-    #To introduce batching, randomly select indices to calculate loss for
-    @show batch
-    if(loss_function == "mae")
-        loss = (mae(pred[1,batch], ode_data_train[1,batch]) / Ir_scale)/2 +
-            (mae(pred[2,batch], ode_data_train[2,batch]) / Ii_scale)/2  
-
-    elseif(loss_function == "mse")
-        loss = (mse(pred[1,batch], ode_data_train[1,batch]) / Ir_scale)/2 +
-        (mse(pred[2,batch], ode_data_train[2,batch]) / Ii_scale)/2  
-    end
+function loss_surr(θ)
+    pred = predict_surr(θ)
+    loss = (mae(pred[1,:], ode_data_train[1,:]) / Ir_scale)/2 +
+            (mae(pred[2,:], ode_data_train[2,:]) / Ii_scale)/2 
     return loss, pred, θ
 end
 
 function loss_fromdata(real_solution, predicted_solution)
-    if(loss_function == "mae")
-        loss = (mae(predicted_solution[1,:], real_solution[1,:]) / Ir_scale)/2 + 
-            (mae(predicted_solution[2,:], real_solution[2,:]) / Ii_scale)/2  
-    elseif(loss_function == "mse")
-        loss = (mse(predicted_solution[1,:], real_solution[1,:]) / Ir_scale)/2 + 
-            (mse(predicted_solution[2,:], real_solution[2,:]) / Ii_scale)/2 
-    end 
+    loss = (mae(predicted_solution[1,:], real_solution[1,:]) / Ir_scale)/2 + 
+        (mae(predicted_solution[2,:], real_solution[2,:]) / Ii_scale)/2  
 end 
-    
 
 list_plots = []
 list_losses = Float64[]
@@ -192,7 +172,7 @@ surr_data = []
 iteration = 0
 
 #Callback run extra time at end if you reach maxiters 
-cb_gfm_nn = function(p, l, pred, θ) 
+cb_ = function(p, l, pred, θ) 
     #DISPLAY LOSS AND PLOT
     global iteration += 1 
     #grad_norm = Statistics.norm(ForwardDiff.gradient(x -> first(loss_gfm_nn(x)),θ), 2) #Better to have a training infrastructure that saves and passes gradient instead of re-calculating 
@@ -200,42 +180,20 @@ cb_gfm_nn = function(p, l, pred, θ)
     push!(list_losses,l)
     push!(list_θ, θ[1:end]) #need[1:end], not sure why
     println("iteration:  ", iteration, "  loss: ", l)
-    cb_gfm_nn_plot(pred, plot_log)
+    cb_plot(pred, plot_log)
 
-    #UPDATE REFERENCES AND INITIAL CONDITIONS - 
-#=     x₀, refs_int, Vr0_int, Vi0_int = initialize_sys!(sys_init, "gen1") #TODO don't need this each time
-    global refs = refs_int
-    global Vr0 = Vr0_int
-    global Vi0 = Vi0_int
-    p = vcat(θ, p_inv, refs, p_fixed, Vr0, Vi0)  
-    x₀_nn = vcat(x₀, 0.0, 0.0,  x₀[5], x₀[19])
-    f = get_init_gfm_nn(p, x₀[5], x₀[19])
-    global res = nlsolve(f, x₀_nn)
-    @assert converged(res)
-    global u₀ = res.zero =#
-    length_curr = length(ode_data_train[1,:])
-    if (batching_factor == 1)
-        global batch = range(1,length=length_curr)
-    else
-        global batch = rand(range(1,length=length_curr),Int(length_curr/batching_factor))
-    end 
     (l > lb_loss) && return false  
     return true 
 end
 
-
 ranges = extending_ranges(steps, group_size)
 
-list_losses_best = []
-list_θ_best = []
 p_start = p_nn
 for range in ranges
     global ode_data_train = ode_data[:,range]
     global tsteps_train = tsteps[range]
-    res_gfm = DiffEqFlux.sciml_train(loss_gfm_nn, p_start, optimizer, GalacticOptim.AutoForwardDiff(), cb=cb_gfm_nn, maxiters=maxiters )
+    res_gfm = DiffEqFlux.sciml_train(loss_surr, p_start, optimizer, GalacticOptim.AutoForwardDiff(), cb=cb_, maxiters=maxiters )
     global p_start = res_gfm.u  
-    push!(list_θ_best, p_start) 
-    push!(list_losses_best, res_gfm.minimum) 
     println("finished with range:", range)
     global iteration = 0 
 
@@ -244,18 +202,14 @@ end
 #Use the full range for reporting results 
 ode_data_train = ode_data
 tsteps_train = tsteps
-batch = range(1,length=length(ode_data_train[1,:]))
 
-@show batch
 
-println("avg model achieves loss of ", loss_fromdata(ode_data, avgmodel_data))
-#if maxiters is hit, last entry might not be lowest loss
-#surr_data = predict_gfm_nn(list_θ[argmin(list_losses)])
+println("avg model achieves loss of ", loss_fromdata(ode_data, avgmodel_data)) #if maxiters is hit, last entry might not be lowest loss
 sublist_θ = list_θ[end-maxiters+1:end-1]
 sublist_losses = list_losses[end-maxiters+1:end-1] 
 best_θ = sublist_θ[argmin(sublist_losses)]
-surr_data = predict_gfm_nn(best_θ)
-println("surr model achieves loss of ", loss_gfm_nn(best_θ)[1])
+surr_data = predict_surr(best_θ)
+println("surr model achieves loss of ", loss_surr(best_θ)[1])
 pcomp = plot_compare(ode_data, avgmodel_data, surr_data)
 display(pcomp)
 

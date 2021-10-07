@@ -20,7 +20,7 @@ using ForwardDiff
 using Statistics
 using GalacticOptim
 include("../models/DynamicComponents.jl")
-include("../models/InverterModels.jl")
+include("../models/SurrogateModels.jl")
 include("../models/utils.jl")
 include("../models/parameter_utils.jl")
 include("../models/init_functions.jl")
