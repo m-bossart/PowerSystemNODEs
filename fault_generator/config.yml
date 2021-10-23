@@ -1,0 +1,53 @@
+CompleteSystemPath: "files/omib.json"
+FaultType: "BranchTrip"
+SimulationParameters:
+  TspanStart: 0.0
+  TspanEnd: 2.0
+  StepSize: 0.001
+  AbsTol: 0.000001
+  RelTol: 0.001
+  TFault: 0.1
+  DtMax: 0.02
+  Solver: "Rodas4"
+
+FaultParameters:
+    BranchTrip:
+      Time: 1.0
+      BranchName: "BUS 1-BUS 2-i_1"
+    BranchImpedanceChange:
+      Time:
+      BranchType:
+      BranchName:
+      Multiplier:
+    NetworkSwitch:
+      Time:
+      YbusRectangular:
+    ControlReferenceChange:
+      Time:
+      Device:
+      Signal:
+      RefValue:
+    SourceBusVoltageChange:
+      Time:
+      Device:
+      SignalIndex:
+      RefValue:
+    GeneratorTrip:
+      Time:
+      Device:
+    LoadChange:
+      Time:
+      Device:
+      Signal:
+      RefValue:
+    LoadTrip:
+      Time:
+      Device:
+
+
+OutputParameters:
+  outputfile:
+  bus_number: [] # buses to export output for
+  BusData: # Vm, Vtheta \theta  
+  DynamicDevice: #[(name, symbol)] # 
+  DynamicData:  []
