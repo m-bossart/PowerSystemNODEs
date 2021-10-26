@@ -34,21 +34,18 @@ include("../src/parameter_utils.jl")
 include("../src/visualize.jl")
 configure_logging(console_level = Logging.Error)
 
-sys_train = System("systems/sys_train.json")
-train_data = TrainData(sys_train, "data/train_input_data")  #Pass the system as a path. 
-train_params = JSON3.read(read("data/default_NODE_params.json"), NODETrainParams)
-#train_params.export_mode = 3 
+train_params = JSON3.read(read("train_parameters/default_NODE_params.json"), NODETrainParams)
 
-ll = train(train_params, train_data)
+ll = train(train_params) #, train_data)        #only input is train_params
 
-p = visualize_training(train_params, train_data)    #pass paths,    
-
+#p = visualize_training(train_params)    #only input is train_params, give an error if you can't find the folder where the results should be.    
+                                         
 ## Example
 # import("my_functions.jl")
 
-# train_data = TrainData(sys_train, "test.arrow")
+
 # train_params = UODETrainParams(Args[1])
 
-# status = train(train_params, train_data)
+# status = train(train_params)
 ################################################################ SLURM FILE 
 # julia --project params_file.json

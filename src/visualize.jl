@@ -1,4 +1,4 @@
-function visualize_training(params::NODETrainParams, data::TrainData)
+function visualize_training(params::NODETrainParams)
     dump(params)
     df_output = DataFrame(Arrow.Table(joinpath(params.export_file_path, "outputdata")))
     df_input = DataFrame(Arrow.Table(data.faults_results_dir))

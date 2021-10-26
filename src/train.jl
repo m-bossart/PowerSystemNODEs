@@ -1,5 +1,12 @@
-
-mutable struct NODETrainParams  #add train id. Name the folder based on id 
+"""
+# Fields
+- `train_id = Int64`: id for the training instance, used for naming output data folder.
+- `solver = ["Rodas4"]`: solver used for the NODE problem.
+- `solver_tols =  Tuple{Float64, Float64}`: solver tolerances (abstol, reltol).
+**Note:** Include a note 
+"""
+mutable struct NODETrainParams  
+    train_id::Int64
     solver::String
     solver_tols::Tuple{Float64, Float64}
     sensealg::String
@@ -11,7 +18,7 @@ mutable struct NODETrainParams  #add train id. Name the folder based on id
     lb_loss::Float64  #default to 0 
     batching::Bool
     batch_factor::Float64 #multiply the size of the current training range by batch_factor to get the number of points.
-    batch_seed::Int64     #re-create results?  #ONLY NEED ONE SEED 
+    rng_seed::Int64     #re-create results?  #ONLY NEED ONE SEED 
     groupsize_steps::Int64  #the size of the extending timespan         
     groupsize_faults::Int64 #how many faults should be trained on simultaneously, default to 1. 
     loss_function_weights::Tuple{Float64, Float64}
@@ -25,14 +32,17 @@ mutable struct NODETrainParams  #add train id. Name the folder based on id
     node_layers::Int64
     node_width::Int64
     node_activation::String
-    node_seed::Int64
-    export_mode::Int64
-    export_file_path::String
+    output_mode::Int64
+    base_path::String
+    input_data_path::String
+    output_data_path::String
+    verify_psid_node_off::Bool
 end
 
 StructTypes.StructType(::Type{NODETrainParams}) = StructTypes.Struct()
 
 function NODETrainParams(;
+    train_id = 1,
     solver = "Rodas4",
     solver_tols = (1e-6, 1e-9),
     sensealg = "ForwardDiffSensitivity",
@@ -44,7 +54,7 @@ function NODETrainParams(;
     lb_loss = 0.0,
     batching = false,
     batch_factor = 1.0,
-    batch_seed = 1234,
+    rng_seed = 1234,
     groupsize_steps = 55,
     groupsize_faults = 1,
     loss_function_weights = (0.5, 0.5),
@@ -58,13 +68,16 @@ function NODETrainParams(;
     node_layers = 2,
     node_width = 2,
     node_activation = "relu",
-    node_seed = 1234,
     export_mode = 3,
-    export_file_path = joinpath(pwd(), "data"),
+    base_path = pwd() ,
+    input_data_path = joinpath(base_path, "input_data"), 
+    output_data_path = joinpath(base_path, "output_data"),
+    verify_psid_node_off = true,
 )
 
     #HERE IS THE LOGIC OF FILLING IN SOME OF THE PARAMETERS THAT MIGHT NOT MAKE SENSE       
     NODETrainParams(
+        train_id,
         solver,
         solver_tols,
         sensealg,
@@ -76,7 +89,7 @@ function NODETrainParams(;
         lb_loss,
         batching,
         batch_factor,
-        batch_seed,
+        rng_seed,
         groupsize_steps,
         groupsize_faults,
         loss_function_weights,
@@ -90,30 +103,26 @@ function NODETrainParams(;
         node_layers,
         node_width,
         node_activation,
-        node_seed,
         export_mode,
-        export_file_path,
+        base_path,
+        input_data_path,
+        output_data_path,
+        verify_psid_node_off,
     )
 end
 
-struct TrainData
-    sys::System
-    faults_results_dir::String
+function read_input_data(pvs, d)
+    id = get_name(pvs)
+    tsteps = Float64.(d[id][:tsteps])
+    i_ground_truth = vcat(Float64.(d[id][:ir_ground_truth])', Float64.(d[id][:ii_ground_truth])')
+    i_node_off = vcat(Float64.(d[id][:ir_node_off])', Float64.(d[id][:ii_node_off])')
+    p_ode = Float64.(d[id][:p_ode])
+    x₀ = Float64.(d[id][:x₀])
+    p_V₀ =  Float64.(d[id][:V₀])
+    return id, tsteps, i_ground_truth, i_node_off, p_ode, x₀, p_V₀
 end
 
-function read_data(pvs, df)
-    df_row = df[df.id .== get_name(pvs), :]     #add a warning in case data doesn't match 
-    id = df_row[1, :id]
-    tsteps = df_row[1, :tsteps]
-    i_true = vcat(df_row[1, :ir_true]', df_row[1, :ii_true]')
-    i_ver = vcat(df_row[1, :ir_ver]', df_row[1, :ii_ver]')
-    p_ode = df_row[1, :p_ode]
-    x₀ = df_row[1, :x₀]
-    p_V₀ = df_row[1, :V₀]
-    return id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀
-end
-
-function train(params::NODETrainParams, data::TrainData)
+function train(params::NODETrainParams)
     #INSTANTIATE 
     sensealg = instantiate_sensealg(params)
     solver = instantiate_solver(params)
@@ -123,39 +132,40 @@ function train(params::NODETrainParams, data::TrainData)
     !(params.optimizer_adjust == "nothing") &&
         (optimizer_adjust = instantiate_optimizer_adjust(params))
 
-    #READ DATA AND INPUT SYSTEM 
-    df = DataFrame(Arrow.Table(data.faults_results_dir))    #change to dictionary 
-    pvss = collect(get_components(PeriodicVariableSource, data.sys))
+    #READ INPUT DATA AND SYSTEM
+    sys = System(joinpath(params.input_data_path,"system.json"))
+    d = JSON3.read(read(joinpath(params.input_data_path,"data.json")),Dict{String, Dict{Symbol, Any}})
+    pvss = collect(get_components(PeriodicVariableSource, sys))
 
     #TRAIN SEQUENTIALLY 
     local min_θ, res, output_data #res = nothing - remove local 
     output_data = []
     min_θ = initial_params(nn)
     for pvs in pvss
-        @show min_θ[1]
+        @show min_θ[1:4]
         res, output_data =
-            train(min_θ, params, sensealg, solver, optimizer, nn, M, df, pvs, output_data)
+            train(min_θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_data)
         min_θ = copy(res.u)
     end
 
     #TRAIN ADJUSTMENTS (TO DO)
 
-    (params.export_mode == 1) && push!(output_data, (min_θ, res.minimum))   #export level = 1, only save final parameters and loss. 
+    #(params.output_mode == 1) && push!(output_data, (min_θ, res.minimum))   #export level = 1, only save final parameters and loss. 
 
-    capture_output(output_data, params.export_file_path, params.export_mode)
+    capture_output(output_data, params.output_data_path, params.output_mode)
 
     return res
 end
 
-function train(θ, params, sensealg, solver, optimizer, nn, M, df, pvs, output_data) #move 159-168
+function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_data) #move 159-168 outside of train
     #READ FAULT DATA FOR THE CURRENT PVS 
-    id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_data(pvs, df)
+    id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)
 
     #DEFINE FUNCTIONS OF TIME FOR THE CURRENT PVS
     Vm, Vθ = Source_to_function_of_time(pvs)
     surr = instantiate_surr(params, nn, Vm, Vθ)
 
-    #DEFINE SCALE FACTORS FOR THE CURRENT PVS , REMOVE 
+    #DEFINE SCALE FACTORS FOR THE CURRENT PVS , TODO  REMOVE 
     Vr_scale =
         1 / (
             maximum(Vm.(tsteps) .* cos.(Vθ.(tsteps))) -
@@ -194,7 +204,8 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, df, pvs, output_d
         reltol = params.solver_tols[2],
         saveat = tsteps,
     )
-    @assert mae(sol[22, :], i_ver[1, :]) < 5e-5
+    @assert  mae(sol[22, :], i_ver[1, :]) < 5e-5
+
 
     #PREPARE THE SURROGATE FOR TRAINING  
     p_scale = [Vr_scale, Vi_scale, params.node_output_scale]
@@ -225,7 +236,7 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, df, pvs, output_d
         pred_function,
     )
 
-    try
+    
         #TRAIN ON A SINGLE FAULT USING EXTENDING TIME RANGES.
         datasize = length(tsteps)
         ranges = extending_ranges(datasize, params.groupsize_steps)
@@ -233,7 +244,7 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, df, pvs, output_d
         min_θ = θ     #Copy? Equal? 
         range_count = 1
         for range in ranges
-            @show min_θ[1]
+            @show min_θ[1:4]
             i_curr = i_true[:, range]
             t_curr = tsteps[range]
             train_loader = Flux.Data.DataLoader(
@@ -249,7 +260,7 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, df, pvs, output_d
             cb = instantiate_cb!(
                 output_data,
                 params.lb_loss,
-                params.export_mode,
+                params.output_mode,
                 id,
                 range_count,
             )
@@ -262,12 +273,13 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, df, pvs, output_d
                 cb = cb,
             )
             min_θ = copy(res.u)
-            @show min_θ[1]
+            @show min_θ[1:4]
             @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
             @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
         end
         @show min_θ
         return res, output_data
+    try
     catch e
         return 0
     end

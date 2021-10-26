@@ -26,6 +26,7 @@ sys_train, sys_test = build_train_test(sys_faults, sys_full, 2, train_split, add
 @info "training set size:", length(collect(get_components(Source, sys_train)))
 @info "test set size:", length(collect(get_components(Source, sys_test)))
 to_json(sys_train, "systems/sys_train.json", force = true)
+to_json(sys_train, "input_data/system.json", force = true)
 to_json(sys_test, "systems/sys_test.json", force = true)
 
 ############################# GENERATE TRUE SOLUTION ###########################
@@ -93,25 +94,28 @@ show_states_initial_value(sim_simp)
 avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
 avgmodel_data = get_total_current_series(sim_simp)
 
-#build dataframe: #Change to dictionary, store as json. 
-df = DataFrame(
+#build dataframe: #Change to dictionary, store as json instead of arrow. 
+#= df = DataFrame(
     :id => [get_name(pvs)],
     :tsteps => [tsteps],
     :ir_true => [ode_data[1, :]],
     :ii_true => [ode_data[2, :]],
-    :ir_ver => [avgmodel_data[1, :]],      #more explicit naming 
+    :ir_ver => [avgmodel_data[1, :]],      
     :ii_ver => [avgmodel_data[2, :]],
     :p_ode => [p_ode],
     :x₀ => [x₀],
     :V₀ => [[Vr0, Vi0]],
-)
-#show(df,allcols=true)
+) =#
 
-open("data/train_input_data", "w") do io
-    Arrow.write(io, df)
+d = Dict{String, Dict{Symbol, Any}}()
+d[get_name(pvs)] = Dict(:tsteps => tsteps, :ir_ground_truth => ode_data[1,:], :ii_ground_truth => ode_data[2,:], :ir_node_off => avgmodel_data[1,:], :ii_node_off => avgmodel_data[2,:], :p_ode => p_ode, :x₀ =>x₀, :V₀ => [Vr0, Vi0])
+
+
+open("input_data/data.json", "w") do io
+    JSON3.write(io, d)
 end
 
 default_params = NODETrainParams()
-open("data/default_NODE_params.json", "w") do io
+open("train_parameters/default_NODE_params.json", "w") do io
     JSON3.write(io, default_params)
 end
