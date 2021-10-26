@@ -5,7 +5,7 @@
 - `solver_tols =  Tuple{Float64, Float64}`: solver tolerances (abstol, reltol).
 **Note:** Include a note 
 """
-mutable struct NODETrainParams  
+mutable struct NODETrainParams
     train_id::Int64
     solver::String
     solver_tols::Tuple{Float64, Float64}
@@ -69,8 +69,8 @@ function NODETrainParams(;
     node_width = 2,
     node_activation = "relu",
     export_mode = 3,
-    base_path = pwd() ,
-    input_data_path = joinpath(base_path, "input_data"), 
+    base_path = pwd(),
+    input_data_path = joinpath(base_path, "input_data"),
     output_data_path = joinpath(base_path, "output_data"),
     verify_psid_node_off = true,
 )
@@ -114,11 +114,12 @@ end
 function read_input_data(pvs, d)
     id = get_name(pvs)
     tsteps = Float64.(d[id][:tsteps])
-    i_ground_truth = vcat(Float64.(d[id][:ir_ground_truth])', Float64.(d[id][:ii_ground_truth])')
+    i_ground_truth =
+        vcat(Float64.(d[id][:ir_ground_truth])', Float64.(d[id][:ii_ground_truth])')
     i_node_off = vcat(Float64.(d[id][:ir_node_off])', Float64.(d[id][:ii_node_off])')
     p_ode = Float64.(d[id][:p_ode])
     x₀ = Float64.(d[id][:x₀])
-    p_V₀ =  Float64.(d[id][:V₀])
+    p_V₀ = Float64.(d[id][:V₀])
     return id, tsteps, i_ground_truth, i_node_off, p_ode, x₀, p_V₀
 end
 
@@ -133,16 +134,19 @@ function train(params::NODETrainParams)
         (optimizer_adjust = instantiate_optimizer_adjust(params))
 
     #READ INPUT DATA AND SYSTEM
-    sys = System(joinpath(params.input_data_path,"system.json"))
-    d = JSON3.read(read(joinpath(params.input_data_path,"data.json")),Dict{String, Dict{Symbol, Any}})
+    sys = System(joinpath(params.input_data_path, "system.json"))
+    d = JSON3.read(
+        read(joinpath(params.input_data_path, "data.json")),
+        Dict{String, Dict{Symbol, Any}},
+    )
     pvss = collect(get_components(PeriodicVariableSource, sys))
 
     #TRAIN SEQUENTIALLY 
-    local min_θ, res, output_data #res = nothing - remove local 
+    res = nothing
     output_data = []
     min_θ = initial_params(nn)
     for pvs in pvss
-        @show min_θ[1:4]
+        @show min_θ[end]
         res, output_data =
             train(min_θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_data)
         min_θ = copy(res.u)
@@ -204,8 +208,7 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_da
         reltol = params.solver_tols[2],
         saveat = tsteps,
     )
-    @assert  mae(sol[22, :], i_ver[1, :]) < 5e-5
-
+    @assert mae(sol[22, :], i_ver[1, :]) < 5e-5
 
     #PREPARE THE SURROGATE FOR TRAINING  
     p_scale = [Vr_scale, Vi_scale, params.node_output_scale]
@@ -236,49 +239,48 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_da
         pred_function,
     )
 
-    
-        #TRAIN ON A SINGLE FAULT USING EXTENDING TIME RANGES.
-        datasize = length(tsteps)
-        ranges = extending_ranges(datasize, params.groupsize_steps)
-        local min_θ, res #remove local 
-        min_θ = θ     #Copy? Equal? 
-        range_count = 1
-        for range in ranges
-            @show min_θ[1:4]
-            i_curr = i_true[:, range]
-            t_curr = tsteps[range]
-            train_loader = Flux.Data.DataLoader(
-                (i_curr, t_curr),
-                batchsize = Int(floor(length(i_curr[1, :]))),
-            )     #TODO - IMPLEMENT BATCHING
-            optfun = OptimizationFunction(
-                (θ, p, batch, time_batch) -> loss_function(θ, batch, time_batch),
-                GalacticOptim.AutoForwardDiff(),
-            )
-            optprob = OptimizationProblem(optfun, min_θ)
+    #TRAIN ON A SINGLE FAULT USING EXTENDING TIME RANGES.
+    datasize = length(tsteps)
+    ranges = extending_ranges(datasize, params.groupsize_steps)
+    res = nothing
+    min_θ = θ
+    range_count = 1
+    for range in ranges
+        @show min_θ[end]
+        i_curr = i_true[:, range]
+        t_curr = tsteps[range]
+        train_loader = Flux.Data.DataLoader(
+            (i_curr, t_curr),
+            batchsize = Int(floor(length(i_curr[1, :]))),
+        )     #TODO - IMPLEMENT BATCHING
+        optfun = OptimizationFunction(
+            (θ, p, batch, time_batch) -> loss_function(θ, batch, time_batch),
+            GalacticOptim.AutoForwardDiff(),
+        )
+        optprob = OptimizationProblem(optfun, min_θ)
 
-            cb = instantiate_cb!(
-                output_data,
-                params.lb_loss,
-                params.output_mode,
-                id,
-                range_count,
-            )
-            range_count += 1
+        cb = instantiate_cb!(
+            output_data,
+            params.lb_loss,
+            params.output_mode,
+            id,
+            range_count,
+        )
+        range_count += 1
 
-            res = GalacticOptim.solve(
-                optprob,
-                optimizer,
-                ncycle(train_loader, params.maxiters),
-                cb = cb,
-            )
-            min_θ = copy(res.u)
-            @show min_θ[1:4]
-            @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
-            @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
-        end
-        @show min_θ
-        return res, output_data
+        res = GalacticOptim.solve(
+            optprob,
+            optimizer,
+            ncycle(train_loader, params.maxiters),
+            cb = cb,
+        )
+        min_θ = copy(res.u)
+        @show min_θ[end]
+        @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
+        @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
+    end
+    @show min_θ
+    return res, output_data
     try
     catch e
         return 0

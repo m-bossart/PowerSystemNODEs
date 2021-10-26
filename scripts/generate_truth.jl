@@ -108,8 +108,16 @@ avgmodel_data = get_total_current_series(sim_simp)
 ) =#
 
 d = Dict{String, Dict{Symbol, Any}}()
-d[get_name(pvs)] = Dict(:tsteps => tsteps, :ir_ground_truth => ode_data[1,:], :ii_ground_truth => ode_data[2,:], :ir_node_off => avgmodel_data[1,:], :ii_node_off => avgmodel_data[2,:], :p_ode => p_ode, :x₀ =>x₀, :V₀ => [Vr0, Vi0])
-
+d[get_name(pvs)] = Dict(
+    :tsteps => tsteps,
+    :ir_ground_truth => ode_data[1, :],
+    :ii_ground_truth => ode_data[2, :],
+    :ir_node_off => avgmodel_data[1, :],
+    :ii_node_off => avgmodel_data[2, :],
+    :p_ode => p_ode,
+    :x₀ => x₀,
+    :V₀ => [Vr0, Vi0],
+)
 
 open("input_data/data.json", "w") do io
     JSON3.write(io, d)

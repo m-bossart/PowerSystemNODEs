@@ -63,7 +63,7 @@ function instantiate_nn(inputs)
     (inputs.node_feedback_current) && (nn_input += 2)
     nn_output += inputs.node_feedback_states
     nn_input += inputs.node_feedback_states
-
+    Random.seed!(inputs.rng_seed)
     return build_nn(nn_input, nn_output, nn_width, nn_hidden, nn_activation)
 end
 
@@ -144,6 +144,7 @@ end
 function _cb3!(p, l, pred, output_data, lb_loss, id, range_count)
     push!(output_data, (id, range_count, l, p, pred[1, :], pred[2, :]))
     @show l
+    @show p[end]
     (l > lb_loss) && return false
     return true
 end
@@ -151,12 +152,14 @@ end
 function _cb2!(p, l, pred, output_data, lb_loss, id, range_count)
     push!(output_data, (id, range_count, l))
     @show l
+    @show p[end]
     (l > lb_loss) && return false
     return true
 end
 
 function _cb1!(p, l, pred, output_data, lb_loss, id, range_count)
     @show l
+    @show p[end]
     (l > lb_loss) && return false
     return true
 end
