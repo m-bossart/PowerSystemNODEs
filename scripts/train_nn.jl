@@ -16,10 +16,10 @@ using Flux
 using Flux.Losses: mae, mse
 using ForwardDiff
 using Statistics
-using Arrow 
+using Arrow
 using StructTypes
 using JSON3
-using DataFrames 
+using DataFrames
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
@@ -34,16 +34,14 @@ include("../src/parameter_utils.jl")
 include("../src/visualize.jl")
 configure_logging(console_level = Logging.Error)
 
-
 sys_train = System("systems/sys_train.json")
-train_data = TrainData(sys_train, "data/train_input_data")
+train_data = TrainData(sys_train, "data/train_input_data")  #Pass the system as a path. 
 train_params = JSON3.read(read("data/default_NODE_params.json"), NODETrainParams)
-train_params.export_mode = 1 
+#train_params.export_mode = 3 
 
 ll = train(train_params, train_data)
-p = visualize_training(train_params, train_data)
 
-
+p = visualize_training(train_params, train_data)    #pass paths,    
 
 ## Example
 # import("my_functions.jl")
