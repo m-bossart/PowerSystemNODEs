@@ -228,15 +228,12 @@ end
 Makes a Float64 Mass Matrix of ones for the ODEProblem. Takes # of differential and algebraic states
 
 """
-function MassMatrix(n_differential::Integer, n_algebraic::Integer, n_nn_dummy::Integer)
-    n_states = n_differential + n_algebraic + n_nn_dummy
+function MassMatrix(n_differential::Integer, n_algebraic::Integer)
+    n_states = n_differential + n_algebraic 
     M = Float64.(zeros(n_states,n_states))
     for i = 1:n_differential 
       M[i,i] = 1.0
     end
-    for i = n_differential+n_algebraic+1:n_states 
-        M[i,i] = 1.0
-      end
     return M
 end
 

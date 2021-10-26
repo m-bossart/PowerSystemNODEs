@@ -69,7 +69,7 @@ for a in devices
                     println("GENERATOR NAMES",gen_name)
                     add_component!(sys, dyn_models[i](gen_name),gen)
                 end
-
+                #to_json(sys, "14bus_testsystem.json", force=true )
                 sim = Simulation!(MassMatrixModel, sys, pwd(), tspan) #Need to initialize before building disturbances
                 disturbances = []
                 disturbances = build_disturbances(sys)
