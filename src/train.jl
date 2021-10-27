@@ -3,7 +3,40 @@
 - `train_id = Int64`: id for the training instance, used for naming output data folder.
 - `solver = ["Rodas4"]`: solver used for the NODE problem.
 - `solver_tols =  Tuple{Float64, Float64}`: solver tolerances (abstol, reltol).
-**Note:** Include a note 
+- `sensealg = ["ForwardDiffSensitivity"]`: sensitivity algorithm used in training. 
+- `optimizer = ["Adam", "Bfgs"]`: main optimizer used in training. 
+- `optimizer_η = Float64`: Learning rate for Adam (amount by which gradients are discounted before updating weights). Ignored if Adam is not the optimizer.
+- `optimizer_adjust = ["Adam", "Bfgs", "nothing"]`: optimizer used for final adjustments (2nd stage). 
+- `optimizer_adjust_η = Float64`: Learning rate for Adam (amount by which gradients are discounted before updating weights). Ignored if Adam is not the optimizer.
+- `maxiters = Int64`: The maximum possible iterations for the entire training instance. If `lb_loss = 0` and `optimizer = "Adam"` the training should never exit early and maxiters will be hit. 
+    Note that the number of saved data points can exceed maxiters because there is an additional callback at the end of each individual optimization.  
+- `lb_loss = Float64`: If the value of the loss function moves below lb_loss during training, the current optimization ends (current range).
+- `batching = Bool`: If `batching = false` the full set of data points are used for each training step.
+- `batching_factor = Float64`: The number of data points in the current range is multiplied by `batching_factor` to get the size of the batch. Batches of this size are used sequentially in time. 
+    The final batch is used even if it is incomplete.  
+**Note:** BATCHING IS NOT YET IMPLEMENTED
+- `rng_seed = Int64`: Seed for the random number generator used for initializing the NN for reproducibility across training runs.  
+- `groupsize_steps = Int64`: Number of data-points in each extension of the range of data used. 
+- `groupsize_faults = Int64`: Number of data-points in each extension of the range of data used. 
+**Note:** GROUPSIZE_FAULTS NOT YET IMPLEMENTED. NOT NEEDED FOR SINGLE FAULT TRAINING.
+- `loss_function_weights = Tuple{Float64, Float64}`: weights used for loss function `(mae_weight, mse_weight)`. 
+- `loss_function_scale = ["range", "none"]`: Scaling of the loss function.  `"range"`: the range of the real current and imaginary current are used to scale both the mae  
+    and mse portions of the loss function. The goal is to give equal weight to real and imaginary components even if the magnitude of the disturbance differs. `"none"`: no additional scaling applied.
+- `ode_model = ["vsm"]`: The ode model used in conjunction with the NODE during training.
+- `node_input_scale = Float64`: Scale factor on the voltage input to the NODE. Does not apply to other inputs (ie the feedback states).
+- `node_output_scale = Float64`: Scale factor on the current output of the NODE. Does not apply to other outputs (ie the feedback states).
+- `node_inputs = ["voltage"]`: Determines the physical states which are inputs to the NODE. Ideally, only voltage to remain as general as possible. 
+- `node_feedback_states = Int64`: Number of feedback states in the NODE. Does not include the output current states which can be feedback if `node_feedback_current = true`. 
+- `node_feedback_current = Bool`: Determines if current is also a feedback state. 
+- `node_layers = Int64`: Number of hidden layers in the NODE. Does not include the input or output layer.
+- `node_width = Int64`: Number of neurons in each hidden layer. Each hidden layer has the same number of neurons. The width of the input and output layers are determined by the combination of other parameters. 
+- `node_activation = ["relu"]`: Activation function for NODE. The output layer always uses the identity activation.  
+- `output_mode = [1,2,3]`: `1`: do not collect any data during training, only save high-level data related to training and final results `2`: Same as `1`, also save value of loss throughout training.
+    `3`: same as `2`, also save parameters and predictions during training. 
+- `base_path = String`: Directory for training where input data is found and output data is written. 
+- `input_data_path = String`: From `base_path`, the directory for input data.
+- `output_data_path = String`: From `base_path`, the directory for saving output data.
+- `verify_psid_node_off = Bool`: `true`: before training, check that the surrogate with NODE turned off matches the data provided from PSID simulation. 
 """
 mutable struct NODETrainParams
     train_id::String
@@ -14,18 +47,18 @@ mutable struct NODETrainParams
     optimizer_η::Float64
     optimizer_adjust::String
     optimizer_adjust_η::Float64
-    maxiters::Int64   #should this be for the full training or per call to the optimizer
-    lb_loss::Float64  #default to 0 
+    maxiters::Int64
+    lb_loss::Float64
     batching::Bool
-    batch_factor::Float64 #multiply the size of the current training range by batch_factor to get the number of points.
-    rng_seed::Int64     #re-create results?  #ONLY NEED ONE SEED 
-    groupsize_steps::Int64  #the size of the extending timespan         
-    groupsize_faults::Int64 #how many faults should be trained on simultaneously, default to 1. 
+    batch_factor::Float64
+    rng_seed::Int64
+    groupsize_steps::Int64
+    groupsize_faults::Int64
     loss_function_weights::Tuple{Float64, Float64}
-    loss_function_scale::String     #"none", "range" 
+    loss_function_scale::String
     ode_model::String
-    node_input_scale::Float64   #scale on the voltage input only
-    node_output_scale::Float64  #scale on the current output only 
+    node_input_scale::Float64
+    node_output_scale::Float64
     node_inputs::String
     node_feedback_states::Int64
     node_feedback_current::Bool
