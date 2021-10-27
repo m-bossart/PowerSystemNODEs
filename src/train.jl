@@ -93,7 +93,7 @@ function NODETrainParams(;
     loss_function_weights = (0.5, 0.5),
     loss_function_scale = "range",
     ode_model = "vsm",
-    node_input_scale = 1e1,
+    node_input_scale = 10e1,
     node_output_scale = 1.0,
     node_inputs = "voltage",
     node_feedback_states = 0,
@@ -189,40 +189,54 @@ function train(params::NODETrainParams)
     min_θ = initial_params(nn)
     for pvs in pvss
         @show min_θ[end]
-        res, output =
-            train(min_θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output)
+
+        id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)   #READ FAULT DATA FOR THE CURRENT PVS 
+        #DEFINE FUNCTIONS OF TIME FOR THE CURRENT PVS
+        Vm, Vθ = Source_to_function_of_time(pvs)
+        surr = instantiate_surr(params, nn, Vm, Vθ)
+
+        res, output = train(
+            min_θ,
+            params,
+            sensealg,
+            solver,
+            optimizer,
+            nn,
+            M,
+            output,
+            id,
+            tsteps,
+            i_true,
+            i_ver,
+            p_ode,
+            x₀,
+            p_V₀,
+            surr,
+            Vm,
+            Vθ,
+        )
         min_θ = copy(res.u)
     end
-
     #TRAIN ADJUSTMENTS (TO DO)
-    @show output
-    capture_output(output, params.output_data_path, params.train_id)
+    #WRITE "HIGH LEVEL" outputs such as total time, total iterations, etc. (To Do)
 
-    return output
+    capture_output(output, params.output_data_path, params.train_id)
+    return
 end
 
-function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output) #move 159-168 outside of train
-    #READ FAULT DATA FOR THE CURRENT PVS 
-    id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)
+function verify_psid_node_off(surr_prob, params, solver, tsteps, i_ver)
+    sol = solve(
+        surr_prob,
+        solver,
+        abstol = params.solver_tols[1],
+        reltol = params.solver_tols[2],
+        saveat = tsteps,
+    )
+    @assert mae(sol[22, :], i_ver[1, :]) < 5e-5
+end
 
-    #DEFINE FUNCTIONS OF TIME FOR THE CURRENT PVS
-    Vm, Vθ = Source_to_function_of_time(pvs)
-    surr = instantiate_surr(params, nn, Vm, Vθ)
-
-    #DEFINE SCALE FACTORS FOR THE CURRENT PVS , TODO  REMOVE 
-    Vr_scale =
-        1 / (
-            maximum(Vm.(tsteps) .* cos.(Vθ.(tsteps))) -
-            minimum(Vm.(tsteps) .* cos.(Vθ.(tsteps)))
-        )
-    Vi_scale =
-        1 / (
-            maximum(Vm.(tsteps) .* sin.(Vθ.(tsteps))) -
-            minimum(Vm.(tsteps) .* sin.(Vθ.(tsteps)))
-        )
-
-    #FIND INITIAL CONDITIONS FOR THE SURROGATE, BUILD AND SOLVE THE PROBLEM, AND CONFIRM IT MATCHES THE VERIFICATION DATA PROVIDED. ABSTRACT TO FUNCITON (170-191), call inside train 
-    p_scale = [Vr_scale, Vi_scale, 0.0]     #turn off the nn 
+function initialize_surrogate(params, nn, M, tsteps, p_ode, x₀, p_V₀, surr, Vm, Vθ)
+    p_scale = [params.node_input_scale, 0.0]     #turn off the nn 
     p_nn = initial_params(nn)
     n_weights_nn = length(p_nn)
     p_fixed = vcat(p_ode, p_scale, p_V₀, n_weights_nn)
@@ -241,29 +255,61 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output) #
     tspan = (tsteps[1], tsteps[end])   #tspan comes from data   #Pass flag as parameter in NODETrainParams if you want to verify or not 
     surr_func = ODEFunction(surr, mass_matrix = M)
     surr_prob = ODEProblem(surr_func, x₀_surr, tspan, p)
-    sol = solve(
-        surr_prob,
-        solver,
-        abstol = params.solver_tols[1],
-        reltol = params.solver_tols[2],
-        saveat = tsteps,
-    )
-    @assert mae(sol[22, :], i_ver[1, :]) < 5e-5
+    return res_surr.zero, surr_prob, p_nn, p_fixed
+end
 
-    #PREPARE THE SURROGATE FOR TRAINING  
-    p_scale = [Vr_scale, Vi_scale, params.node_output_scale]
+function turn_node_on(surr_prob_node_off, params, p_ode, p_V₀, p_nn)
+    n_weights_nn = length(p_nn)
+    p_scale = [params.node_input_scale, params.node_output_scale]
     p_fixed = vcat(p_ode, p_scale, p_V₀, n_weights_nn)
     p = vcat(p_nn, p_fixed)
-    surr_prob = remake(surr_prob, p = p)
+    surr_prob = remake(surr_prob_node_off, p = p)
+    return surr_prob, p_fixed
+end
 
-    #Calculate scale factors for loss function based on true data - Create a function for all of the scaling. 
-    Ir_scale = maximum(i_true[1, :]) - minimum(i_true[1, :])
-    Ii_scale = maximum(i_true[2, :]) - minimum(i_true[2, :])
-    #@show surr_init = instantiate_surr_init(params) #don't need? just use surr? 
+function calculate_loss_function_scaling(params, i_true)
+    if params.loss_function_scale == "range"
+        Ir_scale = maximum(i_true[1, :]) - minimum(i_true[1, :])
+        Ii_scale = maximum(i_true[2, :]) - minimum(i_true[2, :])
+    elseif params.loss_function_scale == "none"
+        Ir_scale = 1.0
+        Ii_scale = 1.0
+    else
+        @warn "Cannot determine loss function scaling"
+    end
+    return Ir_scale, Ii_scale
+end
 
-    u₀ = res_surr.zero
+function train(
+    θ,
+    params,
+    sensealg,
+    solver,
+    optimizer,
+    nn,
+    M,
+    output,
+    id,
+    tsteps,
+    i_true,
+    i_ver,
+    p_ode,
+    x₀,
+    p_V₀,
+    surr,
+    Vm,
+    Vθ,
+)
+    u₀, surr_prob_node_off, p_nn, p_fixed =
+        initialize_surrogate(params, nn, M, tsteps, p_ode, x₀, p_V₀, surr, Vm, Vθ)
 
-    #INSTANTIATE THE TRAINING FUNCTIONS 
+    (params.verify_psid_node_off) &&
+        verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, i_ver)
+
+    surr_prob, p_fixed = turn_node_on(surr_prob_node_off, params, p_ode, p_V₀, p_nn)
+
+    Ir_scale, Ii_scale = calculate_loss_function_scaling(params, i_true)
+
     pred_function = instantiate_pred_function(
         p_fixed,
         solver,
@@ -291,8 +337,8 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output) #
         t_curr = tsteps[range]
         train_loader = Flux.Data.DataLoader(
             (i_curr, t_curr),
-            batchsize = Int(floor(length(i_curr[1, :]))),
-        )     #TODO - IMPLEMENT BATCHING
+            batchsize = Int(floor(length(i_curr[1, :]))),   #TODO - IMPLEMENT BATCHING
+        )
         optfun = OptimizationFunction(
             (θ, p, batch, time_batch) -> loss_function(θ, batch, time_batch),
             GalacticOptim.AutoForwardDiff(),

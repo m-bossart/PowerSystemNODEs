@@ -44,11 +44,10 @@ function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     Qref = p_fixed[27]
     Xtrans = p_fixed[28]
     Rtrans = p_fixed[29]
-    Vr_scale = p_fixed[30]
-    Vi_scale = p_fixed[31]
-    nn_scale = p_fixed[32]
-    Vr0 = p_fixed[33]
-    Vi0 = p_fixed[34]
+    V_scale = p_fixed[30]
+    nn_scale = p_fixed[31]
+    Vr0 = p_fixed[32]
+    Vi0 = p_fixed[33]
 
     #STATE INDEX AND STATES
     i__vi_filter, vi_filter = 1, x[1]
@@ -169,7 +168,7 @@ function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
         (vi_filter - Vi_pcc - rg * ii_filter - ω_sys * lg * ir_filter)
 
     #NN INPUT 
-    nn_input = [(Vr_pcc - Vr0) * Vr_scale, (Vi_pcc - Vi0) * Vi_scale, ir_nn, ii_nn]
+    nn_input = [(Vr_pcc - Vr0) * V_scale, (Vi_pcc - Vi0) * V_scale, ir_nn, ii_nn]
 
     #NN CURRENT SOURCE
     dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale

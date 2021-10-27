@@ -39,6 +39,8 @@ train_params = JSON3.read(read("train_parameters/train_instance_1.json"), NODETr
 
 ll = @time train(train_params)
 
+#visualize_summary(pwd())   #finds the outputs folder, picks up the (total time, total_iterations, final loss) for each instance. Plots. 
+
 #p = visualize_training(train_params)    #only input is train_params, give an error if you can't find the folder where the results should be.    
 
 ## Example
