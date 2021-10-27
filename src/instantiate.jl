@@ -131,33 +131,35 @@ function instantiate_pred_function(p_fixed, solver, surr_prob, tols, sensealg, u
         _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)
 end
 
-function instantiate_cb!(output_data, lb_loss, exportmode, id, range_count)
+function instantiate_cb!(output, lb_loss, exportmode, id, range_count)
     if exportmode == 3
-        return (p, l, pred) -> _cb3!(p, l, pred, output_data, lb_loss, id, range_count)
+        return (p, l, pred) -> _cb3!(p, l, pred, output, lb_loss, id, range_count)
     elseif exportmode == 2
-        return (p, l, pred) -> _cb2!(p, l, pred, output_data, lb_loss, id, range_count)
+        return (p, l, pred) -> _cb2!(p, l, pred, output, lb_loss, id, range_count)
     elseif exportmode == 1
-        return (p, l, pred) -> _cb1!(p, l, pred, output_data, lb_loss, id, range_count)
+        return (p, l, pred) -> _cb1!(p, l, pred, output, lb_loss, id, range_count)
     end
 end
 
-function _cb3!(p, l, pred, output_data, lb_loss, id, range_count)
-    push!(output_data, (id, range_count, l, p, pred[1, :], pred[2, :]))
+function _cb3!(p, l, pred, output, lb_loss, id, range_count)
+    push!(output["loss"], (id, range_count, l))
+    push!(output["parameters"], [p])
+    push!(output["predictions"], (pred[1, :], pred[2, :]))
     @show l
     @show p[end]
     (l > lb_loss) && return false
     return true
 end
 
-function _cb2!(p, l, pred, output_data, lb_loss, id, range_count)
-    push!(output_data, (id, range_count, l))
+function _cb2!(p, l, pred, output, lb_loss, id, range_count)
+    push!(output["loss"], (id, range_count, l))
     @show l
     @show p[end]
     (l > lb_loss) && return false
     return true
 end
 
-function _cb1!(p, l, pred, output_data, lb_loss, id, range_count)
+function _cb1!(p, l, pred, output, lb_loss, id, range_count)
     @show l
     @show p[end]
     (l > lb_loss) && return false

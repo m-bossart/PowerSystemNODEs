@@ -6,7 +6,7 @@
 **Note:** Include a note 
 """
 mutable struct NODETrainParams
-    train_id::Int64
+    train_id::String
     solver::String
     solver_tols::Tuple{Float64, Float64}
     sensealg::String
@@ -42,7 +42,7 @@ end
 StructTypes.StructType(::Type{NODETrainParams}) = StructTypes.Struct()
 
 function NODETrainParams(;
-    train_id = 1,
+    train_id = "train_instance_1",
     solver = "Rodas4",
     solver_tols = (1e-6, 1e-9),
     sensealg = "ForwardDiffSensitivity",
@@ -143,25 +143,32 @@ function train(params::NODETrainParams)
 
     #TRAIN SEQUENTIALLY 
     res = nothing
-    output_data = []
+    output = Dict{String, Any}(
+        "loss" => DataFrame(ID = String[], RangeCount = Int[], Loss = Float64[]),
+        "parameters" => DataFrame(Parameters = Vector{Any}[]),
+        "predictions" =>
+            DataFrame(ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
+        "total_time" => [],
+        "total_iterations" => [],
+        "final_results" => Dict{String, Any}(),
+    )
+
     min_θ = initial_params(nn)
     for pvs in pvss
         @show min_θ[end]
-        res, output_data =
-            train(min_θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_data)
+        res, output =
+            train(min_θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output)
         min_θ = copy(res.u)
     end
 
     #TRAIN ADJUSTMENTS (TO DO)
+    @show output
+    capture_output(output, params.output_data_path, params.train_id)
 
-    #(params.output_mode == 1) && push!(output_data, (min_θ, res.minimum))   #export level = 1, only save final parameters and loss. 
-
-    capture_output(output_data, params.output_data_path, params.output_mode)
-
-    return res
+    return output
 end
 
-function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_data) #move 159-168 outside of train
+function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output) #move 159-168 outside of train
     #READ FAULT DATA FOR THE CURRENT PVS 
     id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)
 
@@ -259,13 +266,7 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_da
         )
         optprob = OptimizationProblem(optfun, min_θ)
 
-        cb = instantiate_cb!(
-            output_data,
-            params.lb_loss,
-            params.output_mode,
-            id,
-            range_count,
-        )
+        cb = instantiate_cb!(output, params.lb_loss, params.output_mode, id, range_count)
         range_count += 1
 
         res = GalacticOptim.solve(
@@ -280,21 +281,25 @@ function train(θ, params, sensealg, solver, optimizer, nn, M, d, pvs, output_da
         @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
     end
     @show min_θ
-    return res, output_data
+    return res, output
     try
     catch e
         return 0
     end
 end
 
-function capture_output(inputs, export_file_path, export_mode)
-    df = DataFrame(inputs)
-
-    (export_mode == 3) && rename!(df, [:id, :range_count, :l, :p, :pred_1, :pred_2])
-    (export_mode == 2) && rename!(df, [:id, :range_count, :l])
-    (export_mode == 1) && rename!(df, [:p, :l])
-
-    open(joinpath(export_file_path, "outputdata"), "w") do io
-        Arrow.write(io, df)
+function capture_output(output_dict, output_directory, id)
+    output_path = joinpath(output_directory, id)
+    mkpath(output_path)
+    for (key, value) in output_dict
+        if typeof(value) == DataFrame
+            df = pop!(output_dict, key)
+            open(joinpath(output_path, key), "w") do io
+                Arrow.write(io, df)
+            end
+        end
+    end
+    open(joinpath(output_path, "high_level_outputs"), "w") do io
+        JSON3.write(io, output_dict)
     end
 end

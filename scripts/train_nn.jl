@@ -35,10 +35,9 @@ include("../src/parameter_utils.jl")
 include("../src/visualize.jl")
 configure_logging(console_level = Logging.Error)
 
-train_params =
-    JSON3.read(read("train_parameters/default_NODE_params.json"), NODETrainParams)
+train_params = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
 
-ll = train(train_params) #, train_data)        #only input is train_params
+ll = @time train(train_params)
 
 #p = visualize_training(train_params)    #only input is train_params, give an error if you can't find the folder where the results should be.    
 
@@ -50,13 +49,3 @@ ll = train(train_params) #, train_data)        #only input is train_params
 # status = train(train_params)
 ################################################################ SLURM FILE 
 # julia --project params_file.json
-
-#= 
-output = Dict{String, Any}(
-    "loss" => DataFrame(),
-    "parameters" => DataFrame(),
-    "predictions" => DataFrame(),
-    "total_time" => [], 
-    "total_ireations" => [], 
-    "final_results" => Dict{String, Any}(),
-) =#
