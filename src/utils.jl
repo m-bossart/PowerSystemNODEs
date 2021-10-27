@@ -1,16 +1,14 @@
 
 """
-    build_train_test(sys_faults::System, sys_structure::System, train_split)
+    build_train_test(sys_faults::System, sys_structure::System)
 
-Builds a train and test system by combining a system with pre-defined faults and a system with the structure
+Builds a train system by combining a system with pre-defined faults and a system with the structure
 """
 
-function build_train_test(
+function build_sys_train(
     sys_faults::System,
     sys_full::System,
     Ref_bus_number::Integer,
-    train_split;
-    add_pvs = true,
 )
     sys_train = deepcopy(sys_full)
     #remove_components!(sys_train, FixedAdmittance) #BUG add back if you include fixed admittance
@@ -62,9 +60,9 @@ function build_train_test(
         collect(get_components(Bus, sys_train, x -> get_number(x) == Ref_bus_number))[1]
     set_bustype!(slack_bus_train, BusTypes.REF)
 
-    sys_test = deepcopy(sys_train)
-    slack_bus_test =
-        collect(get_components(Bus, sys_test, x -> get_bustype(x) == BusTypes.REF))[1]
+    #sys_test = deepcopy(sys_train)
+    #slack_bus_test =
+     #   collect(get_components(Bus, sys_test, x -> get_bustype(x) == BusTypes.REF))[1]
 
     sources = get_components(Source, sys_faults)
 
@@ -73,18 +71,12 @@ function build_train_test(
         remove_component!(sys_faults, pvs)
         remove_component!(sys_faults, s)
 
-        if rand() < train_split
-            set_bus!(s, slack_bus_train)
-            display(s)
-            add_component!(sys_train, s)
-            add_pvs && add_component!(sys_train, pvs, s)
-        else
-            set_bus!(s, slack_bus_test)
-            add_component!(sys_test, s)
-            add_pvs && add_component!(sys_test, pvs, s)
-        end
+        set_bus!(s, slack_bus_train)
+        display(s)
+        add_component!(sys_train, s)
+        add_component!(sys_train, pvs, s)
     end
-    return sys_train, sys_test
+    return sys_train
 end
 
 """
