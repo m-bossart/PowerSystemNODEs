@@ -5,11 +5,7 @@
 Builds a train system by combining a system with pre-defined faults and a system with the structure
 """
 
-function build_sys_train(
-    sys_faults::System,
-    sys_full::System,
-    Ref_bus_number::Integer,
-)
+function build_sys_train(sys_faults::System, sys_full::System, Ref_bus_number::Integer)
     sys_train = deepcopy(sys_full)
     #remove_components!(sys_train, FixedAdmittance) #BUG add back if you include fixed admittance
     remove_components!(sys_train, PowerLoad)
@@ -62,7 +58,7 @@ function build_sys_train(
 
     #sys_test = deepcopy(sys_train)
     #slack_bus_test =
-     #   collect(get_components(Bus, sys_test, x -> get_bustype(x) == BusTypes.REF))[1]
+    #   collect(get_components(Bus, sys_test, x -> get_bustype(x) == BusTypes.REF))[1]
 
     sources = get_components(Source, sys_faults)
 

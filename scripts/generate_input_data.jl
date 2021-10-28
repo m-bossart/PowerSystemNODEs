@@ -39,19 +39,16 @@ tspan = (0.0, 2.0)
 steps = 150
 tsteps = tspan[1]:((tspan[2] - tspan[1]) / steps):tspan[2]
 
-
 default_params = NODETrainParams()
 solver = instantiate_solver(default_params)
 abstol = default_params.solver_tols[1]
 reltol = default_params.solver_tols[2]
-
 
 ################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DATA#############
 sys_faults = System("systems/fault_library_3invs_vsms_20%lossP.json")
 sys_full = System("systems/base_system_3invs_vsms_20%lossP.json")
 sys_train = build_sys_train(sys_faults, sys_full, 2)
 to_json(sys_train, "input_data/system.json", force = true)
-
 
 ############################# GENERATE TRUE SOLUTION ###########################
 available_source = activate_next_source!(sys_train)

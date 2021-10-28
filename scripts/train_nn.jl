@@ -35,13 +35,23 @@ include("../src/parameter_utils.jl")
 include("../src/visualize.jl")
 configure_logging(console_level = Logging.Error)
 
-train_params = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
+train_params_1 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
+train(train_params_1)
 
-ll = @time train(train_params)
+train_params_2 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
+train_params_2.train_id = "train_instance_2"
+train_params_2.loss_function_scale = "none"
+train(train_params_2)
 
-#visualize_summary(pwd())   #finds the outputs folder, picks up the (total time, total_iterations, final loss) for each instance. Plots. 
+#visualize all training runs to see what worked well
+p = visualize_summary(NODETrainParams().output_data_path)  #pass in base_path 
+plot(p)
 
-#p = visualize_training(train_params)    #only input is train_params, give an error if you can't find the folder where the results should be.    
+#visualize individual training runs of interest 
+plots = visualize_training(train_params_1)
+plot(plots[1], plots[2], layout = (1, 2))
+plots = visualize_training(train_params_2)
+plot(plots[1], plots[2], layout = (1, 2))
 
 ## Example
 # import("my_functions.jl")

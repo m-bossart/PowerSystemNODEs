@@ -157,71 +157,113 @@ function read_input_data(pvs, d)
 end
 
 function train(params::NODETrainParams)
-    #INSTANTIATE 
-    sensealg = instantiate_sensealg(params)
-    solver = instantiate_solver(params)
-    optimizer = instantiate_optimizer(params)
-    nn = instantiate_nn(params)
-    M = instantiate_M(params)
-    !(params.optimizer_adjust == "nothing") &&
-        (optimizer_adjust = instantiate_optimizer_adjust(params))
+    total_time = @elapsed begin
+        #INSTANTIATE 
+        sensealg = instantiate_sensealg(params)
+        solver = instantiate_solver(params)
+        optimizer = instantiate_optimizer(params)
+        nn = instantiate_nn(params)
+        M = instantiate_M(params)
+        !(params.optimizer_adjust == "nothing") &&
+            (optimizer_adjust = instantiate_optimizer_adjust(params))
 
-    #READ INPUT DATA AND SYSTEM
-    sys = System(joinpath(params.input_data_path, "system.json"))
-    d = JSON3.read(
-        read(joinpath(params.input_data_path, "data.json")),
-        Dict{String, Dict{Symbol, Any}},
-    )
-    pvss = collect(get_components(PeriodicVariableSource, sys))
-
-    #TRAIN SEQUENTIALLY 
-    res = nothing
-    output = Dict{String, Any}(
-        "loss" => DataFrame(ID = String[], RangeCount = Int[], Loss = Float64[]),
-        "parameters" => DataFrame(Parameters = Vector{Any}[]),
-        "predictions" =>
-            DataFrame(ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
-        "total_time" => [],
-        "total_iterations" => [],
-        "final_results" => Dict{String, Any}(),
-    )
-
-    min_θ = initial_params(nn)
-    for pvs in pvss
-        @show min_θ[end]
-
-        id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)   #READ FAULT DATA FOR THE CURRENT PVS 
-        #DEFINE FUNCTIONS OF TIME FOR THE CURRENT PVS
-        Vm, Vθ = Source_to_function_of_time(pvs)
-        surr = instantiate_surr(params, nn, Vm, Vθ)
-
-        res, output = train(
-            min_θ,
-            params,
-            sensealg,
-            solver,
-            optimizer,
-            nn,
-            M,
-            output,
-            id,
-            tsteps,
-            i_true,
-            i_ver,
-            p_ode,
-            x₀,
-            p_V₀,
-            surr,
-            Vm,
-            Vθ,
+        #READ INPUT DATA AND SYSTEM
+        sys = System(joinpath(params.input_data_path, "system.json"))
+        d = JSON3.read(
+            read(joinpath(params.input_data_path, "data.json")),
+            Dict{String, Dict{Symbol, Any}},
         )
-        min_θ = copy(res.u)
+        pvss = collect(get_components(PeriodicVariableSource, sys))
+
+        #TRAIN SEQUENTIALLY 
+        res = nothing
+        output = Dict{String, Any}(
+            "loss" => DataFrame(ID = String[], RangeCount = Int[], Loss = Float64[]),
+            "parameters" => DataFrame(Parameters = Vector{Any}[]),
+            "predictions" => DataFrame(
+                ir_prediction = Vector{Any}[],
+                ii_prediction = Vector{Any}[],
+            ),
+            "total_time" => [],
+            "total_iterations" => 0,
+            "final_loss" => [],
+            "train_id" => params.train_id,
+        )
+
+        min_θ = initial_params(nn)
+        for pvs in pvss
+            @show min_θ[end]
+
+            id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)   #READ FAULT DATA FOR THE CURRENT PVS 
+            #DEFINE FUNCTIONS OF TIME FOR THE CURRENT PVS
+            Vm, Vθ = Source_to_function_of_time(pvs)
+            surr = instantiate_surr(params, nn, Vm, Vθ)
+
+            res, output = train(
+                min_θ,
+                params,
+                sensealg,
+                solver,
+                optimizer,
+                nn,
+                M,
+                output,
+                id,
+                tsteps,
+                i_true,
+                i_ver,
+                p_ode,
+                x₀,
+                p_V₀,
+                surr,
+                Vm,
+                Vθ,
+            )
+            min_θ = copy(res.u)
+        end
+        #TRAIN ADJUSTMENTS (TO DO)
     end
-    #TRAIN ADJUSTMENTS (TO DO)
-    #WRITE "HIGH LEVEL" outputs such as total time, total iterations, etc. (To Do)
+    output["total_time"] = total_time
+
+    final_loss_for_comparison =
+        calculate_final_loss(params, res.u, solver, nn, M, pvss, d, sensealg)
+    output["final_loss"] = final_loss_for_comparison
 
     capture_output(output, params.output_data_path, params.train_id)
     return
+end
+
+function calculate_final_loss(params, θ, solver, nn, M, pvss, d, sensealg)
+    final_loss_for_comparison = 0.0
+    n_pvs = length(pvss)
+    for pvs in pvss
+        id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)
+        Vm, Vθ = Source_to_function_of_time(pvs)
+        surr = instantiate_surr(params, nn, Vm, Vθ)
+
+        u₀, surr_prob_node_off, p_nn, p_fixed =
+            initialize_surrogate(params, nn, M, tsteps, p_ode, x₀, p_V₀, surr, Vm, Vθ)
+
+        surr_prob, p_fixed = turn_node_on(surr_prob_node_off, params, p_ode, p_V₀, p_nn)
+
+        pred_function = instantiate_pred_function(
+            p_fixed,
+            solver,
+            surr_prob,
+            params.solver_tols,
+            sensealg,
+            u₀,
+        )
+        loss_function = instantiate_loss_function(
+            (1.0, 0.0), #mae only
+            1.0,        #no scaling
+            1.0,
+            pred_function,
+        )
+        final_loss_for_comparison += loss_function(θ, i_true, tsteps)[1]
+    end
+
+    return final_loss_for_comparison / n_pvs
 end
 
 function verify_psid_node_off(surr_prob, params, solver, tsteps, i_ver)
