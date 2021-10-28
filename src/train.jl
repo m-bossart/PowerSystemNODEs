@@ -155,84 +155,107 @@ function read_input_data(pvs, d)
     p_V₀ = Float64.(d[id][:V₀])
     return id, tsteps, i_ground_truth, i_node_off, p_ode, x₀, p_V₀
 end
+function calculate_per_solve_maxiters(params, pvss, d)
+    n_faults = length(pvss)
+    id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvss[1], d)
+    n_timesteps = length(tsteps)
+    total_maxiters = params.maxiters 
+    groupsize_steps = params.groupsize_steps
+    factor_ranges = ceil(n_timesteps/groupsize_steps)
+    factor_batches = ceil(1/params.batch_factor) 
+    per_solve_maxiters = Int(floor(total_maxiters/factor_ranges/factor_batches/n_faults))
+    @info "per solve maxiters"  per_solve_maxiters
+    if per_solve_maxiters == 0 
+        @error "maxiters is too low. The calculated maxiters per solve is 0! cannot train"
+    end 
+    return per_solve_maxiters 
+end 
 
 function train(params::NODETrainParams)
-    total_time = @elapsed begin
-        #INSTANTIATE 
-        sensealg = instantiate_sensealg(params)
-        solver = instantiate_solver(params)
-        optimizer = instantiate_optimizer(params)
-        nn = instantiate_nn(params)
-        M = instantiate_M(params)
-        !(params.optimizer_adjust == "nothing") &&
-            (optimizer_adjust = instantiate_optimizer_adjust(params))
 
-        #READ INPUT DATA AND SYSTEM
-        sys = System(joinpath(params.input_data_path, "system.json"))
-        d = JSON3.read(
-            read(joinpath(params.input_data_path, "data.json")),
-            Dict{String, Dict{Symbol, Any}},
-        )
-        pvss = collect(get_components(PeriodicVariableSource, sys))
+    #INSTANTIATE 
+    sensealg = instantiate_sensealg(params)
+    solver = instantiate_solver(params)
+    optimizer = instantiate_optimizer(params)
+    nn = instantiate_nn(params)
+    M = instantiate_M(params)
+    !(params.optimizer_adjust == "nothing") &&
+        (optimizer_adjust = instantiate_optimizer_adjust(params))
 
-        #TRAIN SEQUENTIALLY 
-        res = nothing
-        output = Dict{String, Any}(
-            "loss" => DataFrame(ID = String[], RangeCount = Int[], Loss = Float64[]),
-            "parameters" => DataFrame(Parameters = Vector{Any}[]),
-            "predictions" => DataFrame(
-                ir_prediction = Vector{Any}[],
-                ii_prediction = Vector{Any}[],
-            ),
-            "total_time" => [],
-            "total_iterations" => 0,
-            "final_loss" => [],
-            "train_id" => params.train_id,
-        )
+    #READ INPUT DATA AND SYSTEM
+    sys = System(joinpath(params.input_data_path, "system.json"))
+    d = JSON3.read(
+        read(joinpath(params.input_data_path, "data.json")),
+        Dict{String, Dict{Symbol, Any}},
+    )
+    pvss = collect(get_components(PeriodicVariableSource, sys))
 
-        min_θ = initial_params(nn)
-        for pvs in pvss
-            @info "start of fault" min_θ[end]
+    
+    res = nothing
+    output = Dict{String, Any}(
+        "loss" => DataFrame(ID = String[], RangeCount = Int[], Loss = Float64[]),
+        "parameters" => DataFrame(Parameters = Vector{Any}[]),
+        "predictions" => DataFrame(
+            ir_prediction = Vector{Any}[],
+            ii_prediction = Vector{Any}[],
+        ),
+        "total_time" => [],
+        "total_iterations" => 0,
+        "final_loss" => [],
+        "train_id" => params.train_id,
+    )
+    per_solve_maxiters = calculate_per_solve_maxiters(params, pvss, d)
+    min_θ = initial_params(nn)
+    try
+        total_time = @elapsed begin
+            #TRAIN SEQUENTIALLY 
+            for pvs in pvss
+                @info "start of fault" min_θ[end]
 
-            id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)   #READ FAULT DATA FOR THE CURRENT PVS 
-            #DEFINE FUNCTIONS OF TIME FOR THE CURRENT PVS
-            Vm, Vθ = Source_to_function_of_time(pvs)
-            surr = instantiate_surr(params, nn, Vm, Vθ)
+                id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)  
+                
+                Vm, Vθ = Source_to_function_of_time(pvs)
+                surr = instantiate_surr(params, nn, Vm, Vθ)
 
-            res, output = train(
-                min_θ,
-                params,
-                sensealg,
-                solver,
-                optimizer,
-                nn,
-                M,
-                output,
-                id,
-                tsteps,
-                i_true,
-                i_ver,
-                p_ode,
-                x₀,
-                p_V₀,
-                surr,
-                Vm,
-                Vθ,
-            )
-            min_θ = copy(res.u)
-            @info "end of fault" min_θ[end]
+                res, output = train(
+                    min_θ,
+                    params,
+                    sensealg,
+                    solver,
+                    optimizer,
+                    nn,
+                    M,
+                    output,
+                    id,
+                    tsteps,
+                    i_true,
+                    i_ver,
+                    p_ode,
+                    x₀,
+                    p_V₀,
+                    surr,
+                    Vm,
+                    Vθ,
+                    per_solve_maxiters,
+                )
+                min_θ = copy(res.u)
+                @info "end of fault" min_θ[end]
+            end
+
+            #TRAIN ADJUSTMENTS GO HERE (TO DO)
         end
-        #TRAIN ADJUSTMENTS (TO DO)
-    end
-    @info "min_θ[end] (end of training)" min_θ[end]
-    output["total_time"] = total_time
+        @info "min_θ[end] (end of training)" min_θ[end]
+        output["total_time"] = total_time
 
-    final_loss_for_comparison =
-        calculate_final_loss(params, res.u, solver, nn, M, pvss, d, sensealg)
-    output["final_loss"] = final_loss_for_comparison
+        final_loss_for_comparison =
+            calculate_final_loss(params, res.u, solver, nn, M, pvss, d, sensealg)
+        output["final_loss"] = final_loss_for_comparison
 
-    capture_output(output, params.output_data_path, params.train_id)
-    return
+        capture_output(output, params.output_data_path, params.train_id)
+        return true 
+    catch 
+        return false 
+    end 
 end
 
 function calculate_final_loss(params, θ, solver, nn, M, pvss, d, sensealg)
@@ -343,6 +366,7 @@ function train(
     surr,
     Vm,
     Vθ,
+    per_solve_maxiters,
 )
     u₀, surr_prob_node_off, p_nn, p_fixed =
         initialize_surrogate(params, nn, M, tsteps, p_ode, x₀, p_V₀, surr, Vm, Vθ)
@@ -368,7 +392,6 @@ function train(
         Ii_scale,
         pred_function,
     )
-
     #TRAIN ON A SINGLE FAULT USING EXTENDING TIME RANGES.
     datasize = length(tsteps)
     ranges = extending_ranges(datasize, params.groupsize_steps)
@@ -379,10 +402,12 @@ function train(
         @info "start of range" min_θ[end]
         i_curr = i_true[:, range]
         t_curr = tsteps[range]
+        batchsize =  Int(floor(length(i_curr[1, :]) * params.batch_factor ))
         train_loader = Flux.Data.DataLoader(
             (i_curr, t_curr),
-            batchsize = Int(floor(length(i_curr[1, :]))),   #TODO - IMPLEMENT BATCHING
+            batchsize = batchsize,   #TODO - IMPLEMENT BATCHING
         )
+        @show batchsize 
         optfun = OptimizationFunction(
             (θ, p, batch, time_batch) -> loss_function(θ, batch, time_batch),
             GalacticOptim.AutoForwardDiff(),
@@ -392,22 +417,24 @@ function train(
         cb = instantiate_cb!(output, params.lb_loss, params.output_mode, id, range_count)
         range_count += 1
 
-        @info @time res = GalacticOptim.solve(
+        res = GalacticOptim.solve(
             optprob,
             optimizer,
-            ncycle(train_loader, params.maxiters),
+            ncycle(train_loader, per_solve_maxiters),
             cb = cb,
         )
         min_θ = copy(res.u)
         @info "end of range" min_θ[end]
-        @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
-        @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
+        @show params.batch_factor
+        if params.batch_factor == 1.0 
+            @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
+            @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
+        end 
+    
     end
     return res, output
-    try
-    catch e
-        return 0
-    end
+    
+
 end
 
 function capture_output(output_dict, output_directory, id)

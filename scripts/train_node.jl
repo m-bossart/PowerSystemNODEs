@@ -35,7 +35,11 @@ configure_logging(console_level = Logging.Info)
 #configure_logging(;filename = "train_node.log")
 
 train_params_1 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
-train(train_params_1)
+train_params_1.batch_factor = 0.4 
+train_params_1.output_mode = 1 
+train_params_1.maxiters = 8
+a = train(train_params_1)
+plots = visualize_training(train_params_1)
 ##
 train_params_2 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
 train_params_2.train_id = "train_instance_2"

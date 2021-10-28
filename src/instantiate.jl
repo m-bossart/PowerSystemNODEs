@@ -1,3 +1,5 @@
+include("../src/SurrogateModels.jl")
+
 optimizer_map = Dict("Adam" => ADAM, "Bfgs" => BFGS)
 
 solver_map = Dict("Rodas4" => Rodas4)
@@ -154,7 +156,7 @@ end
 
 function _cb2!(p, l, pred, output, lb_loss, id, range_count)
     push!(output["loss"], (id, range_count, l))
-    output["total_iterations"][1] += 1
+    output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]
     (l > lb_loss) && return false
@@ -162,7 +164,7 @@ function _cb2!(p, l, pred, output, lb_loss, id, range_count)
 end
 
 function _cb1!(p, l, pred, output, lb_loss, id, range_count)
-    output["total_iterations"][1] += 1
+    output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]
     (l > lb_loss) && return false
