@@ -14,7 +14,6 @@ include("../models/DynamicComponents.jl")
 include("../models/SurrogateModels.jl")
 include("../models/utils.jl")
 include("../models/init_functions.jl")
-include("../models/parameter_utils.jl")
 
 #SIMULATION PARAMETERS
 tspan = (0.0, 2.0)  #changed from (0.0,2.0)
@@ -113,7 +112,7 @@ for a in devices
                     tsteps_org = tsteps
                     tsteps, V = add_tanh(tsteps_org, V_org)
                     tsteps, θ = add_tanh(tsteps_org, θ_org)
-                    @show length(tsteps)
+                    @debug length(tsteps)
                     t = sol.solution.t[1:(end - 1)]
                     if (sol.solution.retcode == :Success)
                         global count_stable += 1
@@ -141,13 +140,13 @@ for a in devices
                             color = :black,
                             linewidth = 1,
                         )
-                        @show fs
-                        @show freqs
-                        @show length(freqs_pos)
+                        @info fs
+                        @info freqs
+                        @info length(freqs_pos)
                         F_V = fft(V)
-                        @show length(F_V)
-                        @show length([freqs .>= 0][1])
-                        @show length(V)
+                        @info length(F_V)
+                        @info length([freqs .>= 0][1])
+                        @info length(V)
                         F_V = F_V[freqs .>= 0]
                         F_V = F_V / N
                         F_V[2:end] = F_V[2:end] * 2  #/ (2*pi)

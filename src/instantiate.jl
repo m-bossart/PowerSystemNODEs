@@ -146,8 +146,8 @@ function _cb3!(p, l, pred, output, lb_loss, id, range_count)
     push!(output["parameters"], [p])
     push!(output["predictions"], (pred[1, :], pred[2, :]))
     output["total_iterations"] += 1
-    @show l
-    @show p[end]
+    @info "loss", l
+    @info "p[end]", p[end]
     (l > lb_loss) && return false
     return true
 end
@@ -155,16 +155,16 @@ end
 function _cb2!(p, l, pred, output, lb_loss, id, range_count)
     push!(output["loss"], (id, range_count, l))
     output["total_iterations"][1] += 1
-    @show l
-    @show p[end]
+    @info "loss", l
+    @info "p[end]", p[end]
     (l > lb_loss) && return false
     return true
 end
 
 function _cb1!(p, l, pred, output, lb_loss, id, range_count)
     output["total_iterations"][1] += 1
-    @show l
-    @show p[end]
+    @info "loss", l
+    @info "p[end]", p[end]
     (l > lb_loss) && return false
     return true
 end

@@ -27,13 +27,12 @@ const PSY = PowerSystems
 include("../src/train.jl")
 include("../src/constants.jl")
 include("../src/DynamicComponents.jl")
-include("../src/init_functions.jl") #get rid of this? should need one function for all surrogates 
+include("../src/init_functions.jl")  #get rid of this? should need one function for all surrogates 
 include("../src/instantiate.jl")
 include("../src/SurrogateModels.jl")
 include("../src/utils.jl")
-include("../src/parameter_utils.jl")
 include("../src/visualize.jl")
-configure_logging(console_level = Logging.Error)
+configure_logging(console_level = Logging.Info)
 
 train_params_1 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
 train(train_params_1)
@@ -44,7 +43,7 @@ train_params_2.loss_function_scale = "none"
 train(train_params_2)
 
 #visualize all training runs to see what worked well
-p = visualize_summary(NODETrainParams().output_data_path)  #pass in base_path 
+p = visualize_summary(NODETrainParams().output_data_path)
 plot(p)
 
 #visualize individual training runs of interest 

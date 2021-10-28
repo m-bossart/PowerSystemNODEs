@@ -31,7 +31,6 @@ include("../src/init_functions.jl") #get rid of this? should need one function f
 include("../src/instantiate.jl")
 include("../src/SurrogateModels.jl")
 include("../src/utils.jl")
-include("../src/parameter_utils.jl")
 include("../src/visualize.jl")
 configure_logging(console_level = Logging.Error)
 

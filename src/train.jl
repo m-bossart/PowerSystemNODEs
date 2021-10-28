@@ -192,7 +192,7 @@ function train(params::NODETrainParams)
 
         min_θ = initial_params(nn)
         for pvs in pvss
-            @show min_θ[end]
+            @info "start of fault" min_θ[end]
 
             id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)   #READ FAULT DATA FOR THE CURRENT PVS 
             #DEFINE FUNCTIONS OF TIME FOR THE CURRENT PVS
@@ -220,9 +220,11 @@ function train(params::NODETrainParams)
                 Vθ,
             )
             min_θ = copy(res.u)
+            @info "end of fault" min_θ[end]
         end
         #TRAIN ADJUSTMENTS (TO DO)
     end
+    @info "min_θ[end] (end of training)" min_θ[end]
     output["total_time"] = total_time
 
     final_loss_for_comparison =
@@ -374,7 +376,7 @@ function train(
     min_θ = θ
     range_count = 1
     for range in ranges
-        @show min_θ[end]
+        @info "start of range" min_θ[end]
         i_curr = i_true[:, range]
         t_curr = tsteps[range]
         train_loader = Flux.Data.DataLoader(
@@ -390,18 +392,17 @@ function train(
         cb = instantiate_cb!(output, params.lb_loss, params.output_mode, id, range_count)
         range_count += 1
 
-        res = GalacticOptim.solve(
+        @info @time res = GalacticOptim.solve(
             optprob,
             optimizer,
             ncycle(train_loader, params.maxiters),
             cb = cb,
         )
         min_θ = copy(res.u)
-        @show min_θ[end]
+        @info "end of range" min_θ[end]
         @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
         @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
     end
-    @show min_θ
     return res, output
     try
     catch e

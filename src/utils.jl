@@ -126,9 +126,9 @@ function add_tanh(t, y)
     C = y[end] + A
 
     B = 20 / (t[end] - t[1])
-    @show A, B, C
-    @show y[end]
-    @show y[1]
+    @info A, B, C
+    @info y[end]
+    @info y[1]
     t_add = (t[end] + Δt):Δt:(t[end] + (t[end] - t[1]))
     y_add = A * tanh.((t_add .- t_add[Int(length(t_add) / 2)]) .* B) .+ C
     t_new = vcat(t, t_add)
@@ -637,4 +637,36 @@ function build_nn(input_dim, output_dim, nn_width, nn_hidden, nn_activation)
         @error "build_nn does not support the provided nn depth"
         return false
     end
+end
+
+function get_parameters(inv::DynamicInverter)
+    #pll
+    p = Vector{Float64}(undef, 23)
+    p[1] = get_ω_lp(inv.freq_estimator)
+    p[2] = get_kp_pll(inv.freq_estimator)
+    p[3] = get_ki_pll(inv.freq_estimator)
+    #outer control
+    p[4] = PSY.get_Ta(inv.outer_control.active_power)
+    p[5] = PSY.get_kd(inv.outer_control.active_power)
+    p[6] = PSY.get_kω(inv.outer_control.active_power)
+    p[7] = PSY.get_kq(inv.outer_control.reactive_power)
+    p[8] = PSY.get_ωf(inv.outer_control.reactive_power)
+    #inner control
+    p[9] = get_kpv(inv.inner_control)
+    p[10] = get_kiv(inv.inner_control)
+    p[11] = get_kffv(inv.inner_control)
+    p[12] = get_rv(inv.inner_control)
+    p[13] = get_lv(inv.inner_control)
+    p[14] = get_kpc(inv.inner_control)
+    p[15] = get_kic(inv.inner_control)
+    p[16] = get_kffi(inv.inner_control)
+    p[17] = get_ωad(inv.inner_control)
+    p[18] = get_kad(inv.inner_control)
+    #lcl
+    p[19] = get_lf(inv.filter)
+    p[20] = get_rf(inv.filter)
+    p[21] = get_cf(inv.filter)
+    p[22] = get_lg(inv.filter)
+    p[23] = get_rg(inv.filter)
+    return p
 end
