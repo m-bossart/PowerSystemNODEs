@@ -10,10 +10,10 @@ const PSY = PowerSystems
 using Plots
 using FFTW
 
-include("../models/DynamicComponents.jl")
-include("../models/SurrogateModels.jl")
-include("../models/utils.jl")
-include("../models/init_functions.jl")
+include("../src/DynamicComponents.jl")
+include("../src/SurrogateModels.jl")
+include("../src/utils.jl")
+
 
 #SIMULATION PARAMETERS
 tspan = (0.0, 2.0)  #changed from (0.0,2.0)

@@ -27,7 +27,6 @@ const PSY = PowerSystems
 include("../src/train.jl")
 include("../src/constants.jl")
 include("../src/DynamicComponents.jl")
-include("../src/init_functions.jl") #get rid of this? should need one function for all surrogates 
 include("../src/instantiate.jl")
 include("../src/SurrogateModels.jl")
 include("../src/utils.jl")

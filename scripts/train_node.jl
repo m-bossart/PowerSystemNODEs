@@ -27,16 +27,16 @@ const PSY = PowerSystems
 include("../src/train.jl")
 include("../src/constants.jl")
 include("../src/DynamicComponents.jl")
-include("../src/init_functions.jl")  #get rid of this? should need one function for all surrogates 
 include("../src/instantiate.jl")
 include("../src/SurrogateModels.jl")
 include("../src/utils.jl")
 include("../src/visualize.jl")
 configure_logging(console_level = Logging.Info)
+#configure_logging(;filename = "train_node.log")
 
 train_params_1 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
 train(train_params_1)
-
+##
 train_params_2 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
 train_params_2.train_id = "train_instance_2"
 train_params_2.loss_function_scale = "none"

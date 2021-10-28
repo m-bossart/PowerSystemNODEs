@@ -289,7 +289,7 @@ function initialize_surrogate(params, nn, M, tsteps, p_ode, x₀, p_V₀, surr, 
     x₀_surr = zeros(order_surr)
     x₀_surr[1:ODE_ORDER] = x₀
     x₀_surr[(end - 1):end] = [x₀[I__IR_FILTER], x₀[I__II_FILTER]]
-    h = get_init_vsm_v_t_0(p, x₀[I__IR_FILTER], x₀[I__II_FILTER], nn, Vm, Vθ) #make generic! get rid of hard code 
+    h = get_init_surr(p, x₀[I__IR_FILTER], x₀[I__II_FILTER], surr) #make generic! get rid of hard code 
     res_surr = nlsolve(h, x₀_surr)
     @assert converged(res_surr)
     dx = similar(x₀_surr)
@@ -423,5 +423,15 @@ function capture_output(output_dict, output_directory, id)
     end
     open(joinpath(output_path, "high_level_outputs"), "w") do io
         JSON3.write(io, output_dict)
+    end
+end
+
+function get_init_surr(p, ir_filter, ii_filter, surr)
+    return (dx, x) -> begin
+        dx[22] = 0
+        x[22] = ir_filter
+        dx[23] = 0
+        x[23] = ii_filter
+        surr(dx, x, p, 0.0)
     end
 end
