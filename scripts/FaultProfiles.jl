@@ -14,7 +14,6 @@ include("../src/DynamicComponents.jl")
 include("../src/SurrogateModels.jl")
 include("../src/utils.jl")
 
-
 #SIMULATION PARAMETERS
 tspan = (0.0, 2.0)  #changed from (0.0,2.0)
 abstol = 1e-6
