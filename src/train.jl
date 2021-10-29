@@ -83,7 +83,7 @@ function NODETrainParams(;
     optimizer_η = 0.01,
     optimizer_adjust = "nothing",
     optimizer_adjust_η = 0.01,
-    maxiters = 5,
+    maxiters = 15,
     lb_loss = 0.0,
     batching = false,
     batch_factor = 1.0,
@@ -407,7 +407,6 @@ function train(
             (i_curr, t_curr),
             batchsize = batchsize,   #TODO - IMPLEMENT BATCHING
         )
-        @show batchsize 
         optfun = OptimizationFunction(
             (θ, p, batch, time_batch) -> loss_function(θ, batch, time_batch),
             GalacticOptim.AutoForwardDiff(),
@@ -425,7 +424,6 @@ function train(
         )
         min_θ = copy(res.u)
         @info "end of range" min_θ[end]
-        @show params.batch_factor
         if params.batch_factor == 1.0 
             @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
             @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
