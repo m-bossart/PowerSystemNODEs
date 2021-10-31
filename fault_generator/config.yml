@@ -1,8 +1,8 @@
-CompleteSystemPath: "files/omib.json"
+CompleteSystemPath: "files/omib_sys.json"
 FaultType: "BranchTrip"
 SimulationParameters:
   TspanStart: 0.0
-  TspanEnd: 2.0
+  TspanEnd: 30.0
   StepSize: 0.001
   AbsTol: 0.000001
   RelTol: 0.001
@@ -13,6 +13,7 @@ SimulationParameters:
 FaultParameters:
     BranchTrip:
       Time: 1.0
+      Type: "Line"
       BranchName: "BUS 1-BUS 2-i_1"
     BranchImpedanceChange:
       Time:

@@ -1,12 +1,17 @@
+using Pkg
+Pkg.activate("Project.toml")
+Pkg.instantiate
 using PowerSimulationsDynamics
 PSID = PowerSimulationsDynamics
 using PowerSystems
+using Sundials
+using Plots
+using YAML
 
 function get_fault(fault_type, fault_parameters)
-    fault_type = configurations["FaultType"]
     fault_name = fault_parameters[fault_type]
     if fault_type == "BranchTrip"
-        fault = BranchTrip(fault_name["Time"], fault_name["BranchName"])
+        fault = BranchTrip(fault_name["Time"], Line, fault_name["BranchName"],)
     elseif fault_type == "BranchImpedanceChange"
         fault = BranchImpedanceChange(fault_name["Time"], fault_name["BranchType"], fault_name["BranchName"], fault_name["Multiplier"])        
     elseif fault_type == "NetworkSwitch"
