@@ -1,19 +1,24 @@
 #CLASSICAL GENERATOR CONSTRUCTION
-machine_classic() = BaseMachine(0.0,  0.2995, 0.7087) #ra, Xd_p, eq_p (eq_p will change)
+machine_classic() = BaseMachine(0.0, 0.2995, 0.7087) #ra, Xd_p, eq_p (eq_p will change)
 shaft_damping() = SingleMass(3.148, 2.0)
 avr_none() = AVRFixed(0.0)
 tg_none() = TGFixed(1.0) #efficiency
 pss_none() = PSSFixed(0.0)
 function dyn_gen_classic(generator)    #1.0 is ωref
-    return DynamicGenerator(generator, 1.0, machine_classic(), shaft_damping(),
-                            avr_none(), tg_none(), pss_none())
+    return DynamicGenerator(
+        generator,
+        1.0,
+        machine_classic(),
+        shaft_damping(),
+        avr_none(),
+        tg_none(),
+        pss_none(),
+    )
 end
-
 
 #################################### CONVERTER #########################################################
 converter_low_power() = AverageConverter(rated_voltage = 690.0, rated_current = 2.75)
 converter_high_power() = AverageConverter(rated_voltage = 138.0, rated_current = 100.0)
-
 
 #################################### OUTER CONTROL #####################################################
 function outer_control()
@@ -46,7 +51,6 @@ function outer_control_gfoll()
     return OuterControl(active_pi(), reactive_pi())
 end
 
-
 #################################### INNER CONRTOL ######################################################
 inner_control() = VoltageModeControl(
     kpv = 0.59,     #Voltage controller proportional gain
@@ -65,7 +69,6 @@ current_mode_inner() = CurrentModeControl(
     kic = 0.7,     #Current controller integral gain
     kffv = 1.0,     #Binary variable enabling the voltage feed-forward in output of current controllers
 )
-
 
 #################################### DC SOURCE #########################################################
 dc_source_lv() = FixedDCSource(voltage = 600.0)
@@ -86,7 +89,6 @@ no_pll() = PSY.FixedFrequency()
 #################################### LCL FILTERS ######################################################
 filt() = LCLFilter(lf = 0.08, rf = 0.003, cf = 0.074, lg = 0.2, rg = 0.01)
 filt_gfoll() = LCLFilter(lf = 0.009, rf = 0.016, cf = 2.5, lg = 0.002, rg = 0.003)
-
 
 #################################### FULL INVERTERS ###################################################
 
@@ -126,12 +128,6 @@ function inv_gfoll(static_device)
         filt_gfoll(),
     ) #pss
 end
-
-
-
-
-
-
 
 function add_source_to_ref(sys::System)
     for g in get_components(StaticInjection, sys)

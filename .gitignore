@@ -29,5 +29,6 @@ docs/site/
 
 #figures
 figs/
+output_data/
 power-systems.log
 power-simulations-dynamics.log
