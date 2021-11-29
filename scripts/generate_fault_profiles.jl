@@ -239,4 +239,4 @@ if false  # Check that reconstructed time domain signal matches
     display(plot(p3, p4, layout = (2, 1)))
 end
 
-to_json(sys_faults, fault_system_path, force = true)
+to_json(sys_faults, fault_system_file, force = true)

@@ -38,10 +38,10 @@ abstol = default_params.solver_tols[1]
 reltol = default_params.solver_tols[2]
 
 ################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DATA#############
-sys_faults = System("systems/fault_library_3invs_vsms_20%lossP.json")
-sys_full = System("systems/base_system_3invs_vsms_20%lossP.json")
+sys_faults = System(joinpath(INPUT_SYSTEM_FOLDER, "fault_library_3invs_vsms_20%lossP.json"))
+sys_full = System(joinpath(INPUT_SYSTEM_FOLDER, "base_system_3invs_vsms_20%lossP.json"))
 sys_train = build_sys_train(sys_faults, sys_full, 2)
-to_json(sys_train, "input_data/system.json", force = true)
+to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "system.json"), force = true)
 
 ############################# GENERATE TRUE SOLUTION ###########################
 available_source = activate_next_source!(sys_train)
