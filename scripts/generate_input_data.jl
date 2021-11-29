@@ -102,23 +102,20 @@ sim_simp = Simulation!(MassMatrixModel, sys_init, pwd(), tspan)
 avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
 avgmodel_data = get_total_current_series(sim_simp)
 
-d = Dict{String, Dict{Symbol, Any}}()
-d[get_name(pvs)] = Dict(
-    :tsteps => tsteps,
-    :ir_ground_truth => ode_data[1, :],
-    :ii_ground_truth => ode_data[2, :],
-    :ir_node_off => avgmodel_data[1, :],
-    :ii_node_off => avgmodel_data[2, :],
-    :p_ode => p_ode,
-    :x₀ => x₀,
-    :V₀ => [Vr0, Vi0],
+d = NODETrainInputs(
+    get_name(pvs),
+    Dict(
+        :tsteps => tsteps,
+        :ir_ground_truth => ode_data[1, :],
+        :ii_ground_truth => ode_data[2, :],
+        :ir_node_off => avgmodel_data[1, :],
+        :ii_node_off => avgmodel_data[2, :],
+        :p_ode => p_ode,
+        :x₀ => x₀,
+        :V₀ => [Vr0, Vi0],
+    ),
 )
-
-open("input_data/data.json", "w") do io
-    JSON3.write(io, d)
-end
+serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 
 default_params = NODETrainParams()
-open("train_parameters/train_instance_1.json", "w") do io
-    JSON3.write(io, default_params)
-end
+serialize(default_params, joinpath(INPUT_FOLDER_NAME, "train_instance_1.json"))
