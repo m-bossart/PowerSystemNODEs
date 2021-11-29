@@ -3,18 +3,12 @@ Pkg.activate(".")
 using Revise
 using Distributions
 using OrdinaryDiffEq
-using PowerSystems
-using PowerSimulationsDynamics
-const PSID = PowerSimulationsDynamics
-const PSY = PowerSystems
 using Plots
 using FFTW
 
-include("../src/system_data/dynamic_components_data.jl")
-include("../src/SurrogateModels.jl")
-include("../src/utils.jl")
-
-#SIMULATION PARAMETERS
+include("../src/PowerSystemNODEs.jl")
+include("../system_data/dynamic_components_data.jl")
+# SIMULATION PARAMETERS
 tspan = (0.0, 2.0)  #changed from (0.0,2.0)
 abstol = 1e-6
 reltol = 1e-3
@@ -23,25 +17,25 @@ tsteps = tspan[1]:stepsize:tspan[2]
 tfault = 0.1
 solver = Rodas4()
 
-base_system_path = "systems\\base_system_3invs_vsms_20%lossP.json"
-fault_system_path = "systems\\fault_library_3invs_vsms_20%lossP.json"
+base_system_file = joinpath(INPUT_SYSTEM_FOLDER, "base_system_3invs_vsms_20%lossP.json")
+fault_system_file = joinpath(INPUT_SYSTEM_FOLDER, "fault_library_3invs_vsms_20%lossP.json")
+raw_file = joinpath(INPUT_SYSTEM_FOLDER, "IEEE 14 bus_modified_33.raw")
+full_system_file = joinpath(INPUT_SYSTEM_FOLDER, "full_system.json")
 smooth_signal = true
 
-#SYSTEM PARAMETERS
-#BUG possible power flow issues using 14-bus system due to Fixed Admittance
-#sys = System("cases/IEEE 14 bus_modified_33.raw")
-sys = System("cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw")
-source_bus = 2  #TODO Must have single line between source_bus and surrogate_bus?
+# SYSTEM PARAMETERS
+sys_from_raw = System(raw_file)
+source_bus = 2  # TODO: Must have single line between source_bus and surrogate_bus?
 surrogate_bus = 16
 devices = [inv_case78]  # [inv_gfoll]# [inv_darco_droop]# [inv_case78] #  #     inv_darco_droop doesn't work, can't find the frequency??
 Prefchange = [0.8]
 n_devices = 3
 
-add_devices_to_surrogatize!(sys, n_devices, surrogate_bus, source_bus)
-to_json(sys, base_system_path, force = true)
+add_devices_to_surrogatize!(sys_from_raw, n_devices, surrogate_bus, source_bus)
+to_json(sys_from_raw, base_system_file, force = true)
 
-global sys = System(base_system_path)
-base_sys = System(base_system_path)
+sys = System(base_system_file)
+base_sys = System(base_system_file)
 
 surrogate_gens =
     collect(get_components(ThermalStandard, sys, x -> get_bus(x).number == surrogate_bus))
@@ -90,7 +84,7 @@ for a in devices
                 println(disturbances)
                 for (n, e) in enumerate(disturbances)
                     sim = Simulation!(MassMatrixModel, sys, pwd(), tspan, e)
-                    to_json(sys, "systems/full_system.json", force = true)
+                    to_json(sys, full_system_file, force = true)
                     @info solve_powerflow(sys)["flow_results"]
                     @info solve_powerflow(sys)["bus_results"]
 
@@ -193,14 +187,14 @@ for a in devices
                     print("Plotting simulation number ", counter, "\n")
                 end
 
-                global sys = System(base_system_path)
+                global sys = System(base_system_file)
                 @info "Building new system"
             end
         end
     end
 end
 
-#Display and Summarize Time Domain Signals
+# Display and Summarize Time Domain Signals
 p = plot(p1, p2, layout = (2, 1))
 display(p)
 png(p, "figs/fault_fft_invs")
@@ -214,13 +208,13 @@ print("Resulting in...\n")
 print(count_stable, " stable runs\n")
 print(count_unstable, " unstable runs\n")
 
-if false  #Check that reconstructed time domain signal matches
-    #t_reconstruct= 0:stepsize:(tspan[2]-tfault)   #CHANGED
+if false  # Check that reconstructed time domain signal matches
+    # t_reconstruct= 0:stepsize:(tspan[2]-tfault) # CHANGED
     p3 = plot()
     p4 = plot()
     fault_sources = get_components(PeriodicVariableSource, sys_faults)
     for fault_source in fault_sources
-        t_reconstruct = tsteps#tspan[1]:(stepsize*10):tspan[2]
+        t_reconstruct = tsteps # tspan[1]:(stepsize*10):tspan[2]
         V_reconstruct = zeros(length(t_reconstruct))
         dV_reconstruct = zeros(length(t_reconstruct))
         V_reconstruct = V_reconstruct .+ get_internal_voltage_bias(fault_source)

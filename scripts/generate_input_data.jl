@@ -24,13 +24,8 @@ using Random
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
-include("../src/train.jl")
-include("../src/constants.jl")
-include("../src/system_data/dynamic_components_data.jl")
-include("../src/instantiate.jl")
-include("../src/SurrogateModels.jl")
-include("../src/utils.jl")
-include("../src/visualize.jl")
+include("../system_data/dynamic_components_data.jl")
+include("../src/PowerSystemNODEs.jl")
 configure_logging(console_level = Logging.Error)
 
 tspan = (0.0, 2.0)
