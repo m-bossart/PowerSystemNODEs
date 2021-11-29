@@ -1,12 +1,10 @@
-include("../src/SurrogateModels.jl")
+const optimizer_map = Dict("Adam" => ADAM, "Bfgs" => BFGS)
 
-optimizer_map = Dict("Adam" => ADAM, "Bfgs" => BFGS)
+const solver_map = Dict("Rodas4" => Rodas4)
 
-solver_map = Dict("Rodas4" => Rodas4)
+const sensealg_map = Dict("ForwardDiffSensitivity" => ForwardDiffSensitivity)
 
-sensealg_map = Dict("ForwardDiffSensitivity" => ForwardDiffSensitivity)
-
-surr_map = Dict(
+const surr_map = Dict(
     "vsm_v_t_0" => vsm_v_t_0,
     #=  "vsm_v_t_3" => vsm_v_t_3,
         "vsm_v_t_4" => vsm_v_t_4,
@@ -27,7 +25,7 @@ surr_map = Dict(
         "vsm_v_t_19" => vsm_v_t_19, =#
 )
 
-activation_map = Dict("relu" => relu)
+const activation_map = Dict("relu" => relu)
 
 function instantiate_solver(inputs)
     return solver_map[inputs.solver]()

@@ -7,3 +7,7 @@ const I__IR_NN = 20
 const I__II_NN = 21
 
 const ODE_ORDER = 19
+
+const INPUT_FOLDER_NAME = "input_data"
+const OUTPUT_FOLDER_NAME = "output_data"
+const INPUT_SYSTEM_FOLDER = "system_data"
