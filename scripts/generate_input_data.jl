@@ -26,7 +26,7 @@ const PSY = PowerSystems
 
 include("../src/train.jl")
 include("../src/constants.jl")
-include("../src/DynamicComponents.jl")
+include("../src/system_data/dynamic_components_data.jl")
 include("../src/instantiate.jl")
 include("../src/SurrogateModels.jl")
 include("../src/utils.jl")
@@ -71,7 +71,7 @@ Stiffness =
     reset_simulation = false,
     saveat = tsteps,
 );
-#tsteps = sim.solution.t  #to use the solver time steps, uncomment this line and get rid of saveat above 
+#tsteps = sim.solution.t  #to use the solver time steps, uncomment this line and get rid of saveat above
 
 sol_full = read_results(sim_full)
 
@@ -84,7 +84,7 @@ Vmag_internal = get_state_series(sol_full, ("source1", :Vt))
 ode_data = get_total_current_series(sim_full) #TODO Better to measure current at the PVS (implement method after PVS is complete)
 
 #################### BUILD INITIALIZATION SYSTEM ###############################
-sys_init, p_inv = build_sys_init(sys_train) #returns p_inv, the set of average parameters 
+sys_init, p_inv = build_sys_init(sys_train) #returns p_inv, the set of average parameters
 transformer = collect(get_components(Transformer2W, sys_init))[1]
 pvs = collect(get_components(PeriodicVariableSource, sys_init))[1]
 p_fixed = [get_x(transformer) + get_X_th(pvs), get_r(transformer) + get_R_th(pvs)]

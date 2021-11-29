@@ -10,7 +10,7 @@ const PSY = PowerSystems
 using Plots
 using FFTW
 
-include("../src/DynamicComponents.jl")
+include("../src/system_data/dynamic_components_data.jl")
 include("../src/SurrogateModels.jl")
 include("../src/utils.jl")
 
@@ -33,7 +33,7 @@ smooth_signal = true
 sys = System("cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw")
 source_bus = 2  #TODO Must have single line between source_bus and surrogate_bus?
 surrogate_bus = 16
-devices = [inv_case78]  # [inv_gfoll]# [inv_darco_droop]# [inv_case78] #  #     inv_darco_droop doesn't work, can't find the frequency?? 
+devices = [inv_case78]  # [inv_gfoll]# [inv_darco_droop]# [inv_case78] #  #     inv_darco_droop doesn't work, can't find the frequency??
 Prefchange = [0.8]
 n_devices = 3
 
