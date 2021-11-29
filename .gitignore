@@ -32,3 +32,6 @@ figs/
 output_data/
 power-systems.log
 power-simulations-dynamics.log
+
+input_data/
+output_data/
