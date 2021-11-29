@@ -1,3 +1,6 @@
+using PowerSystems
+const PSY = PowerSystems
+
 #CLASSICAL GENERATOR CONSTRUCTION
 machine_classic() = BaseMachine(0.0, 0.2995, 0.7087) #ra, Xd_p, eq_p (eq_p will change)
 shaft_damping() = SingleMass(3.148, 2.0)
