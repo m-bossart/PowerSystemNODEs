@@ -4,8 +4,8 @@
 #<nn_external_inputs>: the inputs to the model that are not states of the nn
 # v: terminal voltage (real and imag)
 # i: output current of the analytical model (real and imag)
-# NOTE: could explore using states of the analytical model in the future 
-#<#_feedback_states>: number of outputs of the nn. The states associated with each output are automatically inputs to the nn 
+# NOTE: could explore using states of the analytical model in the future
+#<#_feedback_states>: number of outputs of the nn. The states associated with each output are automatically inputs to the nn
 # 1-10
 # NOTE: Input dimension of nn =  <nn_external_inputs> + <#_feedback_states>
 
@@ -167,7 +167,7 @@ function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
         +(ω_base / lg) *                                            #docs:(5f)
         (vi_filter - Vi_pcc - rg * ii_filter - ω_sys * lg * ir_filter)
 
-    #NN INPUT 
+    #NN INPUT
     nn_input = [(Vr_pcc - Vr0) * V_scale, (Vi_pcc - Vi0) * V_scale, ir_nn, ii_nn]
 
     #NN CURRENT SOURCE

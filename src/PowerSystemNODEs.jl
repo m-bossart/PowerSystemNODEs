@@ -10,6 +10,7 @@ const PSY = PowerSystems
 
 include("constants.jl")
 include("NODETrainParams.jl")
+include("NODETrainInputs.jl")
 include("surrogate_models.jl")
 include("instantiate.jl")
 include("train.jl")
