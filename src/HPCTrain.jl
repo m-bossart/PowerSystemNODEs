@@ -9,7 +9,7 @@ const bash_file_template = """
 #SBATCH --account={{account}}
 #
 # QoS:
-#SBATCH --qos={{QoS}}(
+#SBATCH --qos={{QoS}}
 #
 # Partition:
 #SBATCH --partition={{partition}}
@@ -17,11 +17,12 @@ const bash_file_template = """
 #SBATCH --nodes={{n_nodes}}
 #SBATCH --cpus-per-task=1
 #
-#SBATCH --output={{project_path}}/job_output_%j.o
-#SBATCH --error={{project_path}}/job_output_%j.e
+#SBATCH --time={{time_limit}}
+#SBATCH --output={{{project_path}}}/job_output_%j.o
+#SBATCH --error={{{project_path}}}/job_output_%j.e
 
 # Check Dependencies
-julia --project={{project_path}} -e 'using Pkg; Pkg.instantiate("{{project_path}}")'
+julia --project={{{project_path}}} -e 'using Pkg; Pkg.instantiate()'
 
 # Load Parallel
 module load {{gnu_parallel_name}}
@@ -31,9 +32,10 @@ echo \$SLURM_JOB_NODELIST |sed s/\\,/\\\\n/g > hostfile
 # --slf is needed to parallelize across all the cores on multiple nodes
 parallel --jobs \$SLURM_CPUS_ON_NODE \\
     --slf hostfile \\
-    --wd {{project_path}} \\
-    --progress -a {{train_set_file}}.lst \\
-    julia --project={{project_path}} {{project_path}}/scripts/train.jl {}
+    --wd {{{project_path}}} \\
+    --progress -a {{{train_set_file}}}\\
+    --joblog {{{project_path}}}/hpc_train.log \\
+    julia --project={{{project_path}}} {{{project_path}}}/scripts/train.jl {}
 """
 
 struct HPCTrain
@@ -46,17 +48,18 @@ struct HPCTrain
     scratch_path::String
     gnu_parallel_name::String
     n_nodes::Int
-    params_data::Vector{NODETrainParams}
-    input_data::NODETrainInputs
+    params_data::Vector # TODO: return to Vector{NODETrainParams} after testing
+    time_limit::String
     train_bash_file::String
 end
 
 function SavioHPCTrain(;
     username,
     params_data,
-    input_data = "train_data.json",
     project_folder = "PowerSystemNODEs",
-    n_nodes = "1",
+    scratch_path = "/global/scratch/users",
+    time_limit = "24:00:00",
+    n_nodes = 1,
 )
     return HPCTrain(
         username,
@@ -64,11 +67,11 @@ function SavioHPCTrain(;
         "savio_normal",
         "savio",
         project_folder,
-        "/global/scratch/users",
+        scratch_path,
         "gnu-parallel",
         n_nodes,
         params_data,
-        input_data,
+        time_limit,
         "",
     )
 end
@@ -77,9 +80,10 @@ end
 function SummitHPCTrain(;
     username,
     params_data,
-    input_data = "train_data.json",
     project_folder = "PowerSystemNODEs",
-    n_nodes = "1",
+    scratch_path = "/scratch/summit/",
+    time_limit = "24:00:00",
+    n_nodes = 1,
 )
     return HPCTrain(
         username,
@@ -87,11 +91,11 @@ function SummitHPCTrain(;
         "normal",
         "shas",
         project_folder,
-        "/scratch/summit/",
+        scratch_path,
         "gnu_parallel",
         n_nodes,
         params_data,
-        input_data,
+        time_limit,
         "",
     )
 end
@@ -101,25 +105,25 @@ function generate_train_files(train::HPCTrain)
     data["username"] = train.username
     data["account"] = train.account
     data["QoS"] = train.QoS
+    data["time_limit"] = train.time_limit
     data["partition"] = train.partition
     data["gnu_parallel_name"] = train.gnu_parallel_name
     data["project_path"] = joinpath(train.scratch_path, train.project_folder)
     data["n_nodes"] = train.n_nodes
     data["train_set_file"] =
         joinpath(train.scratch_path, train.project_folder, "train_files.lst")
-    open(data["train_set_file"], "w") do file
-        for param in train.params_data
-            param_file_path = joinpath(
-                train.scratch_path,
-                train.project_folder,
-                INPUT_FOLDER_NAME,
-                param.train_id,
-                ".json",
-            )
-            serialize(param, param_file_path)
-            write(file, "$param_file_path\n")
-        end
-    end
+    #open(data["train_set_file"], "w") do file
+    #    for param in train.params_data
+    #        param_file_path = joinpath(
+    #            train.scratch_path,
+    #            train.project_folder,
+    #            INPUT_FOLDER_NAME,
+    #            "train_$(param.train_id).json",
+    #        )
+    #        #serialize(param, param_file_path)
+    #        #write(file, "$param_file_path\n")
+    #    end
+    #end
 
     filename = HPC_TRAIN_FILE
     open(filename, "w") do io
