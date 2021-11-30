@@ -288,7 +288,7 @@ function find_acbranch(from_bus_number::Int, to_bus_number::Int)
 end
 
 """
-Test function description 
+Test function description
 """
 function build_sys_init(sys_train::System)
     sys_init = deepcopy(sys_train)

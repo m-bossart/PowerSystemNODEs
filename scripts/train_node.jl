@@ -24,13 +24,9 @@ using Random
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
-include("../src/train.jl")
-include("../src/constants.jl")
-include("../src/DynamicComponents.jl")
-include("../src/instantiate.jl")
-include("../src/SurrogateModels.jl")
-include("../src/utils.jl")
-include("../src/visualize.jl")
+include("../src/PowerSystemNODEs.jl")
+include("../system_data/dynamic_components_data.jl")
+
 configure_logging(console_level = Logging.Info)
 #configure_logging(;filename = "train_node.log")
 
@@ -46,7 +42,7 @@ status = train(train_params_2)
 p = visualize_summary(NODETrainParams().output_data_path)
 plot(p)
 
-#visualize individual training runs of interest 
+#visualize individual training runs of interest
 plots = visualize_training(train_params_1)
 plot(plots[1], plots[2], layout = (1, 2))
 plots = visualize_training(train_params_2)
@@ -58,5 +54,5 @@ plot(plots[1], plots[2], layout = (1, 2))
 # train_params = UODETrainParams(Args[1])
 
 # status = train(train_params)
-################################################################ SLURM FILE 
+################################################################ SLURM FILE
 # julia --project params_file.json

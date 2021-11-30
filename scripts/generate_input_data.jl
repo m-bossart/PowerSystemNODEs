@@ -24,13 +24,8 @@ using Random
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
-include("../src/train.jl")
-include("../src/constants.jl")
-include("../src/DynamicComponents.jl")
-include("../src/instantiate.jl")
-include("../src/SurrogateModels.jl")
-include("../src/utils.jl")
-include("../src/visualize.jl")
+include("../system_data/dynamic_components_data.jl")
+include("../src/PowerSystemNODEs.jl")
 configure_logging(console_level = Logging.Error)
 
 tspan = (0.0, 2.0)
@@ -43,10 +38,10 @@ abstol = default_params.solver_tols[1]
 reltol = default_params.solver_tols[2]
 
 ################BUILD THE TRAINING SYSTEMS FOR GENERATING TRUTH DATA#############
-sys_faults = System("systems/fault_library_3invs_vsms_20%lossP.json")
-sys_full = System("systems/base_system_3invs_vsms_20%lossP.json")
+sys_faults = System(joinpath(INPUT_SYSTEM_FOLDER, "fault_library_3invs_vsms_20%lossP.json"))
+sys_full = System(joinpath(INPUT_SYSTEM_FOLDER, "base_system_3invs_vsms_20%lossP.json"))
 sys_train = build_sys_train(sys_faults, sys_full, 2)
-to_json(sys_train, "input_data/system.json", force = true)
+to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "system.json"), force = true)
 
 ############################# GENERATE TRUE SOLUTION ###########################
 available_source = activate_next_source!(sys_train)
@@ -71,7 +66,7 @@ Stiffness =
     reset_simulation = false,
     saveat = tsteps,
 );
-#tsteps = sim.solution.t  #to use the solver time steps, uncomment this line and get rid of saveat above 
+#tsteps = sim.solution.t  #to use the solver time steps, uncomment this line and get rid of saveat above
 
 sol_full = read_results(sim_full)
 
@@ -84,7 +79,7 @@ Vmag_internal = get_state_series(sol_full, ("source1", :Vt))
 ode_data = get_total_current_series(sim_full) #TODO Better to measure current at the PVS (implement method after PVS is complete)
 
 #################### BUILD INITIALIZATION SYSTEM ###############################
-sys_init, p_inv = build_sys_init(sys_train) #returns p_inv, the set of average parameters 
+sys_init, p_inv = build_sys_init(sys_train) #returns p_inv, the set of average parameters
 transformer = collect(get_components(Transformer2W, sys_init))[1]
 pvs = collect(get_components(PeriodicVariableSource, sys_init))[1]
 p_fixed = [get_x(transformer) + get_X_th(pvs), get_r(transformer) + get_R_th(pvs)]
@@ -107,23 +102,20 @@ sim_simp = Simulation!(MassMatrixModel, sys_init, pwd(), tspan)
 avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
 avgmodel_data = get_total_current_series(sim_simp)
 
-d = Dict{String, Dict{Symbol, Any}}()
-d[get_name(pvs)] = Dict(
-    :tsteps => tsteps,
-    :ir_ground_truth => ode_data[1, :],
-    :ii_ground_truth => ode_data[2, :],
-    :ir_node_off => avgmodel_data[1, :],
-    :ii_node_off => avgmodel_data[2, :],
-    :p_ode => p_ode,
-    :x₀ => x₀,
-    :V₀ => [Vr0, Vi0],
+d = NODETrainInputs(
+    get_name(pvs),
+    Dict(
+        :tsteps => tsteps,
+        :ir_ground_truth => ode_data[1, :],
+        :ii_ground_truth => ode_data[2, :],
+        :ir_node_off => avgmodel_data[1, :],
+        :ii_node_off => avgmodel_data[2, :],
+        :p_ode => p_ode,
+        :x₀ => x₀,
+        :V₀ => [Vr0, Vi0],
+    ),
 )
-
-open("input_data/data.json", "w") do io
-    JSON3.write(io, d)
-end
+serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 
 default_params = NODETrainParams()
-open("train_parameters/train_instance_1.json", "w") do io
-    JSON3.write(io, default_params)
-end
+serialize(default_params, joinpath(INPUT_FOLDER_NAME, "train_instance_1.json"))
