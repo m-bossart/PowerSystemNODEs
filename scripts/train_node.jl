@@ -24,35 +24,23 @@ using Random
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
-include("../src/PowerSystemNODEs.jl")
-include("../system_data/dynamic_components_data.jl")
-
 configure_logging(console_level = Logging.Info)
 #configure_logging(;filename = "train_node.log")
 
-train_params_1 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
-status = train(train_params_1)
+include("../src/PowerSystemNODEs.jl")
+include("../system_data/dynamic_components_data.jl")
 
-train_params_2 = JSON3.read(read("train_parameters/train_instance_1.json"), NODETrainParams)
-train_params_2.train_id = "train_instance_2"
-train_params_2.loss_function_scale = "none"
-status = train(train_params_2)
+train_params_file = isempty(ARGS) ? "train_parameters/train_instance_1.json" : ARGS[1]
+train_params = NODETrainParams(train_file)
+status = train(train_params)
 
-#visualize all training runs to see what worked well
-p = visualize_summary(NODETrainParams().output_data_path)
-plot(p)
-
-#visualize individual training runs of interest
-plots = visualize_training(train_params_1)
-plot(plots[1], plots[2], layout = (1, 2))
-plots = visualize_training(train_params_2)
-plot(plots[1], plots[2], layout = (1, 2))
-
-## Example
-# import("my_functions.jl")
-
-# train_params = UODETrainParams(Args[1])
-
-# status = train(train_params)
-################################################################ SLURM FILE
-# julia --project params_file.json
+if train_params.graphical_report
+    #visualize all training runs to see what worked well
+    p = visualize_summary(NODETrainParams().output_data_path)
+    #plot(p)
+    #visualize individual training runs of interest
+    plots = visualize_training(train_params_1)
+    plot(plots[1], plots[2], layout = (1, 2))
+    plots = visualize_training(train_params_2)
+    plot(plots[1], plots[2], layout = (1, 2))
+end
