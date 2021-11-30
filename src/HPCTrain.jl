@@ -33,7 +33,7 @@ parallel --jobs \$SLURM_CPUS_ON_NODE \\
     --slf hostfile \\
     --wd {{project_path}} \\
     --progress -a {{train_set_file}}.lst \\
-    julia --project={{project_path}} {{project_path}}/train.jl {{train_data_file}} {}
+    julia --project={{project_path}} {{project_path}}/scripts/train.jl {}
 """
 
 struct HPCTrain
@@ -42,6 +42,7 @@ struct HPCTrain
     QoS::String
     partition::String
     project_folder::String
+    # TODO: Coordinate properly with the data in the inputs vector base_path field
     scratch_path::String
     gnu_parallel_name::String
     n_nodes::Int
@@ -56,19 +57,19 @@ function SavioHPCTrain(;
     input_data = "train_data.json",
     project_folder = "PowerSystemNODEs",
     n_nodes = "1",
-    )
+)
     return HPCTrain(
-    username,
-    "fc_emac",
-    "savio_normal",
-    "savio",
-    project_folder,
-    "/global/scratch/users",
-    "gnu-parallel",
-    n_nodes,
-    params_data,
-    input_data,
-    ""
+        username,
+        "fc_emac",
+        "savio_normal",
+        "savio",
+        project_folder,
+        "/global/scratch/users",
+        "gnu-parallel",
+        n_nodes,
+        params_data,
+        input_data,
+        "",
     )
 end
 
@@ -79,19 +80,19 @@ function SummitHPCTrain(;
     input_data = "train_data.json",
     project_folder = "PowerSystemNODEs",
     n_nodes = "1",
-    )
+)
     return HPCTrain(
-    username,
-    "cu_allocation", # The proper value is TBD
-    "normal",
-    "shas",
-    project_folder,
-    "/scratch/summit/",
-    "gnu_parallel",
-    n_nodes,
-    params_data,
-    input_data,
-    ""
+        username,
+        "cu_allocation", # The proper value is TBD
+        "normal",
+        "shas",
+        project_folder,
+        "/scratch/summit/",
+        "gnu_parallel",
+        n_nodes,
+        params_data,
+        input_data,
+        "",
     )
 end
 
@@ -104,11 +105,17 @@ function generate_train_files(train::HPCTrain)
     data["gnu_parallel_name"] = train.gnu_parallel_name
     data["project_path"] = joinpath(train.scratch_path, train.project_folder)
     data["n_nodes"] = train.n_nodes
-    data["train_set_file"] = joinpath(train.scratch_path, train.project_folder, "train_files.lst")
-    data["train_data_file"] = joinpath(train.scratch_path, train.project_folder, INPUT_FOLDER_NAME, train.input_data)
+    data["train_set_file"] =
+        joinpath(train.scratch_path, train.project_folder, "train_files.lst")
     open(data["train_set_file"], "w") do file
         for param in train.params_data
-            param_file_path = joinpath(train.scratch_path, train.project_folder, INPUT_FOLDER_NAME, param.train_id, ".json")
+            param_file_path = joinpath(
+                train.scratch_path,
+                train.project_folder,
+                INPUT_FOLDER_NAME,
+                param.train_id,
+                ".json",
+            )
             serialize(param, param_file_path)
             write(file, "$param_file_path\n")
         end
