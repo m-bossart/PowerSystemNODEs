@@ -5,6 +5,7 @@ using StructTypes
 # TODO: We can use Requires.jl to speed load times
 # using GalacticOptim
 using DiffEqFlux
+using Mustache
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
