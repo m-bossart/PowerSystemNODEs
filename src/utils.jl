@@ -670,3 +670,110 @@ function get_parameters(inv::DynamicInverter)
     p[23] = get_rg(inv.filter)
     return p
 end
+
+function build_train_system(sys_surr_original, sys_pvs_original, surrogate_area_name )
+    sys_surr = deepcopy(sys_surr_original)
+    sys_pvs = deepcopy(sys_pvs_original)
+    non_surrogate_buses = collect(get_components(Bus, sys_surr, x->get_name(get_area(x)) != surrogate_area_name ))
+    if length(non_surrogate_buses) != 1 
+        @error "Must have one-non surrogate bus designated in surrogate system to add the PVS to"
+        return 
+    end 
+    non_surrogate_bus = non_surrogate_buses[1]
+    set_bustype!(non_surrogate_bus, BusTypes.REF)
+
+    sources = get_components(Source, sys_pvs)
+    for s in sources
+        pvs = get_dynamic_injector(s)
+        remove_component!(sys_pvs, pvs)
+        remove_component!(sys_pvs, s)
+
+        set_bus!(s, non_surrogate_bus)
+        add_component!(sys_surr, s)
+        add_component!(sys_surr, pvs, s)
+    end
+    return sys_surr
+end 
+
+#Label an collection of buses with a name
+function label_area!(sys::System, bus_numbers, area_name::String)
+    buses = collect(get_components(Bus,sys))
+    areas = collect(get_components(Area,sys))
+    for area in areas
+        if get_name(area) == area_name
+            @error "area already exists"
+            return 0 
+        end 
+    end         
+    surrogate_area = Area(; name = area_name)
+    add_component!(sys, surrogate_area)
+    for bus in buses    
+        if get_number(bus) in bus_numbers
+            set_area!(bus, surrogate_area )
+            @show get_number(bus)
+        end 
+    end 
+end 
+
+function check_single_connecting_line_condition(sys::System)
+    areas = get_components(Area, sys)
+    if length(areas) != 2
+        @warn "There aren't two areas in this system. Cannot check single line condition"
+    end 
+    branches = collect(get_components(Branch,sys))
+    count_connections = 0 
+    for branch in branches
+        area_from =  get_name(get_area(get_from(get_arc(branch))))
+        area_to = get_name(get_area(get_to(get_arc(branch))))
+        if (area_from != area_to)
+            count_connections += 1 
+        end 
+    end 
+    if count_connections == 1 
+        return true
+    else 
+        @warn "Not exactly one connections between the two areas"
+        return false 
+    end 
+end 
+
+function remove_area(sys_original::System, area_name::String)
+    sys = deepcopy(sys_original)
+    (length(collect(get_components(Area, sys, x->get_name(x)== area_name))) == 1) || @warn "area with name not found or multiple areas with same name"
+    connecting_bus_name = nothing 
+
+    static_injectors = collect(get_components(Component,sys, x->typeof(x) <:StaticInjection))
+    for static_injector in static_injectors 
+        if get_name(get_area(get_bus(static_injector))) == area_name 
+            dynamic_injector = get_dynamic_injector(static_injector)
+            (dynamic_injector !== nothing) && remove_component!(sys, dynamic_injector)
+            remove_component!(sys, static_injector)
+        end 
+    end 
+
+    branches = collect(get_components(Component,sys, x->typeof(x) <:Branch))
+    for branch in branches     #DOES ORDER MATTER ?  
+        area_name_from = get_name(get_area(get_from(get_arc(branch))))
+        area_name_to = get_name(get_area(get_to(get_arc(branch))))
+        if (area_name_from == area_name_to == area_name)
+            arc = get_arc(branch)
+            remove_component!(sys, arc)
+            remove_component!(sys, branch)
+        end 
+        if (area_name_from != area_name_to)
+            if (area_name_from == area_name)
+                connecting_bus_name = get_name(get_from(get_arc(branch)))
+            else 
+                connecting_bus_name = get_name(get_to(get_arc(branch)))
+            end
+        end 
+    end 
+
+    buses = collect(get_components(Component,sys, x->typeof(x) <:Bus))
+    for bus in buses
+        if (get_name(get_area(bus)) == area_name) && (get_name(bus) != connecting_bus_name)  
+            remove_component!(sys, bus)
+        end 
+    end 
+    return sys 
+end 
