@@ -1,47 +1,47 @@
 using Pkg
-Pkg.activate("SIIPExamples.jl/Project.toml")
+Pkg.activate("Project.toml")
 Pkg.instantiate
+Pkg.status
 using PowerSimulationsDynamics
 PSID = PowerSimulationsDynamics
+PSID.GeneratorTrip
 using PowerSystems
 using Sundials
 using Plots
 using YAML
+using CSV
 gr()
 
 include("generator.jl")
 include("fault.jl")
-file_dir = joinpath(
-    "SIIPExamples.jl",
-    "script",
-    "4_PowerSimulationsDynamics_examples",
-    "Data",
-)
 
+number = 1;
 configuration = YAML.load_file("config.yml")
 SimulationParameters = configuration["SimulationParameters"]
 FaultParameters = configuration["FaultParameters"]
 OutputParameters = configuration["OutputParameters"]
-fault_type = configuration["FaultType"]
+fault_types = configuration["FaultsType"]
 
-system = System(joinpath(file_dir, "omib_sys.json"))
+system = System(configuration["CompleteSystemPath"])
 time_span = (SimulationParameters["TspanStart"], SimulationParameters["TspanEnd"])
-fault = get_fault(fault_type, FaultParameters)
 
-sim = PSID.Simulation(PSID.ResidualModel, system, pwd(), time_span, fault)
-
-PSID.execute!(
-    sim, #simulation structure
-    IDA(), #Sundials DAE Solver
+for fault in FaultParameters
+    
+    temp = get_fault(string(fault.first), FaultParameters, system)
+    sim = PSID.Simulation(PSID.ResidualModel, system, pwd(), time_span, temp)
+    PSID.execute!(
+    sim, 
+    IDA(),
     dtmax = SimulationParameters["DtMax"],
-);
+    );
 
-results = read_results(sim)
+    results = read_results(sim)
+    angles = []
+    volts = []
+    for output in OutputParameters["OutputData"]
+        append!(angles, get_state_series(results, (output, :δ));)
+        append!(volts, get_voltage_magnitude_series(results, OutputParameters["BusNumber"]));
+    end
+    CSV.write(OutputParameters["OutputFile"] * string(fault.first) * ".csv", (x=volts, y=angles))
 
-angle = get_state_series(results, ("generator-102-1", :δ));
-Plots.plot(angle, xlabel = "time", ylabel = "rotor angle [rad]", label = "rotor angle")
-Plots.savefig("try.png")
-
-volt = get_voltage_magnitude_series(results, 102);
-Plots.plot(volt, xlabel = "time", ylabel = "Voltage [pu]", label = "V_2")
-Plots.savefig("try_2.png")
+end

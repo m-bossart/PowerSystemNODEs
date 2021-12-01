@@ -1,5 +1,5 @@
-CompleteSystemPath: "files/omib_sys.json"
-FaultType: "BranchTrip"
+CompleteSystemPath: "SIIPExamples.jl/script/4_PowerSimulationsDynamics_examples/Data/omib_sys.json"
+FaultsType: ["BranchTrip", "BranchImpedanceChange", "ControlReferenceChange", "GeneratorTrip"]
 SimulationParameters:
   TspanStart: 0.0
   TspanEnd: 30.0
@@ -10,45 +10,33 @@ SimulationParameters:
   DtMax: 0.02
   Solver: "Rodas4"
 
+all: true
+
 FaultParameters:
     BranchTrip:
       Time: 1.0
-      Type: "Line"
       BranchName: "BUS 1-BUS 2-i_1"
     BranchImpedanceChange:
-      Time:
-      BranchType:
-      BranchName:
-      Multiplier:
-    NetworkSwitch:
-      Time:
-      YbusRectangular:
+      Time: 7.0
+      BranchName: "BUS 1-BUS 2-i_1"
+      Multiplier: 2
     ControlReferenceChange:
-      Time:
-      Device:
-      Signal:
-      RefValue:
-    SourceBusVoltageChange:
-      Time:
-      Device:
-      SignalIndex:
-      RefValue:
+      Time: 5.0
+      Device: "generator-102-1"
+      RefValue: 0.5
     GeneratorTrip:
-      Time:
-      Device:
+      Time: 3.0
+      Device: "generator-102-1"
     LoadChange:
-      Time:
-      Device:
-      Signal:
-      RefValue:
+      Time: 1.0
+      Device: "load-103-1"
+      RefValue: 0.8
     LoadTrip:
-      Time:
-      Device:
+      Time: 1.0
+      Device: "load-103-1"
 
 
 OutputParameters:
-  outputfile:
-  bus_number: [] # buses to export output for
-  BusData: # Vm, Vtheta \theta  
-  DynamicDevice: #[(name, symbol)] # 
-  DynamicData:  []
+  OutputFile: "output"
+  OutputData: ["generator-102-1"] # buses to export output for
+  BusNumber: 102
