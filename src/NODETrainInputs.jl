@@ -31,10 +31,10 @@ function NODETrainDataParams(;
     solver = "Rodas4",
     solver_tols = (1e-6, 1e-9),
     tspan = (0.0, 2.0),
-    steps = 150, 
+    steps = 150,
     tsteps_spacing = "linear",
     base_path = pwd(),
-    output_data_path = joinpath(base_path, "input_data")
+    output_data_path = joinpath(base_path, "input_data"),
 )
     NODETrainDataParams(
         solver,
@@ -43,16 +43,16 @@ function NODETrainDataParams(;
         steps,
         tsteps_spacing,
         base_path,
-        output_data_path
+        output_data_path,
     )
-end 
+end
 
 function generate_train_data(sys_train, NODETrainDataParams)
     tspan = NODETrainDataParams.tspan
     steps = NODETrainDataParams.steps
     if NODETrainDataParams.tsteps_spacing == "linear"
         tsteps = tspan[1]:((tspan[2] - tspan[1]) / steps):tspan[2]
-    end 
+    end
     solver = instantiate_solver(NODETrainDataParams)
     abstol = NODETrainDataParams.solver_tols[1]
     reltol = NODETrainDataParams.solver_tols[2]
@@ -70,7 +70,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
         reltol = reltol,
         reset_simulation = false,
         saveat = tsteps,
-    );
+    )
     active_source = collect(get_components(Source, sys_train, x -> PSY.get_available(x)))[1]
     ode_data = get_total_current_series(sim_full) #TODO Better to measure current at the PVS (implement method after PVS is complete)
 
@@ -93,7 +93,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
         reltol = reltol,
         reset_simulation = false,
         saveat = tsteps,
-    );
+    )
 
     avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
     avgmodel_data = get_total_current_series(sim_simp)
@@ -112,8 +112,5 @@ function generate_train_data(sys_train, NODETrainDataParams)
         ),
     )
 
-    return d 
-end 
-
-
-
+    return d
+end

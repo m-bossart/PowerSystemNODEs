@@ -17,18 +17,18 @@ include("../src/constants.jl")
 
 #BUG possible power flow issues using 14-bus system due to Fixed Admittance
 #raw_file_path = "cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw"
-raw_file_path = joinpath(INPUT_SYSTEM_FOLDER_NAME,"IEEE 14 bus_modified_33.raw")
-base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME,"base_system_3invs.json") 
+raw_file_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "IEEE 14 bus_modified_33.raw")
+base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "base_system_3invs.json")
 
 sys = System(raw_file_path)
 surrogate_bus_number = 16
 surrogate_bus =
-collect(get_components(Bus, sys, x -> get_number(x) == surrogate_bus_number))[1]
+    collect(get_components(Bus, sys, x -> get_number(x) == surrogate_bus_number))[1]
 gens = collect(
     get_components(
         ThermalStandard,
         sys,
-        x -> get_number(get_bus(x)) ==  surrogate_bus_number,
+        x -> get_number(get_bus(x)) == surrogate_bus_number,
     ),
 )
 !(length(gens) == 1) && @error "number of devices at surrogate bus not equal to one"
