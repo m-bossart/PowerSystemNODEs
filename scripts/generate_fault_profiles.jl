@@ -17,10 +17,12 @@ tsteps = tspan[1]:stepsize:tspan[2]
 tfault = 0.1
 solver = Rodas4()
 
-base_system_file = joinpath(INPUT_SYSTEM_FOLDER, "base_system_3invs_vsms_20%lossP.json")
-fault_system_file = joinpath(INPUT_SYSTEM_FOLDER, "fault_library_3invs_vsms_20%lossP.json")
-raw_file = joinpath(INPUT_SYSTEM_FOLDER, "IEEE 14 bus_modified_33.raw")
-full_system_file = joinpath(INPUT_SYSTEM_FOLDER, "full_system.json")
+base_system_file =
+    joinpath(INPUT_SYSTEM_FOLDER_NAME, "base_system_3invs_vsms_20%lossP.json")
+fault_system_file =
+    joinpath(INPUT_SYSTEM_FOLDER_NAME, "fault_library_3invs_vsms_20%lossP.json")
+raw_file = joinpath(INPUT_SYSTEM_FOLDER_NAME, "IEEE 14 bus_modified_33.raw")
+full_system_file = joinpath(INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
 smooth_signal = true
 
 # SYSTEM PARAMETERS

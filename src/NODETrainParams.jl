@@ -108,6 +108,7 @@ function NODETrainParams(;
     input_data_path = joinpath(base_path, "input_data"),
     output_data_path = joinpath(base_path, "output_data"),
     verify_psid_node_off = true,
+    graphical_report = false,
 )
 
     #HERE IS THE LOGIC OF FILLING IN SOME OF THE PARAMETERS THAT MIGHT NOT MAKE SENSE
