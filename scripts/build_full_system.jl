@@ -75,10 +75,9 @@ gens = collect(
         x -> get_number(get_bus(x)) != surrogate_bus_number,
     ),
 )
-for g in gens 
+for g in gens
     inv_typ = inv_case78(get_name(g))
     add_component!(sys, inv_typ, g)
-end 
-
+end
 
 to_json(sys, base_system_path, force = true)

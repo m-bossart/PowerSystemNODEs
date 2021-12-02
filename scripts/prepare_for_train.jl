@@ -37,12 +37,11 @@ base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs.json")
 pvs_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs_pvs.json")
 
 include("build_full_system.jl")   #Build base system with all dynamic models 
-sys_full = System(base_system_path)            
+sys_full = System(base_system_path)
 pvs_data = fault_data_generator("scripts/config.yml") #pvs_data could be synthetic or real data 
 sys_pvs = build_pvs(pvs_data)
 to_json(sys_pvs, pvs_system_path, force = true)
-sys_pvs =
-    System(pvs_system_path)
+sys_pvs = System(pvs_system_path)
 #ground_truth_data = fault_data_generator(sys_full) 
 
 label_area!(sys_full, [16], "surrogate")
