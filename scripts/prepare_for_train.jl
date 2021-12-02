@@ -19,10 +19,13 @@ using Flux.Losses: mae, mse
 using ForwardDiff
 using Statistics
 using Arrow
+using YAML
+using Sundials
 using StructTypes
 using JSON3
 using DataFrames
 using Random
+using FFTW
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
@@ -30,17 +33,17 @@ include("../system_data/dynamic_components_data.jl")
 include("../src/PowerSystemNODEs.jl")
 configure_logging(console_level = Logging.Error)
 
-base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "base_system_3invs.json")
-sys_full = System(base_system_path)            #Has all dynamic models, ready to simulate 
+base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs.json")
+pvs_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs_pvs.json")
 
-#pvs_data = fault_data_generator(sys_full)      #TODO - generate pvs data from simulation
-#pvs_data = XXX()                               #TODO - generate pvs data from system id 
-#sys_pvs = build_pvs(pvs_data, smooth=true)     #TODO - build pvs from data 
-#include("../scripts/generate_fault_profiles.jl")    #Replace generate_fault_profiles.jl with three lines above 
-
+include("build_full_system.jl")   #Build base system with all dynamic models 
+sys_full = System(base_system_path)            
+pvs_data = fault_data_generator("scripts/config.yml") #pvs_data could be synthetic or real data 
+sys_pvs = build_pvs(pvs_data)
+to_json(sys_pvs, pvs_system_path, force = true)
 sys_pvs =
-    System(joinpath(INPUT_SYSTEM_FOLDER_NAME, "fault_library_3invs_vsms_20%lossP.json"))
-#ground_truth_data = fault_data_generator(sys_full) #TODO 
+    System(pvs_system_path)
+#ground_truth_data = fault_data_generator(sys_full) 
 
 label_area!(sys_full, [16], "surrogate")
 @assert check_single_connecting_line_condition(sys_full)
@@ -48,9 +51,11 @@ sys_surr = remove_area(sys_full, "1")
 sys_train = build_train_system(sys_surr, sys_pvs, "surrogate")
 to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "sys_train.json"), force = true)
 
-#CHECK: Should now be able to delete generate_input_data.jl 
 #create and serialize train data using default parameters 
-d = generate_train_data(sys_train, NODETrainDataParams())
+d = generate_train_data(sys_train, NODETrainDataParams())   #BUG - only works for single fault
+
+#plot(d.data[:tsteps], d.data[:ir_ground_truth])
+
 serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 
 #serialize default train params 

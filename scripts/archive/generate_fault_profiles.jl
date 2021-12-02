@@ -105,8 +105,8 @@ for a in devices
                     θ_org = get_voltage_angle_series(sol, source_bus)[2]
 
                     tsteps_org = tsteps
-                    tsteps, V = add_tanh(tsteps_org, V_org)
-                    tsteps, θ = add_tanh(tsteps_org, θ_org)
+                    tsteps, V = pad_tanh(tsteps_org, V_org)
+                    tsteps, θ = pad_tanh(tsteps_org, θ_org)
                     @debug length(tsteps)
                     t = sol.solution.t[1:(end - 1)]
                     if (sol.solution.retcode == :Success)

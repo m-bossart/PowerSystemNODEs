@@ -117,7 +117,7 @@ function Source_to_function_of_time(source::Source)
     return (V, θ)
 end
 
-function add_tanh(t, y)
+function pad_tanh(t, y)
     first = y[1]
     last = y[end]
     Δt = t[2] - t[1] #assume linear spacing

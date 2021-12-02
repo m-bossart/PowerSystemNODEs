@@ -1,4 +1,4 @@
-CompleteSystemPath: "system_data/base_system_3invs.json" 
+CompleteSystemPath: "system_data/14bus_3invs.json" 
 SimulationParameters:
   TspanStart: 0.0
   TspanEnd: 2.0
@@ -12,27 +12,31 @@ SimulationParameters:
 
 FaultParameters:
     BranchTrip:
-      DeviceName: ["BUS 10-BUS 11-i_15"]
+      DeviceName:  #["BUS 10-BUS 11-i_15"]
     BranchImpedanceChange:
-      DeviceName: ["BUS 7-BUS 8-i_11","BUS 10-BUS 11-i_15"]
+      DeviceName: # ["BUS 7-BUS 8-i_11","BUS 10-BUS 11-i_15"]
       Multiplier: 1.0
     ControlReferenceChange:
-      DeviceName:
-      RefValue: 0.9
+      DeviceName: ["generator-15-1"]
+      RefValue: 0.8
     GeneratorTrip:
-      DeviceName: ["generator-18-1"]
+      DeviceName: #["generator-18-1"]
     LoadChange:
-      DeviceName: ["load101"]
+      DeviceName: # ["load101"]
       RefValue: 0.8
     LoadTrip:
-      DeviceName: ["load101"]
+      DeviceName: # ["load101"]
 
 OutputParameters:
   WriteFile: false  
   OutputFile: "output"
+  PVS:
+    SavePVSData: true
+    PVSBus: 2 
+    PVSBranchName: "BUS 2-BUS 16-i_19" 
   OutputData: 
-    BusNumbers: [1, 1]
-    BusData: ["Vm", "Vtheta"]
+    BusNumbers: [1,1,2, 2]
+    BusData: ["Vm","Vtheta","Vm", "Vtheta"]
     DynamicDevices: #["gen2", "gen2"]
     States: #["ir_filter", "ii_filter"]
   
