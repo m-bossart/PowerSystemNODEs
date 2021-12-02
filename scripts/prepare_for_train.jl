@@ -31,7 +31,7 @@ include("../src/PowerSystemNODEs.jl")
 configure_logging(console_level = Logging.Error)
 
 base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "base_system_3invs.json")
-sys_full = System(base_system_path)             #TODO doesn't have non surrogate dynamic models yet 
+sys_full = System(base_system_path)            #Has all dynamic models, ready to simulate 
 
 #pvs_data = fault_data_generator(sys_full)      #TODO - generate pvs data from simulation
 #pvs_data = XXX()                               #TODO - generate pvs data from system id 

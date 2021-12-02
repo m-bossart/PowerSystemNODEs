@@ -285,3 +285,19 @@ function train(params::NODETrainParams)
         return false
     end
 end
+
+function capture_output(output_dict, output_directory, id)
+    output_path = joinpath(output_directory, id)
+    mkpath(output_path)
+    for (key, value) in output_dict
+        if typeof(value) == DataFrame
+            df = pop!(output_dict, key)
+            open(joinpath(output_path, key), "w") do io
+                Arrow.write(io, df)
+            end
+        end
+    end
+    open(joinpath(output_path, "high_level_outputs"), "w") do io
+        JSON3.write(io, output_dict)
+    end
+end

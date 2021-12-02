@@ -66,4 +66,19 @@ for i in 1:3
         add_component!(sys, inv_typ, g)
     end
 end
+
+#Add dynamic models to non-surrogate generators 
+gens = collect(
+    get_components(
+        ThermalStandard,
+        sys,
+        x -> get_number(get_bus(x)) != surrogate_bus_number,
+    ),
+)
+for g in gens 
+    inv_typ = inv_case78(get_name(g))
+    add_component!(sys, inv_typ, g)
+end 
+
+
 to_json(sys, base_system_path, force = true)

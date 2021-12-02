@@ -1,42 +1,38 @@
-CompleteSystemPath: "SIIPExamples.jl/script/4_PowerSimulationsDynamics_examples/Data/omib_sys.json"
-FaultsType: ["BranchTrip", "BranchImpedanceChange", "ControlReferenceChange", "GeneratorTrip"]
+CompleteSystemPath: "system_data/base_system_3invs.json" 
 SimulationParameters:
   TspanStart: 0.0
-  TspanEnd: 30.0
+  TspanEnd: 2.0
   StepSize: 0.001
-  AbsTol: 0.000001
-  RelTol: 0.001
+  AbsTol: 1e-9
+  RelTol: 1e-6
   TFault: 0.1
   DtMax: 0.02
-  Solver: "Rodas4"
-
-all: true
+  Solver: "Rodas4"  #TODO use this solver, currently hardcoded 
+  FaultTime: 1.0 
 
 FaultParameters:
     BranchTrip:
-      Time: 1.0
-      BranchName: "BUS 1-BUS 2-i_1"
+      DeviceName: ["BUS 10-BUS 11-i_15"]
     BranchImpedanceChange:
-      Time: 7.0
-      BranchName: "BUS 1-BUS 2-i_1"
-      Multiplier: 2
+      DeviceName: ["BUS 7-BUS 8-i_11","BUS 10-BUS 11-i_15"]
+      Multiplier: 1.0
     ControlReferenceChange:
-      Time: 5.0
-      Device: "generator-102-1"
-      RefValue: 0.5
+      DeviceName:
+      RefValue: 0.9
     GeneratorTrip:
-      Time: 3.0
-      Device: "generator-102-1"
+      DeviceName: ["generator-18-1"]
     LoadChange:
-      Time: 1.0
-      Device: "load-103-1"
+      DeviceName: ["load101"]
       RefValue: 0.8
     LoadTrip:
-      Time: 1.0
-      Device: "load-103-1"
-
+      DeviceName: ["load101"]
 
 OutputParameters:
+  WriteFile: false  
   OutputFile: "output"
-  OutputData: ["generator-102-1"] # buses to export output for
-  BusNumber: 102
+  OutputData: 
+    BusNumbers: [1, 1]
+    BusData: ["Vm", "Vtheta"]
+    DynamicDevices: #["gen2", "gen2"]
+    States: #["ir_filter", "ii_filter"]
+  
