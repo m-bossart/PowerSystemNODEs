@@ -18,7 +18,7 @@ include("../src/constants.jl")
 #BUG possible power flow issues using 14-bus system due to Fixed Admittance
 #raw_file_path = "cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw"
 raw_file_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "IEEE 14 bus_modified_33.raw")
-base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "base_system_3invs.json")
+base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs.json")
 
 sys = System(raw_file_path)
 surrogate_bus_number = 16
@@ -66,4 +66,18 @@ for i in 1:3
         add_component!(sys, inv_typ, g)
     end
 end
+
+#Add dynamic models to non-surrogate generators 
+gens = collect(
+    get_components(
+        ThermalStandard,
+        sys,
+        x -> get_number(get_bus(x)) != surrogate_bus_number,
+    ),
+)
+for g in gens
+    inv_typ = inv_case78(get_name(g))
+    add_component!(sys, inv_typ, g)
+end
+
 to_json(sys, base_system_path, force = true)
