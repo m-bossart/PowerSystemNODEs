@@ -3,26 +3,33 @@
 
 using Mustache
 include("../src/constants.jl")
+include("../src/PowerSystemNODEs.jl")
 include("../src/HPCTrain.jl")
 
-struct TestParams
+#= struct TestParams
     train_id::String
 end
+ =#
 
-test = [TestParams("test"), TestParams("test2")]
+params_data = NODETrainParams[]
+for i = 1:2
+    push!(params_data, NODETrainParams(train_id=string(i)))
+end 
 
-#=  hpc_params = SavioHPCTrain(;
+#=
+test = [NODETrainParams(), NODETrainParams()]
+
+ hpc_params = SavioHPCTrain(;
     username = "jdlara",
     params_data = test,
     project_folder = "test",
     scratch_path = "/global/home/users/jdlara",
 )
-
-generate_train_files(hpc_params)  =#
+  =#
 
 hpc_params = SummitHPCTrain(;
     username = "mabo4366",
-    params_data = test, 
+    params_data = params_data, 
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/mabo4366"
 )
