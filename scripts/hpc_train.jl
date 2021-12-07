@@ -1,5 +1,5 @@
-#using Pkg
-#Pkg.activate(".")
+using Pkg
+Pkg.activate(".")
 
 using Mustache
 include("../src/constants.jl")
