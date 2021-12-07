@@ -35,7 +35,7 @@ parallel --jobs \$SLURM_CPUS_ON_NODE \\
     --wd {{{project_path}}} \\
     --progress -a {{{train_set_file}}}\\
     --joblog {{{project_path}}}/hpc_train.log \\
-    julia --project={{{project_path}}} {{{project_path}}}/scripts/train.jl {}
+    julia --project={{{project_path}}} {{{project_path}}}/scripts/train_node.jl {}
 """
 
 struct HPCTrain
