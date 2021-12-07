@@ -112,18 +112,18 @@ function generate_train_files(train::HPCTrain)
     data["n_nodes"] = train.n_nodes
     data["train_set_file"] =
         joinpath(train.scratch_path, train.project_folder, "train_files.lst")
-    #open(data["train_set_file"], "w") do file
-    #    for param in train.params_data
-    #        param_file_path = joinpath(
-    #            train.scratch_path,
-    #            train.project_folder,
-    #            INPUT_FOLDER_NAME,
-    #            "train_$(param.train_id).json",
-    #        )
-    #        #serialize(param, param_file_path)
-    #        #write(file, "$param_file_path\n")
-    #    end
-    #end
+    open(data["train_set_file"], "w") do file
+        for param in train.params_data
+            param_file_path = joinpath(
+                train.scratch_path,
+                train.project_folder,
+                INPUT_FOLDER_NAME,
+                "train_$(param.train_id).json",
+            )
+            serialize(param, param_file_path)
+            write(file, "$param_file_path\n")
+        end
+    end
 
     filename = HPC_TRAIN_FILE
     open(filename, "w") do io
