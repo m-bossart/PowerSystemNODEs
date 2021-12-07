@@ -121,6 +121,7 @@ function generate_train_files(train::HPCTrain)
                 INPUT_FOLDER_NAME,
                 "train_$(param.train_id).json",
             )
+            touch(param_file_path)
             serialize(param, param_file_path)
             write(file, "$param_file_path\n")
         end

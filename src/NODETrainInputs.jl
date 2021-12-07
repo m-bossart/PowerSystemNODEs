@@ -9,7 +9,6 @@ function NODETrainInputs(name::String)
 end
 
 function serialize(inputs::NODETrainInputs, file_path::AbstractString)
-    touch(file_path)
     open(file_path, "w") do io
         JSON3.write(io, inputs)
     end
