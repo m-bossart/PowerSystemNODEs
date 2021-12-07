@@ -112,6 +112,7 @@ function generate_train_files(train::HPCTrain)
     data["n_nodes"] = train.n_nodes
     data["train_set_file"] =
         joinpath(train.scratch_path, train.project_folder, "train_files.lst")
+    touch(data["train_set_file"])
     open(data["train_set_file"], "w") do file
         for param in train.params_data
             param_file_path = joinpath(
