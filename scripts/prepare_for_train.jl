@@ -33,6 +33,12 @@ include("../system_data/dynamic_components_data.jl")
 include("../src/PowerSystemNODEs.jl")
 configure_logging(console_level = Logging.Info)
 
+mkpath(INPUT_FOLDER_NAME)
+mkpath(INPUT_SYSTEM_FOLDER_NAME)
+mkpath(OUTPUT_FOLDER_NAME)
+touch(HPC_TRAIN_FILE)
+touch(joinpath(INPUT_FOLDER_NAME,"data.json"))
+
 base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs.json")
 pvs_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs_pvs.json")
 
