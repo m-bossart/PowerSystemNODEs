@@ -32,7 +32,8 @@ hpc_params = SummitHPCTrain(;
     username = "mabo4366",
     params_data = params_data, 
     project_folder = "PowerSystemNODEs",
-    scratch_path = "/scratch/summit/mabo4366"
+    scratch_path = "/scratch/summit/mabo4366",
+    account = "ucb-general"
 )
 
 generate_train_files(hpc_params) 

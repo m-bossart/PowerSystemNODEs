@@ -88,7 +88,7 @@ function SummitHPCTrain(;
 )
     return HPCTrain(
         username,
-        "cu_allocation", # The proper value is TBD
+        "ucb-general", # The proper value is TBD
         "normal",
         "shas",
         project_folder,
