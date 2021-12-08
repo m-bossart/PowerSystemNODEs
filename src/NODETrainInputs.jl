@@ -91,6 +91,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
         solver,
         abstol = abstol,
         reltol = reltol,
+        initializealg = NoInit(),
         reset_simulation = false,
         saveat = tsteps,
     )
