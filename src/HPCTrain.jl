@@ -73,7 +73,7 @@ function SavioHPCTrain(;
         n_nodes,
         params_data,
         time_limit,
-        "",
+        HPC_TRAIN_FILE,
     )
 end
 
@@ -88,7 +88,7 @@ function SummitHPCTrain(;
 )
     return HPCTrain(
         username,
-        "ucb-general", # The proper value is TBD
+        "ucb-general", # Get allocation 
         "normal",
         "shas",
         project_folder,
@@ -97,7 +97,7 @@ function SummitHPCTrain(;
         n_nodes,
         params_data,
         time_limit,
-        "",
+        HPC_TRAIN_FILE,
     )
 end
 
