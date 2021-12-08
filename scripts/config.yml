@@ -1,4 +1,4 @@
-CompleteSystemPath: "system_data/14bus_3invs.json" 
+CompleteSystemPath: "system_data/full_system.json" 
 SimulationParameters:
   TspanStart: 0.0
   TspanEnd: 2.0

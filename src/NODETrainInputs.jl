@@ -62,7 +62,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
     set_bus_from_source(available_source) #Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
 
     sim_full = Simulation!(MassMatrixModel, sys_train, pwd(), tspan)
-    res = small_signal_analysis(sim_full)
+    #res = small_signal_analysis(sim_full)
     execute!(
         sim_full,
         solver,

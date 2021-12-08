@@ -23,7 +23,7 @@ const bash_file_template = """
 
 # Check Dependencies
 julia --project={{{project_path}}} -e 'using Pkg; Pkg.instantiate()'
-julia --project={{{project_path}}} -e 'include("scripts/prepare_for_train.jl")'
+julia --project={{{project_path}}} {{{project_path}}}/scripts/prepare_for_train.jl {{force_generate_inputs}}
 
 # Load Parallel
 module load {{gnu_parallel_name}}
@@ -52,6 +52,7 @@ struct HPCTrain
     params_data::Vector # TODO: return to Vector{NODETrainParams} after testing
     time_limit::String
     train_bash_file::String
+    force_generate_inputs::Bool
 end
 
 function SavioHPCTrain(;
@@ -74,6 +75,7 @@ function SavioHPCTrain(;
         params_data,
         time_limit,
         HPC_TRAIN_FILE,
+        false,
     )
 end
 
@@ -98,6 +100,7 @@ function SummitHPCTrain(;
         params_data,
         time_limit,
         HPC_TRAIN_FILE,
+        false,
     )
 end
 
@@ -117,6 +120,7 @@ function generate_train_files(train::HPCTrain)
     data["gnu_parallel_name"] = train.gnu_parallel_name
     data["project_path"] = joinpath(train.scratch_path, train.project_folder)
     data["n_nodes"] = train.n_nodes
+    data["force_generate_inputs"] = train.force_generate_inputs
     data["train_set_file"] =
         joinpath(train.scratch_path, train.project_folder, "train_files.lst")
     touch(data["train_set_file"])
