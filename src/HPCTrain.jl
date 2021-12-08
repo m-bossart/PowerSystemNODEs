@@ -142,5 +142,6 @@ function generate_train_files(train::HPCTrain)
 end
 
 function run_parallel_train(train::HPCTrain)
-    return run(`sbatch $train.train_bash_file`)
+    bash_file  = train.train_bash_file
+    return run(`sbatch $bash_file`)
 end
