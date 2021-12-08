@@ -95,7 +95,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
         saveat = tsteps,
     )
 
-    avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
+    #avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
     avgmodel_data = get_total_current_series(sim_simp)
 
     d = NODETrainInputs(
