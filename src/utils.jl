@@ -11,29 +11,26 @@ function build_sys_train(sys_faults::System, sys_full::System, Ref_bus_number::I
     remove_components!(sys_train, PowerLoad)
     remove_components!(sys_train, LoadZone)
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(x))) == "surrogate" &&
-                get_name(get_area(get_from(x))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(x))) == "surrogate" &&
+            get_name(get_area(get_from(x))) == "surrogate"
+        ),
         sys_train,
         Arc,
     )
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
-                get_name(get_area(get_from(get_arc(x)))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
+            get_name(get_area(get_from(get_arc(x)))) == "surrogate"
+        ),
         sys_train,
         Transformer2W,
     )
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
-                get_name(get_area(get_from(get_arc(x)))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
+            get_name(get_area(get_from(get_arc(x)))) == "surrogate"
+        ),
         sys_train,
         Line,
     )
@@ -712,7 +709,6 @@ function label_area!(sys::System, bus_numbers, area_name::String)
     for bus in buses
         if get_number(bus) in bus_numbers
             set_area!(bus, surrogate_area)
-            @show get_number(bus)
         end
     end
 end
