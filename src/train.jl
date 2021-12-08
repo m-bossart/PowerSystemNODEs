@@ -215,10 +215,11 @@ function train(params::NODETrainParams)
 
     #READ INPUT DATA AND SYSTEM
     sys = System(joinpath(params.input_data_path, "system.json"))
-    d = JSON3.read(
+    TrainInputs = JSON3.read(
         read(joinpath(params.input_data_path, "data.json")),
-        Dict{String, Dict{Symbol, Any}},
+        NODETrainInputs,
     )
+    d = TrainInputs.data 
     pvss = collect(get_components(PeriodicVariableSource, sys))
 
     res = nothing
