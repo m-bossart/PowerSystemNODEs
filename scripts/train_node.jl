@@ -30,7 +30,7 @@ configure_logging(console_level = Logging.Info)
 include("../src/PowerSystemNODEs.jl")
 include("../system_data/dynamic_components_data.jl")
 
-script_train_params_file = "train_parameters/train_instance_1.json"
+script_train_params_file = "input_data/train_instance_1.json"
 
 train_params_file = isempty(ARGS) ? script_train_params_file : ARGS[1]
 train_params = NODETrainParams(train_params_file)

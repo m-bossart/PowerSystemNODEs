@@ -58,7 +58,7 @@ d = generate_train_data(sys_train, NODETrainDataParams())   #BUG - only works fo
 serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 
 #serialize default train params 
-serialize(NODETrainParams(), joinpath(INPUT_FOLDER_NAME, "train_instance_1.json"))
+serialize(NODETrainParams(), joinpath(INPUT_FOLDER_NAME, "train_1.json"))
 
 ######### POST TRAIN GENERATE PREDICTION DATA ########
 #= sys_rest = remove_area(sys_full, "surrogate")

@@ -23,7 +23,7 @@ const bash_file_template = """
 
 # Check Dependencies
 julia --project={{{project_path}}} -e 'using Pkg; Pkg.instantiate()'
-julia --project={{{project_path}}} -e 'include("scripts/prepare_for_train.jl'
+julia --project={{{project_path}}} -e 'include("scripts/prepare_for_train.jl")'
 
 # Load Parallel
 module load {{gnu_parallel_name}}
