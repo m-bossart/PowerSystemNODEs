@@ -109,7 +109,7 @@ function generate_train_files(train::HPCTrain)
     mkpath(INPUT_SYSTEM_FOLDER_NAME)
     mkpath(OUTPUT_FOLDER_NAME)
     touch(HPC_TRAIN_FILE)
-    touch(joinpath(INPUT_FOLDER_NAME,"data.json"))
+    #touch(joinpath(INPUT_FOLDER_NAME,"data.json"))
 
     data = Dict()
     data["username"] = train.username
