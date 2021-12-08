@@ -13,7 +13,7 @@ end
  =#
 
 params_data = NODETrainParams[]
-for i in 1:2
+for i in 1:1
     push!(params_data, NODETrainParams(train_id = string(i)))
 end
 
