@@ -38,4 +38,4 @@ hpc_params = SummitHPCTrain(;
 ##
 
 generate_train_files(hpc_params)
-run_parallel_train(hpc_params)
+run_parallel_train(hpc_params) #submit bash file
