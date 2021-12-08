@@ -31,7 +31,7 @@ const PSY = PowerSystems
 
 include("../system_data/dynamic_components_data.jl")
 include("../src/PowerSystemNODEs.jl")
-configure_logging(console_level = Logging.Error)
+configure_logging(console_level = Logging.Info)
 
 base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs.json")
 pvs_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "14bus_3invs_pvs.json")
@@ -48,17 +48,17 @@ label_area!(sys_full, [16], "surrogate")
 @assert check_single_connecting_line_condition(sys_full)
 sys_surr = remove_area(sys_full, "1")
 sys_train = build_train_system(sys_surr, sys_pvs, "surrogate")
-to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "sys_train.json"), force = true)
+to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "system.json"), force = true)
 
+##
 #create and serialize train data using default parameters 
 d = generate_train_data(sys_train, NODETrainDataParams())   #BUG - only works for single fault
 
 #plot(d.data[:tsteps], d.data[:ir_ground_truth])
-
 serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 
 #serialize default train params 
-serialize(NODETrainParams(), joinpath(INPUT_FOLDER_NAME, "train_instance_1.json"))
+serialize(NODETrainParams(), joinpath(INPUT_FOLDER_NAME, "train_1.json"))
 
 ######### POST TRAIN GENERATE PREDICTION DATA ########
 #= sys_rest = remove_area(sys_full, "surrogate")

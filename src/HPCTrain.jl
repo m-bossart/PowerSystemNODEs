@@ -23,6 +23,7 @@ const bash_file_template = """
 
 # Check Dependencies
 julia --project={{{project_path}}} -e 'using Pkg; Pkg.instantiate()'
+julia --project={{{project_path}}} -e 'include("scripts/prepare_for_train.jl")'
 
 # Load Parallel
 module load {{gnu_parallel_name}}
@@ -35,7 +36,7 @@ parallel --jobs \$SLURM_CPUS_ON_NODE \\
     --wd {{{project_path}}} \\
     --progress -a {{{train_set_file}}}\\
     --joblog {{{project_path}}}/hpc_train.log \\
-    julia --project={{{project_path}}} {{{project_path}}}/scripts/train.jl {}
+    julia --project={{{project_path}}} {{{project_path}}}/scripts/train_node.jl {}
 """
 
 struct HPCTrain
@@ -87,7 +88,7 @@ function SummitHPCTrain(;
 )
     return HPCTrain(
         username,
-        "cu_allocation", # The proper value is TBD
+        "ucb-general", # The proper value is TBD
         "normal",
         "shas",
         project_folder,
@@ -112,18 +113,20 @@ function generate_train_files(train::HPCTrain)
     data["n_nodes"] = train.n_nodes
     data["train_set_file"] =
         joinpath(train.scratch_path, train.project_folder, "train_files.lst")
-    #open(data["train_set_file"], "w") do file
-    #    for param in train.params_data
-    #        param_file_path = joinpath(
-    #            train.scratch_path,
-    #            train.project_folder,
-    #            INPUT_FOLDER_NAME,
-    #            "train_$(param.train_id).json",
-    #        )
-    #        #serialize(param, param_file_path)
-    #        #write(file, "$param_file_path\n")
-    #    end
-    #end
+    touch(data["train_set_file"])
+    open(data["train_set_file"], "w") do file
+        for param in train.params_data
+            param_file_path = joinpath(
+                train.scratch_path,
+                train.project_folder,
+                INPUT_FOLDER_NAME,
+                "train_$(param.train_id).json",
+            )
+            touch(param_file_path)
+            serialize(param, param_file_path)
+            write(file, "$param_file_path\n")
+        end
+    end
 
     filename = HPC_TRAIN_FILE
     open(filename, "w") do io
