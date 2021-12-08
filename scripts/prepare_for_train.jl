@@ -33,7 +33,13 @@ include("../system_data/dynamic_components_data.jl")
 include("../src/PowerSystemNODEs.jl")
 configure_logging(console_level = Logging.Info)
 
-force_generate_inputs = isempty(ARGS) ? false : ARGS[1]
+force_generate = isempty(ARGS) ? "false" : ARGS[1]
+if force_generate == "false"
+    force_generate_inputs = false 
+else 
+    force_generate_inputs = true 
+end 
+
 
 train_data_path = joinpath(INPUT_FOLDER_NAME, "data.json")
 train_system_path = joinpath(INPUT_FOLDER_NAME, "system.json")

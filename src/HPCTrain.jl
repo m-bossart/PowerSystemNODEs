@@ -52,7 +52,7 @@ struct HPCTrain
     params_data::Vector # TODO: return to Vector{NODETrainParams} after testing
     time_limit::String
     train_bash_file::String
-    force_generate_inputs::Bool
+    force_generate_inputs::String
 end
 
 function SavioHPCTrain(;
@@ -75,7 +75,7 @@ function SavioHPCTrain(;
         params_data,
         time_limit,
         HPC_TRAIN_FILE,
-        false,
+        "false",
     )
 end
 
@@ -100,7 +100,7 @@ function SummitHPCTrain(;
         params_data,
         time_limit,
         HPC_TRAIN_FILE,
-        false,
+        "false",
     )
 end
 
