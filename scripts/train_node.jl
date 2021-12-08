@@ -34,6 +34,7 @@ script_train_params_file = "input_data/train_instance_1.json"
 
 train_params_file = isempty(ARGS) ? script_train_params_file : ARGS[1]
 train_params = NODETrainParams(train_params_file)
+#train_params = NODETrainParams()  #uncomment for defaults
 status = train(train_params)
 
 if train_params.graphical_report

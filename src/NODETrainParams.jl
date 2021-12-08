@@ -154,13 +154,13 @@ end
 
 function read_input_data(pvs, d)
     id = get_name(pvs)
-    tsteps = Float64.(d[id][:tsteps])
+    tsteps = Float64.(d[:tsteps])
     i_ground_truth =
-        vcat(Float64.(d[id][:ir_ground_truth])', Float64.(d[id][:ii_ground_truth])')
-    i_node_off = vcat(Float64.(d[id][:ir_node_off])', Float64.(d[id][:ii_node_off])')
-    p_ode = Float64.(d[id][:p_ode])
-    x₀ = Float64.(d[id][:x₀])
-    p_V₀ = Float64.(d[id][:V₀])
+        vcat(Float64.(d[:ir_ground_truth])', Float64.(d[:ii_ground_truth])')
+    i_node_off = vcat(Float64.(d[:ir_node_off])', Float64.(d[:ii_node_off])')
+    p_ode = Float64.(d[:p_ode])
+    x₀ = Float64.(d[:x₀])
+    p_V₀ = Float64.(d[:V₀])
     return id, tsteps, i_ground_truth, i_node_off, p_ode, x₀, p_V₀
 end
 
