@@ -1,6 +1,6 @@
 include("../system_data/dynamic_components_data.jl")
 include("../src/PowerSystemNODEs.jl")
-configure_logging(console_level = Logging.Info)
+configure_logging(console_level = NODE_CONSOLE_LEVEL, file_level = NODE_FILE_LEVEL)
 
 force_generate = isempty(ARGS) ? "true" : ARGS[1]
 force_generate_inputs = convert(Bool, force_generate == "true")
@@ -10,14 +10,14 @@ train_system_path = joinpath(INPUT_FOLDER_NAME, "system.json")
 full_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
 
 if (!(isfile(full_system_path)) || force_generate_inputs)
-    @warn "Rebuilding full system "
+    @warn "Rebuilding full system"
     include("build_full_system.jl")
     force_generate_inputs = true
 end
 
 if (!(isfile(train_system_path)) || !(isfile(train_data_path)) || force_generate_inputs)
-    @warn "Rebuilding train system and train input data"
-    sys_full = System(full_system_path)
+    @warn "Rebuilding input data files"
+    sys_full = node_load_system(full_system_path)
     pvs_data = fault_data_generator("scripts/config.yml")
     sys_pvs = build_pvs(pvs_data)
     label_area!(sys_full, [16], "surrogate")

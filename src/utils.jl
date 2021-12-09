@@ -11,29 +11,26 @@ function build_sys_train(sys_faults::System, sys_full::System, Ref_bus_number::I
     remove_components!(sys_train, PowerLoad)
     remove_components!(sys_train, LoadZone)
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(x))) == "surrogate" &&
-                get_name(get_area(get_from(x))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(x))) == "surrogate" &&
+            get_name(get_area(get_from(x))) == "surrogate"
+        ),
         sys_train,
         Arc,
     )
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
-                get_name(get_area(get_from(get_arc(x)))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
+            get_name(get_area(get_from(get_arc(x)))) == "surrogate"
+        ),
         sys_train,
         Transformer2W,
     )
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
-                get_name(get_area(get_from(get_arc(x)))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
+            get_name(get_area(get_from(get_arc(x)))) == "surrogate"
+        ),
         sys_train,
         Line,
     )
@@ -338,7 +335,14 @@ function initialize_sys!(sys::System, name::String)
     device = get_component(DynamicInverter, sys, name)
     bus = get_bus(get_component(StaticInjection, sys, name)).number
     # set_parameters!(device, p)
-    sim = Simulation!(MassMatrixModel, sys, pwd(), (0.0, 1.0))
+    sim = Simulation!(
+        MassMatrixModel,
+        sys,
+        pwd(),
+        (0.0, 1.0),
+        console_level = PSID_CONSOLE_LEVEL,
+        file_level = PSID_FILE_LEVEL,
+    )
     x₀_dict = read_initial_conditions(sim)[get_name(device)]
     x₀ = [value for (key, value) in x₀_dict]
     wrappers = sim.inputs.dynamic_injectors
@@ -403,178 +407,6 @@ function plot_pvs(tsteps, pvs::PeriodicVariableSource, xaxis)
         plot(tsteps, V, label = "plot from pvs coefficients", xaxis = xaxis, legend = false)
     p2 = plot(tsteps, θ, label = "plot from pvs coefficients", xaxis = xaxis)
     return p1, p2
-end
-
-#Before you can initialize your surrogate, you need the true response in steady state.
-
-#function Initialize(V,θ,Ir,Ii)
-
-function cb_plot(pred, plot_log::Bool)
-    if plot_log
-        p1 = plot(
-            tsteps_train,
-            pred[1, :],
-            markersize = 2,
-            label = "real current prediction",
-        )
-        plot!(p1, tsteps, ode_data[1, :], label = "real current true")
-        plot!(p1, tsteps, avgmodel_data[1, :], label = "real current avg. model")
-        p1_log = plot(
-            tsteps_train,
-            pred[1, :],
-            markersize = 2,
-            label = "real current prediction",
-            xaxis = :log,
-        )
-        plot!(p1_log, tsteps, ode_data[1, :], label = "real current true")
-        plot!(p1_log, tsteps, avgmodel_data[1, :], label = "real current avg. model")
-        p2 = plot(
-            tsteps_train,
-            pred[2, :],
-            markersize = 2,
-            label = "imag current prediction",
-        )
-        plot!(p2, tsteps, ode_data[2, :], label = "imag current true")
-        plot!(p2, tsteps, avgmodel_data[2, :], label = "imag current avg. model")
-        p2_log = plot(
-            tsteps_train,
-            pred[2, :],
-            markersize = 2,
-            label = "imag current prediction",
-        )
-        plot!(p2_log, tsteps, ode_data[2, :], xaxis = :log, label = "imag current true")
-        plot!(p2_log, tsteps, avgmodel_data[2, :], label = "imag current avg. model")
-
-        p3 = plot(
-            tsteps_train,
-            pred[3, :],
-            markersize = 2,
-            label = "real current from inverter",
-        )
-        p3_log = plot(
-            tsteps_train,
-            pred[3, :],
-            markersize = 2,
-            label = "real current from inverter",
-            xaxis = :log,
-        )
-        p4 = plot(
-            tsteps_train,
-            pred[4, :],
-            markersize = 2,
-            label = "imag current from inverter",
-        )
-        p4_log = plot(
-            tsteps_train,
-            pred[4, :],
-            markersize = 2,
-            label = "imag current from inverter",
-            xaxis = :log,
-        )
-
-        p5 = plot(
-            tsteps_train,
-            pred[5, :],
-            markersize = 2,
-            label = "real current from nn source",
-        )
-        p5_log = plot(
-            tsteps_train,
-            pred[5, :],
-            markersize = 2,
-            label = "real current from nn source",
-            xaxis = :log,
-        )
-        p6 = plot(
-            tsteps_train,
-            pred[6, :],
-            markersize = 2,
-            label = "imag current from nn source",
-        )
-        p6_log = plot(
-            tsteps_train,
-            pred[6, :],
-            markersize = 2,
-            label = "imag current from nn source",
-            xaxis = :log,
-        )
-
-        plt = plot(
-            p1,
-            p2,
-            p1_log,
-            p2_log,
-            p3,
-            p4,
-            p3_log,
-            p4_log,
-            p5,
-            p6,
-            p5_log,
-            p6_log,
-            layout = (6, 2),
-            size = (1000, 1000),
-        )
-        push!(list_plots, plt)
-        display_plots && display(plt)
-    else
-        p1 = plot(
-            tsteps_train,
-            pred[1, :],
-            markersize = 2,
-            label = "real current prediction",
-        )
-        plot!(p1, tsteps, ode_data[1, :], label = "real current true")
-        plot!(p1, tsteps, avgmodel_data[1, :], label = "real current avg. model")
-        p2 = plot(
-            tsteps_train,
-            pred[2, :],
-            markersize = 2,
-            label = "imag current prediction",
-        )
-        plot!(p2, tsteps, ode_data[2, :], label = "imag current true")
-        plot!(p2, tsteps, avgmodel_data[2, :], label = "imag current avg. model")
-        p3 = plot(
-            tsteps_train,
-            pred[3, :],
-            markersize = 2,
-            label = "real current from inverter",
-        )
-        p4 = plot(
-            tsteps_train,
-            pred[4, :],
-            markersize = 2,
-            label = "imag current from inverter",
-        )
-        p5 = plot(
-            tsteps_train,
-            pred[5, :],
-            markersize = 2,
-            label = "real current from nn source",
-        )
-        p6 = plot(
-            tsteps_train,
-            pred[6, :],
-            markersize = 2,
-            label = "imag current from nn source",
-        )
-        plt = plot(p1, p2, p3, p4, p5, p6, layout = (3, 2), size = (1000, 1000))
-        push!(list_plots, plt)
-        display_plots && display(plt)
-    end
-end
-
-function plot_compare(full_model, simple_model, surr_model)
-    pcomp_1 = plot(full_model[1, :], label = "full order")
-    plot!(pcomp_1, simple_model[1, :], label = "avg param model")
-    plot!(pcomp_1, surr_model[1, :], label = "uode surrogate model")
-    plot!(pcomp_1, surr_model[3, :], label = "inv part of surrogate model")
-    pcomp_2 = plot(full_model[2, :], label = "full order")
-    plot!(pcomp_2, simple_model[2, :], label = "avg param model")
-    plot!(pcomp_2, surr_model[2, :], label = "uode surrogate model")
-    plot!(pcomp_2, surr_model[4, :], label = "inv part of surrogate model")
-    pcomp = plot(pcomp_1, pcomp_2, layout = (1, 2))
-    return pcomp
 end
 
 function extending_ranges(datasize::Integer, groupsize::Integer)
@@ -779,4 +611,18 @@ function remove_area(sys_original::System, area_name::String)
         end
     end
     return sys
+end
+
+function node_load_system(inputs...)
+    logger =
+        configure_logging(console_level = PSY_CONSOLE_LEVEL, file_level = PSY_FILE_LEVEL)
+    try
+        Logging.with_logger(logger) do
+            sys = PSY.System(inputs...)
+            return sys
+        end
+    finally
+        close(logger)
+        configure_logging(console_level = NODE_CONSOLE_LEVEL, file_level = NODE_FILE_LEVEL)
+    end
 end
