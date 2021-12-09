@@ -24,6 +24,5 @@ hpc_params = SummitHPCTrain(;
     scratch_path = "/scratch/summit/mabo4366",
 )
 
-
 generate_train_files(hpc_params)
-run_parallel_train(hpc_params) 
+run_parallel_train(hpc_params)

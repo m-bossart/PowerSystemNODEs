@@ -25,7 +25,6 @@ using DataFrames
 using Random
 using FFTW
 
-
 const PSID = PowerSimulationsDynamics
 const PSY = PowerSystems
 
@@ -39,4 +38,3 @@ include("NODETrainInputs.jl")
 include("train.jl")
 include("utils.jl")
 include("visualize.jl")
-
