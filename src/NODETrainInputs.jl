@@ -61,7 +61,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
 
     set_bus_from_source(available_source) #Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
 
-    sim_full = Simulation!(MassMatrixModel, sys_train, pwd(), tspan)
+    sim_full = Simulation!(MassMatrixModel, sys_train, pwd(), tspan, console_level = PSID_CONSOLE_LEVEL, file_level = PSID_FILE_LEVEL)
     #res = small_signal_analysis(sim_full)
     execute!(
         sim_full,
@@ -82,7 +82,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
     x₀, refs, Vr0, Vi0 = initialize_sys!(sys_init, "gen1")
     Vm, Vθ = Source_to_function_of_time(get_dynamic_injector(active_source))
     p_ode = vcat(p_inv, refs, p_fixed)
-    sim_simp = Simulation!(MassMatrixModel, sys_init, pwd(), tspan)
+    sim_simp = Simulation!(MassMatrixModel, sys_init, pwd(), tspan, console_level = PSID_CONSOLE_LEVEL, file_level = PSID_FILE_LEVEL)
     @debug "initialize system power flow", solve_powerflow(sys_init)["flow_results"]
     @debug "initialize system power flow", solve_powerflow(sys_init)["bus_results"]
     @debug show_states_initial_value(sim_simp)

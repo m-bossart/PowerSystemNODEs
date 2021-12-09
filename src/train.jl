@@ -214,7 +214,7 @@ function train(params::NODETrainParams)
         (optimizer_adjust = instantiate_optimizer_adjust(params))
 
     #READ INPUT DATA AND SYSTEM
-    sys = System(joinpath(params.input_data_path, "system.json"))
+    sys = node_load_system(joinpath(params.input_data_path, "system.json"))
     TrainInputs =
         JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
     d = TrainInputs.data

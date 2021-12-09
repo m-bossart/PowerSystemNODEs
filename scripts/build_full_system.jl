@@ -6,7 +6,7 @@ include("../src/PowerSystemNODEs.jl")
 raw_file_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "IEEE 14 bus_modified_33.raw")
 base_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
 
-sys = System(raw_file_path)
+sys = node_load_system(raw_file_path)
 surrogate_bus_number = 16
 surrogate_bus =
     collect(get_components(Bus, sys, x -> get_number(x) == surrogate_bus_number))[1]

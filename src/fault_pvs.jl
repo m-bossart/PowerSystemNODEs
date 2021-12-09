@@ -15,7 +15,7 @@ function fault_data_generator(path_to_config)
     OutputParameters = configuration["OutputParameters"]
 
     t_fault = SimulationParameters["FaultTime"]
-    system = System(configuration["CompleteSystemPath"])
+    system = node_load_system(configuration["CompleteSystemPath"])
 
     faults = []
     append_faults!(faults, FaultParameters, system, t_fault) #Build list of PSID faults based on FaultParameters
@@ -32,7 +32,7 @@ end
 function build_pvs(dict_fault_data; pad_signal = true)
     pad_signal
 
-    sys_pvs = System(100.0)
+    sys_pvs = node_load_system(100.0)
     add_component!(
         sys_pvs,
         Bus(
@@ -117,7 +117,7 @@ function build_fault_data_dataframe(faults, system, OutputParameters, Simulation
 
     output = Dict{Int, Dict{String, Any}}()
     for (i, fault) in enumerate(faults)
-        sim = Simulation!(MassMatrixModel, system, pwd(), tspan, fault)
+        sim = Simulation!(MassMatrixModel, system, pwd(), tspan, fault, console_level = PSID_CONSOLE_LEVEL, file_level = PSID_FILE_LEVEL)
         @warn fault
         execute!(
             sim,
