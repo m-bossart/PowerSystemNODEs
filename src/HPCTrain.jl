@@ -23,7 +23,7 @@ const bash_file_template = """
 
 # Check Dependencies
 julia --project={{{project_path}}} -e 'using Pkg; Pkg.instantiate()'
-julia --project={{{project_path}}} -e 'include("scripts/prepare_for_train.jl")'
+julia --project={{{project_path}}} {{{project_path}}}/scripts/prepare_for_train.jl {{force_generate_inputs}}
 
 # Load Parallel
 module load {{gnu_parallel_name}}
@@ -52,6 +52,7 @@ struct HPCTrain
     params_data::Vector # TODO: return to Vector{NODETrainParams} after testing
     time_limit::String
     train_bash_file::String
+    force_generate_inputs::String
 end
 
 function SavioHPCTrain(;
@@ -73,7 +74,8 @@ function SavioHPCTrain(;
         n_nodes,
         params_data,
         time_limit,
-        "",
+        HPC_TRAIN_FILE,
+        "false",
     )
 end
 
@@ -88,7 +90,7 @@ function SummitHPCTrain(;
 )
     return HPCTrain(
         username,
-        "ucb-general", # The proper value is TBD
+        "ucb-general", # Get allocation 
         "normal",
         "shas",
         project_folder,
@@ -97,11 +99,18 @@ function SummitHPCTrain(;
         n_nodes,
         params_data,
         time_limit,
-        "",
+        HPC_TRAIN_FILE,
+        "false",
     )
 end
 
 function generate_train_files(train::HPCTrain)
+    mkpath(INPUT_FOLDER_NAME)
+    mkpath(INPUT_SYSTEM_FOLDER_NAME)
+    mkpath(OUTPUT_FOLDER_NAME)
+    touch(HPC_TRAIN_FILE)
+    #touch(joinpath(INPUT_FOLDER_NAME,"data.json"))
+
     data = Dict()
     data["username"] = train.username
     data["account"] = train.account
@@ -111,6 +120,7 @@ function generate_train_files(train::HPCTrain)
     data["gnu_parallel_name"] = train.gnu_parallel_name
     data["project_path"] = joinpath(train.scratch_path, train.project_folder)
     data["n_nodes"] = train.n_nodes
+    data["force_generate_inputs"] = train.force_generate_inputs
     data["train_set_file"] =
         joinpath(train.scratch_path, train.project_folder, "train_files.lst")
     touch(data["train_set_file"])
@@ -136,5 +146,6 @@ function generate_train_files(train::HPCTrain)
 end
 
 function run_parallel_train(train::HPCTrain)
-    return run(`sbatch $train.train_bash_file`)
+    bash_file = train.train_bash_file
+    return run(`sbatch $bash_file`)
 end

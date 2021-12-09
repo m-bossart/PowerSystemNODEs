@@ -8,7 +8,7 @@ function NODETrainInputs(name::String)
     return NODETrainInputs(name, Dict{Symbol, Vector{Float64}}())
 end
 
-function serialize(inputs::NODETrainInputs, file_path::AbstractString)
+function serialize(inputs::NODETrainInputs, file_path::String)
     open(file_path, "w") do io
         JSON3.write(io, inputs)
     end
@@ -62,7 +62,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
     set_bus_from_source(available_source) #Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
 
     sim_full = Simulation!(MassMatrixModel, sys_train, pwd(), tspan)
-    res = small_signal_analysis(sim_full)
+    #res = small_signal_analysis(sim_full)
     execute!(
         sim_full,
         solver,
@@ -91,11 +91,12 @@ function generate_train_data(sys_train, NODETrainDataParams)
         solver,
         abstol = abstol,
         reltol = reltol,
+        initializealg = NoInit(),
         reset_simulation = false,
         saveat = tsteps,
     )
 
-    avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
+    #avgmodel_data_p = get_real_current_series(read_results(sim_simp), "gen1")
     avgmodel_data = get_total_current_series(sim_simp)
 
     d = NODETrainInputs(
