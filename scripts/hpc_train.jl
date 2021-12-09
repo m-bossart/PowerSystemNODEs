@@ -1,12 +1,7 @@
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
-
 using Mustache
 include("../src/constants.jl")
 include("../src/PowerSystemNODEs.jl")
 include("../src/HPCTrain.jl")
-
 
 params_data = NODETrainParams[]
 for i in 1:2
