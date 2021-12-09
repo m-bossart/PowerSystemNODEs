@@ -1,19 +1,5 @@
-#Script that builds the original full system which is used in prepare_for_train.jl
-
-using Pkg
-Pkg.activate(".")
-using Revise
-using Distributions
-using OrdinaryDiffEq
-using PowerSystems
-using PowerSimulationsDynamics
-const PSID = PowerSimulationsDynamics
-const PSY = PowerSystems
-using Plots
-using FFTW
-
 include("../system_data/dynamic_components_data.jl")
-include("../src/constants.jl")
+include("../src/PowerSystemNODEs.jl")
 
 #BUG possible power flow issues using 14-bus system due to Fixed Admittance
 #raw_file_path = "cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw"

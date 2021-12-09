@@ -7,23 +7,17 @@ include("../src/constants.jl")
 include("../src/PowerSystemNODEs.jl")
 include("../src/HPCTrain.jl")
 
-#= struct TestParams
-    train_id::String
-end
- =#
 
 params_data = NODETrainParams[]
-for i in 1:1
+for i in 1:2
     push!(params_data, NODETrainParams(train_id = string(i)))
 end
 
 #=
-test = [NODETrainParams(), NODETrainParams()]
-
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
-    params_data = test,
-    project_folder = "test",
+    params_data = params_data,
+    project_folder = "PowerSystemNODEs",
     scratch_path = "/global/home/users/jdlara",
 )
   =#
@@ -37,5 +31,4 @@ hpc_params = SummitHPCTrain(;
 
 
 generate_train_files(hpc_params)
-##
-run_parallel_train(hpc_params) #submit bash file
+run_parallel_train(hpc_params) 
