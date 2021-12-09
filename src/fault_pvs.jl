@@ -117,7 +117,15 @@ function build_fault_data_dataframe(faults, system, OutputParameters, Simulation
 
     output = Dict{Int, Dict{String, Any}}()
     for (i, fault) in enumerate(faults)
-        sim = Simulation!(MassMatrixModel, system, pwd(), tspan, fault, console_level = PSID_CONSOLE_LEVEL, file_level = PSID_FILE_LEVEL)
+        sim = Simulation!(
+            MassMatrixModel,
+            system,
+            pwd(),
+            tspan,
+            fault,
+            console_level = PSID_CONSOLE_LEVEL,
+            file_level = PSID_FILE_LEVEL,
+        )
         @warn fault
         execute!(
             sim,

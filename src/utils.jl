@@ -11,29 +11,26 @@ function build_sys_train(sys_faults::System, sys_full::System, Ref_bus_number::I
     remove_components!(sys_train, PowerLoad)
     remove_components!(sys_train, LoadZone)
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(x))) == "surrogate" &&
-                get_name(get_area(get_from(x))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(x))) == "surrogate" &&
+            get_name(get_area(get_from(x))) == "surrogate"
+        ),
         sys_train,
         Arc,
     )
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
-                get_name(get_area(get_from(get_arc(x)))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
+            get_name(get_area(get_from(get_arc(x)))) == "surrogate"
+        ),
         sys_train,
         Transformer2W,
     )
     remove_components!(
-        x ->
-            !(
-                get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
-                get_name(get_area(get_from(get_arc(x)))) == "surrogate"
-            ),
+        x -> !(
+            get_name(get_area(get_to(get_arc(x)))) == "surrogate" &&
+            get_name(get_area(get_from(get_arc(x)))) == "surrogate"
+        ),
         sys_train,
         Line,
     )
@@ -338,7 +335,14 @@ function initialize_sys!(sys::System, name::String)
     device = get_component(DynamicInverter, sys, name)
     bus = get_bus(get_component(StaticInjection, sys, name)).number
     # set_parameters!(device, p)
-    sim = Simulation!(MassMatrixModel, sys, pwd(), (0.0, 1.0), console_level = PSID_CONSOLE_LEVEL, file_level = PSID_FILE_LEVEL)
+    sim = Simulation!(
+        MassMatrixModel,
+        sys,
+        pwd(),
+        (0.0, 1.0),
+        console_level = PSID_CONSOLE_LEVEL,
+        file_level = PSID_FILE_LEVEL,
+    )
     x₀_dict = read_initial_conditions(sim)[get_name(device)]
     x₀ = [value for (key, value) in x₀_dict]
     wrappers = sim.inputs.dynamic_injectors
@@ -610,14 +614,15 @@ function remove_area(sys_original::System, area_name::String)
 end
 
 function node_load_system(inputs...)
-    logger =  configure_logging(console_level = PSY_CONSOLE_LEVEL , file_level = PSY_FILE_LEVEL)
+    logger =
+        configure_logging(console_level = PSY_CONSOLE_LEVEL, file_level = PSY_FILE_LEVEL)
     try
         Logging.with_logger(logger) do
             sys = PSY.System(inputs...)
             return sys
         end
     finally
-       close(logger)
-       configure_logging(console_level = NODE_CONSOLE_LEVEL, file_level = NODE_FILE_LEVEL)
+        close(logger)
+        configure_logging(console_level = NODE_CONSOLE_LEVEL, file_level = NODE_FILE_LEVEL)
     end
 end

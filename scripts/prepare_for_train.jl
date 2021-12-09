@@ -29,7 +29,6 @@ if (!(isfile(train_system_path)) || !(isfile(train_data_path)) || force_generate
     serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 end
 
-
 ######### POST TRAIN GENERATE PREDICTION DATA ########
 #= sys_rest = remove_area(sys_full, "surrogate")
 sys_reduced = build_reduced_system(sys_rest, NODE, "1")
