@@ -2,12 +2,12 @@
 
 function calculate_loss_function_scaling(params, fault_data)
     if params.loss_function_scale == "range"
-        full_ir = Float64[] 
+        full_ir = Float64[]
         full_ii = Float64[]
-        for (key,value) in fault_data
+        for (key, value) in fault_data
             full_ir = vcat(full_ir, value[:ir_ground_truth])
             full_ii = vcat(full_ii, value[:ii_ground_truth])
-        end     
+        end
         Ir_scale = maximum(full_ir) - minimum(full_ir)
         Ii_scale = maximum(full_ii) - minimum(full_ii)
     elseif params.loss_function_scale == "none"
@@ -20,7 +20,7 @@ function calculate_loss_function_scaling(params, fault_data)
 end
 
 function initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
-    p_ode= fault_dict[:p_ode]
+    p_ode = fault_dict[:p_ode]
     x₀ = fault_dict[:x₀]
     p_V₀ = fault_dict[:V₀]
 
@@ -40,14 +40,17 @@ function initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
     surr(dx, res_surr.zero, p, 0.0)
     @assert all(isapprox.(dx, 0.0; atol = 1e-8))
 
-    tspan = (tsteps[1], tsteps[end])   
+    tspan = (tsteps[1], tsteps[end])
     surr_func = ODEFunction(surr, mass_matrix = M)
     surr_prob = ODEProblem(surr_func, x₀_surr, tspan, p)
     return res_surr.zero, surr_prob, p_nn, p_fixed
 end
 
 function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
-    i_ver =  vcat(Float64.(fault_dict[:ir_ground_truth])', Float64.(fault_dict[:ii_ground_truth])')
+    i_ver = vcat(
+        Float64.(fault_dict[:ir_ground_truth])',
+        Float64.(fault_dict[:ii_ground_truth])',
+    )
     sol = solve(
         surr_prob,
         solver,
@@ -59,7 +62,7 @@ function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
     @assert mae(sol[22, :], i_ver[1, :]) < 1e-3 # was 5e-5 with sequential train. need to double check
 end
 
-function turn_node_on(surr_prob_node_off, params, fault_dict , p_nn)
+function turn_node_on(surr_prob_node_off, params, fault_dict, p_nn)
     p_ode = fault_dict[:p_ode]
     p_V₀ = fault_dict[:V₀]
     n_weights_nn = length(p_nn)
@@ -127,7 +130,6 @@ function calculate_per_solve_maxiters(params, tsteps, n_faults)
     return per_solve_maxiters
 end
 
-
 function train(params::NODETrainParams)
 
     #INSTANTIATE
@@ -142,20 +144,17 @@ function train(params::NODETrainParams)
     #READ INPUT DATA AND SYSTEM
     sys = node_load_system(joinpath(params.input_data_path, "system.json"))
 
-    TrainInputs = JSON3.read(
-        read(joinpath(params.input_data_path, "data.json")),
-        NODETrainInputs,
-    )
+    TrainInputs =
+        JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
 
     tsteps = TrainInputs.tsteps
     fault_data = TrainInputs.fault_data
     pvss = collect(get_components(PeriodicVariableSource, sys))
-    Ir_scale, Ii_scale = calculate_loss_function_scaling(params, fault_data)   
+    Ir_scale, Ii_scale = calculate_loss_function_scaling(params, fault_data)
 
-    
     res = nothing
     output = Dict{String, Any}(
-        "loss" => DataFrame( RangeCount = Int[], Loss = Float64[]),
+        "loss" => DataFrame(RangeCount = Int[], Loss = Float64[]),
         "parameters" => DataFrame(Parameters = Vector{Any}[]),
         "predictions" =>
             DataFrame(ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
@@ -164,67 +163,68 @@ function train(params::NODETrainParams)
         "final_loss" => [],
         "train_id" => params.train_id,
     )
-    per_solve_maxiters = calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss)) #TODO check logic holds for parallel train 
+    per_solve_maxiters =
+        calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss)) #TODO check logic holds for parallel train 
 
     #At keys to fault_data with surrogate, u0, etc. 
-    for pvs in pvss 
+    for pvs in pvss
         Vm, Vθ = Source_to_function_of_time(pvs)
         surr = instantiate_surr(params, nn, Vm, Vθ)
         fault_dict = fault_data[get_name(pvs)]
 
         u₀, surr_prob_node_off, p_nn, p_fixed =
-              initialize_surrogate(params, nn, M, tsteps, fault_dict, surr) 
+            initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
         @warn p_fixed
         (params.verify_psid_node_off) &&
-            verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict) 
+            verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
 
         surr_prob, p_fixed = turn_node_on(surr_prob_node_off, params, fault_dict, p_nn)
 
         fault_data[get_name(pvs)][:surr_problem] = surr_prob
         fault_data[get_name(pvs)][:u₀] = u₀     #different than u0 stored in problem? remake instead?
         fault_data[get_name(pvs)][:p_fixed] = p_fixed
-    end 
+    end
 
     min_θ = initial_params(nn)
     #try
-        @warn 1
-        total_time = @elapsed begin
-            for group_pvs in partition(pvss, params.groupsize_faults) 
-                @info "start of fault" min_θ[end]
-                @show pvs_names_subset = get_name.(group_pvs)
+    @warn 1
+    total_time = @elapsed begin
+        for group_pvs in partition(pvss, params.groupsize_faults)
+            @info "start of fault" min_θ[end]
+            @show pvs_names_subset = get_name.(group_pvs)
 
-                #Could get subset of fault_data dictionary to pass to _train, more straightforward to pass the full thing?
-                @warn 2
-                res, output = _train(
-                    min_θ,
-                    params,
-                    sensealg,
-                    solver,
-                    optimizer,
-                    Ir_scale,
-                    Ii_scale,
-                    output,
-                    tsteps,   
-                    pvs_names_subset,
-                    fault_data,  #p_ode should come out of fault_data eventually
-                    per_solve_maxiters,  
-                )
-                @warn 3
-                min_θ = copy(res.u)
-                @info "end of fault" min_θ[end]
-            end
-
-            #TRAIN ADJUSTMENTS GO HERE (TO DO)
+            #Could get subset of fault_data dictionary to pass to _train, more straightforward to pass the full thing?
+            @warn 2
+            res, output = _train(
+                min_θ,
+                params,
+                sensealg,
+                solver,
+                optimizer,
+                Ir_scale,
+                Ii_scale,
+                output,
+                tsteps,
+                pvs_names_subset,
+                fault_data,  #p_ode should come out of fault_data eventually
+                per_solve_maxiters,
+            )
+            @warn 3
+            min_θ = copy(res.u)
+            @info "end of fault" min_θ[end]
         end
-        @info "min_θ[end] (end of training)" min_θ[end]
-        output["total_time"] = total_time
 
-        final_loss_for_comparison = 0.0 #TODO calculate_final_loss needs to be rewritten... a bunch of the subfunctions changed. 
-            #calculate_final_loss(params, res.u, solver, nn, M, pvss, d, sensealg)
-        output["final_loss"] = final_loss_for_comparison
+        #TRAIN ADJUSTMENTS GO HERE (TO DO)
+    end
+    @info "min_θ[end] (end of training)" min_θ[end]
+    output["total_time"] = total_time
 
-        capture_output(output, params.output_data_path, params.train_id)
-        return true
+    final_loss_for_comparison = 0.0 #TODO calculate_final_loss needs to be rewritten... a bunch of the subfunctions changed. 
+    #calculate_final_loss(params, res.u, solver, nn, M, pvss, d, sensealg)
+    output["final_loss"] = final_loss_for_comparison
+
+    capture_output(output, params.output_data_path, params.train_id)
+    return true
     #catch
     #    return false
     #end
@@ -245,10 +245,10 @@ function _train(
     fault_data,
     per_solve_maxiters,
 )
-    pred_function = instantiate_pred_function(  
+    pred_function = instantiate_pred_function(
         solver,
         pvs_names_subset,
-        fault_data,   
+        fault_data,
         params.solver_tols,
         sensealg,
     )
@@ -259,7 +259,7 @@ function _train(
         Ii_scale,
         pred_function,
     )
-    @warn loss_function 
+    @warn loss_function
     #TRAIN ON A SINGLE FAULT USING EXTENDING TIME RANGES.
     datasize = length(tsteps)
     ranges = extending_ranges(datasize, params.groupsize_steps)
@@ -276,7 +276,7 @@ function _train(
             (i_curr, t_curr),
             batchsize = batchsize,   #TODO - IMPLEMENT BATCHING
         )
-        optfun = OptimizationFunction(    
+        optfun = OptimizationFunction(
             (θ, p, batch, time_batch) -> loss_function(θ, batch, time_batch),
             GalacticOptim.AutoForwardDiff(),
         )
@@ -301,33 +301,34 @@ function _train(
 end
 
 function concatonate_i_true(fault_data, pvs_names_subset, range)
-    i_true = [] 
-    for (i,pvs_name) in enumerate(pvs_names_subset)
-        i_true_fault = vcat((fault_data[pvs_name][:ir_ground_truth])', (fault_data[pvs_name][:ii_ground_truth])'  )
-        i_true_fault = i_true_fault[:,range]
-        if i == 1 
+    i_true = []
+    for (i, pvs_name) in enumerate(pvs_names_subset)
+        i_true_fault = vcat(
+            (fault_data[pvs_name][:ir_ground_truth])',
+            (fault_data[pvs_name][:ii_ground_truth])',
+        )
+        i_true_fault = i_true_fault[:, range]
+        if i == 1
             i_true = i_true_fault
-        else 
-            i_true = hcat(i_true, i_true_fault )
-        end 
-    end 
+        else
+            i_true = hcat(i_true, i_true_fault)
+        end
+    end
     return i_true
-end 
+end
 
 function concatonate_t(tsteps, pvs_names_subset, range)
-    t = [] 
-    for (i,pvs_name) in enumerate(pvs_names_subset)
+    t = []
+    for (i, pvs_name) in enumerate(pvs_names_subset)
         t_fault = (tsteps[range])'
-        if i == 1 
+        if i == 1
             t = t_fault
-        else 
+        else
             t = hcat(t, t_fault)
-        end 
-    end 
-    return t 
-end 
-
-
+        end
+    end
+    return t
+end
 
 function capture_output(output_dict, output_directory, id)
     output_path = joinpath(output_directory, id)

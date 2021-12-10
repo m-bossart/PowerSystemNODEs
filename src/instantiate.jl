@@ -125,24 +125,44 @@ function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, 
     return Array(sol)   #What is this type? 
 end
 
-function full_array_pred_function(θ, tsteps, solver, pvs_names_subset, fault_data, tols, sensealg)
+function full_array_pred_function(
+    θ,
+    tsteps,
+    solver,
+    pvs_names_subset,
+    fault_data,
+    tols,
+    sensealg,
+)
     #full_array = Matrix{}[]
-    for (i,pvs_name) in enumerate(pvs_names_subset) 
+    for (i, pvs_name) in enumerate(pvs_names_subset)
         surr_prob = fault_data[pvs_name][:surr_problem]
-        u₀ =  fault_data[pvs_name][:u₀]
+        u₀ = fault_data[pvs_name][:u₀]
         p_fixed = fault_data[pvs_name][:p_fixed]
-        if i == 1 
-            full_array = _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)
-        else 
-            full_array = hcat(full_array, _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀))
-        end 
-    end 
+        if i == 1
+            full_array =
+                _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)
+        else
+            full_array = hcat(
+                full_array,
+                _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀),
+            )
+        end
+    end
     return full_array
 end
 
 function instantiate_pred_function(solver, pvs_names_subset, fault_data, tols, sensealg)
-    return (θ, tsteps) -> full_array_pred_function(θ, tsteps, solver, pvs_names_subset, fault_data, tols, sensealg)
-end 
+    return (θ, tsteps) -> full_array_pred_function(
+        θ,
+        tsteps,
+        solver,
+        pvs_names_subset,
+        fault_data,
+        tols,
+        sensealg,
+    )
+end
 
 function instantiate_cb!(output, lb_loss, exportmode, range_count)
     if exportmode == 3
@@ -155,7 +175,7 @@ function instantiate_cb!(output, lb_loss, exportmode, range_count)
 end
 
 function _cb3!(p, l, pred, output, lb_loss, range_count)
-    push!(output["loss"], ( range_count, l))
+    push!(output["loss"], (range_count, l))
     push!(output["parameters"], [p])
     push!(output["predictions"], (pred[1, :], pred[2, :]))
     output["total_iterations"] += 1
@@ -166,7 +186,7 @@ function _cb3!(p, l, pred, output, lb_loss, range_count)
 end
 
 function _cb2!(p, l, pred, output, lb_loss, range_count)
-    push!(output["loss"], ( range_count, l))
+    push!(output["loss"], (range_count, l))
     output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]
@@ -174,7 +194,7 @@ function _cb2!(p, l, pred, output, lb_loss, range_count)
     return true
 end
 
-function _cb1!(p, l, pred, output, lb_loss,  range_count)
+function _cb1!(p, l, pred, output, lb_loss, range_count)
     output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]

@@ -57,7 +57,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
     solver = instantiate_solver(NODETrainDataParams)
     abstol = NODETrainDataParams.solver_tols[1]
     reltol = NODETrainDataParams.solver_tols[2]
-    fault_data = Dict{String, Dict{Symbol,Any}}()
+    fault_data = Dict{String, Dict{Symbol, Any}}()
 
     n_sources = length(collect(get_components(PeriodicVariableSource, sys_train)))
     for i in 1:n_sources
