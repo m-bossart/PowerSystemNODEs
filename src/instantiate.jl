@@ -95,9 +95,8 @@ function instantiate_surr(inputs::NODETrainParams, nn, Vm, Vθ)
     end
 end
 
-#CLOSURE
-function _loss_function(θ, y_actual, tsteps, weights, Ir_scale, Ii_scale, pred_function)
-    y_predicted = pred_function(θ, tsteps)
+function _loss_function(θ, y_actual, tsteps, weights, Ir_scale, Ii_scale, pred_function)    #same or similar, pass the dictionary 
+    y_predicted = pred_function(θ, tsteps)                                                  #Careful of dict ordering.                     
     loss =
         (mae(y_predicted[1, :], y_actual[1, :]) / Ir_scale) +
         (mae(y_predicted[2, :], y_actual[2, :]) / Ii_scale) * weights[1] +
@@ -111,7 +110,7 @@ function instantiate_loss_function(weights, Ir_scale, Ii_scale, pred_function)
         _loss_function(θ, y_actual, tsteps, weights, Ir_scale, Ii_scale, pred_function)
 end
 
-function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)
+function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)  #stays same 
     p = vcat(θ, p_fixed)
     _prob = remake(surr_prob, p = p, u0 = u₀)
     sol = solve(
@@ -123,26 +122,40 @@ function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, 
         save_idxs = [I__IR_OUT, I__II_OUT, I__IR_FILTER, I__II_FILTER, I__IR_NN, I__II_NN], #first two for loss function, rest for data export
         sensealg = ForwardDiffSensitivity(),
     )
-    return Array(sol)
+    return Array(sol)   #What is this type? 
 end
 
-function instantiate_pred_function(p_fixed, solver, surr_prob, tols, sensealg, u₀)
-    return (θ, tsteps) ->
-        _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)
+function full_array_pred_function(θ, tsteps, solver, pvs_names_subset, fault_data, tols, sensealg)
+    #full_array = Matrix{}[]
+    for (i,pvs_name) in enumerate(pvs_names_subset) 
+        surr_prob = fault_data[pvs_name][:surr_problem]
+        u₀ =  fault_data[pvs_name][:u₀]
+        p_fixed = fault_data[pvs_name][:p_fixed]
+        if i == 1 
+            full_array = _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)
+        else 
+            full_array = hcat(full_array, _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀))
+        end 
+    end 
+    return full_array
 end
 
-function instantiate_cb!(output, lb_loss, exportmode, id, range_count)
+function instantiate_pred_function(solver, pvs_names_subset, fault_data, tols, sensealg)
+    return (θ, tsteps) -> full_array_pred_function(θ, tsteps, solver, pvs_names_subset, fault_data, tols, sensealg)
+end 
+
+function instantiate_cb!(output, lb_loss, exportmode, range_count)
     if exportmode == 3
-        return (p, l, pred) -> _cb3!(p, l, pred, output, lb_loss, id, range_count)
+        return (p, l, pred) -> _cb3!(p, l, pred, output, lb_loss, range_count)
     elseif exportmode == 2
-        return (p, l, pred) -> _cb2!(p, l, pred, output, lb_loss, id, range_count)
+        return (p, l, pred) -> _cb2!(p, l, pred, output, lb_loss, range_count)
     elseif exportmode == 1
-        return (p, l, pred) -> _cb1!(p, l, pred, output, lb_loss, id, range_count)
+        return (p, l, pred) -> _cb1!(p, l, pred, output, lb_loss, range_count)
     end
 end
 
-function _cb3!(p, l, pred, output, lb_loss, id, range_count)
-    push!(output["loss"], (id, range_count, l))
+function _cb3!(p, l, pred, output, lb_loss, range_count)
+    push!(output["loss"], ( range_count, l))
     push!(output["parameters"], [p])
     push!(output["predictions"], (pred[1, :], pred[2, :]))
     output["total_iterations"] += 1
@@ -152,8 +165,8 @@ function _cb3!(p, l, pred, output, lb_loss, id, range_count)
     return true
 end
 
-function _cb2!(p, l, pred, output, lb_loss, id, range_count)
-    push!(output["loss"], (id, range_count, l))
+function _cb2!(p, l, pred, output, lb_loss, range_count)
+    push!(output["loss"], ( range_count, l))
     output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]
@@ -161,7 +174,7 @@ function _cb2!(p, l, pred, output, lb_loss, id, range_count)
     return true
 end
 
-function _cb1!(p, l, pred, output, lb_loss, id, range_count)
+function _cb1!(p, l, pred, output, lb_loss,  range_count)
     output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]

@@ -10,6 +10,7 @@ train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
 train_params = NODETrainParams(train_params_file)
 
 status = train(train_params)
+#status = train_simultaneous(train_params)  #compare results for single fault profile, should be same
 
 if train_params.graphical_report
     plots = visualize_training(train_params_1)

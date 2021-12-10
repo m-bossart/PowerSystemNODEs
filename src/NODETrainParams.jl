@@ -17,12 +17,12 @@
 **Note:** BATCHING IS NOT YET IMPLEMENTED
 - `rng_seed::Int64`: Seed for the random number generator used for initializing the NN for reproducibility across training runs.
 - `groupsize_steps::Int64`: Number of data-points in each extension of the range of data used.
-- `groupsize_faults::Int64`: Number of data-points in each extension of the range of data used.
+- `groupsize_faults::Int64`: Number of faults trained on simultaneous `1`:sequential training. if equal to number of pvs in sys_train, parallel training.
 **Note:** GROUPSIZE_FAULTS NOT YET IMPLEMENTED. NOT NEEDED FOR SINGLE FAULT TRAINING.
 - `loss_function_weights::Tuple{Float64, Float64}`: weights used for loss function `(mae_weight, mse_weight)`.
 - `loss_function_scale::String`: Scaling of the loss function.  `"range"`: the range of the real current and imaginary current are used to scale both the mae. Valid values ["range", "none"]
     and mse portions of the loss function. The goal is to give equal weight to real and imaginary components even if the magnitude of the disturbance differs. `"none"`: no additional scaling applied.
-- `ode_model::String ["vsm"]`: The ode model used in conjunction with the NODE during training.
+- `ode_model::String ["none","vsm"]`: The ode model used in conjunction with the NODE during training. `"none"` uses a purely data driven NODE surrogate. 
 - `node_input_scale::Float64`: Scale factor on the voltage input to the NODE. Does not apply to other inputs (ie the feedback states).
 - `node_output_scale::Float64`: Scale factor on the current output of the NODE. Does not apply to other outputs (ie the feedback states).
 - `node_inputs::["voltage"]`: Determines the physical states which are inputs to the NODE. Ideally, only voltage to remain as general as possible.
