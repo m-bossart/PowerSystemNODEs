@@ -25,6 +25,7 @@ docs/site/
 
 #log files
 *.log
+*.png
 .vscode
 
 #figures
