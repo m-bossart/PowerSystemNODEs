@@ -156,7 +156,7 @@ function train(params::NODETrainParams)
 
     res = nothing
     output = Dict{String, Any}(
-        "loss" => DataFrame(RangeCount = Int[], Loss = Float64[]),
+        "loss" => DataFrame(PVS_name =  Vector{String}[], RangeCount = Int[], Loss = Float64[]),
         "parameters" => DataFrame(Parameters = Vector{Any}[]),
         "predictions" =>
             DataFrame(ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
@@ -166,8 +166,9 @@ function train(params::NODETrainParams)
         "train_id" => params.train_id,
     )
     per_solve_maxiters =
-        calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss)) #TODO check logic holds for parallel train 
+        calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss)) 
 
+    #PREPARE SURROGATES FOR EACH FAULT 
     for pvs in pvss
         Vm, Vθ = Source_to_function_of_time(pvs)
         surr = instantiate_surr(params, nn, Vm, Vθ)
@@ -234,6 +235,7 @@ function train(params::NODETrainParams)
         output["final_loss"] = final_loss_for_comparison
 
         capture_output(output, params.output_data_path, params.train_id)
+        params.graphical_report && visualize_training(params) 
         return true
     catch
         return false
@@ -289,7 +291,7 @@ function _train(
             GalacticOptim.AutoForwardDiff(),
         )
         optprob = OptimizationProblem(optfun, min_θ)
-        cb = instantiate_cb!(output, params.lb_loss, params.output_mode, range_count)
+        cb = instantiate_cb!(output, params.lb_loss, params.output_mode, range_count, pvs_names_subset)
         range_count += 1
 
         res = GalacticOptim.solve(
