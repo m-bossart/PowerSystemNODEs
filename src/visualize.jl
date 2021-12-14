@@ -13,9 +13,20 @@ function visualize_training(params::NODETrainParams)
     println("--------------------------------")
 
     if params.output_mode == 2
-        return visualize_2(params, path_to_output, path_to_input)
+        plots = visualize_2(params, path_to_output, path_to_input)
+        for p in plots
+            png(p, path_to_output)
+        end 
+        return 
     elseif params.output_mode == 3
-        return visualize_3(params, path_to_output, path_to_input)
+        plots = visualize_3(params, path_to_output, path_to_input)
+        @warn length(plots)
+
+        for (i,p) in enumerate(plots)
+            @warn joinpath(path_to_output, string("plot_", i ))
+            png(p, joinpath(path_to_output, string("plot_", i )))
+        end 
+        return
     end
 end
 
@@ -28,6 +39,7 @@ end
 
 function visualize_3(params, path_to_output, path_to_input)
     df_loss = DataFrame(Arrow.Table(joinpath(path_to_output, "loss")))
+    @show df_loss
     list_plots = []
     p1 = plot(df_loss.Loss, title = "Loss")
     p2 = plot(df_loss.RangeCount, title = "Range Count")
@@ -36,18 +48,24 @@ function visualize_3(params, path_to_output, path_to_input)
 
     output_dict =
         JSON3.read(read(joinpath(path_to_output, "high_level_outputs")), Dict{String, Any})
-    IDs = df_loss.ID[:]
-    transition_indices = find_transition_indices(IDs)
+    PVS_name = df_loss.PVS_name[:]
+    transition_indices = find_transition_indices(PVS_name)
+    @warn transition_indices
+    transition_indices = find_transition_indices(df_loss.RangeCount)
+    @warn transition_indices
+    
     df_predictions = DataFrame(Arrow.Table(joinpath(path_to_output, "predictions")))
-    input_dict = JSON3.read(
-        read(joinpath(path_to_input, "data.json")),
-        Dict{String, Dict{Symbol, Any}},
-    )
+    TrainInputs =
+    JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
+    fault_data = TrainInputs.fault_data
+
     for i in transition_indices
         ir_pred = df_predictions[i, "ir_prediction"]
         ii_pred = df_predictions[i, "ii_prediction"]
-        ir_true = input_dict[IDs[i]][:ir_ground_truth]
-        ii_true = input_dict[IDs[i]][:ii_ground_truth]
+
+        i_true = concatonate_i_true(fault_data, df_loss[i,:PVS_name],:)
+        ir_true = i_true[1,:]
+        ii_true = i_true[2,:]
         p3 = plot(ir_pred, label = "prediction")
         plot!(p3, ir_true, label = "truth")
         p4 = plot(ii_pred, label = "prediction")
@@ -55,7 +73,7 @@ function visualize_3(params, path_to_output, path_to_input)
         p = plot(
             p3,
             p4,
-            title = string(IDs[i], " loss: ", output_dict["final_loss"]),
+            title = string(df_loss[i,:PVS_name], " loss: ", output_dict["final_loss"]),
             layout = (2, 1),
         )
         push!(list_plots, p)
@@ -67,7 +85,7 @@ function find_transition_indices(list)
     transition_indices = Int[]
 
     for i in 1:(length(list) - 1)
-        if list[i] !== list[i + 1]
+        if list[i] != list[i + 1]
             push!(transition_indices, i)
         end
     end

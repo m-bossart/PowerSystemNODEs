@@ -8,11 +8,10 @@ serialize(NODETrainParams(), "input_data/sample_train_parameters.json")
 
 train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
 train_params = NODETrainParams(train_params_file)
+train_params.graphical_report = true 
+status = train(train_params)    #compare to previous serial version 
 
+#LOCAL TEST OF MULTIPLE RUNS 
+train_params.train_id = "train_instance_2"
+train_params.maxiters = 6
 status = train(train_params)
-#status = train_simultaneous(train_params)  #compare results for single fault profile, should be same
-
-if train_params.graphical_report
-    plots = visualize_training(train_params_1)
-    #TODO save plots, and move inside train() function 
-end

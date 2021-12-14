@@ -166,18 +166,18 @@ function instantiate_pred_function(solver, pvs_names_subset, fault_data, tols, s
     )
 end
 
-function instantiate_cb!(output, lb_loss, exportmode, range_count)
+function instantiate_cb!(output, lb_loss, exportmode, range_count, pvs_names)
     if exportmode == 3
-        return (p, l, pred) -> _cb3!(p, l, pred, output, lb_loss, range_count)
+        return (p, l, pred) -> _cb3!(p, l, pred, output, lb_loss, range_count, pvs_names)
     elseif exportmode == 2
-        return (p, l, pred) -> _cb2!(p, l, pred, output, lb_loss, range_count)
+        return (p, l, pred) -> _cb2!(p, l, pred, output, lb_loss, range_count, pvs_names)
     elseif exportmode == 1
-        return (p, l, pred) -> _cb1!(p, l, pred, output, lb_loss, range_count)
+        return (p, l, pred) -> _cb1!(p, l, pred, output, lb_loss, range_count, pvs_names)
     end
 end
 
-function _cb3!(p, l, pred, output, lb_loss, range_count)
-    push!(output["loss"], (range_count, l))
+function _cb3!(p, l, pred, output, lb_loss, range_count, pvs_names)
+    push!(output["loss"], (collect(pvs_names), range_count, l))
     push!(output["parameters"], [p])
     push!(output["predictions"], (pred[1, :], pred[2, :]))
     output["total_iterations"] += 1
@@ -187,8 +187,8 @@ function _cb3!(p, l, pred, output, lb_loss, range_count)
     return true
 end
 
-function _cb2!(p, l, pred, output, lb_loss, range_count)
-    push!(output["loss"], (range_count, l))
+function _cb2!(p, l, pred, output, lb_loss, range_count, pvs_names)
+    push!(output["loss"], (collect(pvs_names), range_count, l))
     output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]
@@ -196,7 +196,7 @@ function _cb2!(p, l, pred, output, lb_loss, range_count)
     return true
 end
 
-function _cb1!(p, l, pred, output, lb_loss, range_count)
+function _cb1!(p, l, pred, output, lb_loss, range_count, pvs_names)
     output["total_iterations"] += 1
     @info "loss", l
     @info "p[end]", p[end]
