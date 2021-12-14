@@ -1,7 +1,7 @@
 # TODO: Use Dict temporarily during dev while the fields are defined
 # WHich things change with fault? 
 struct NODETrainInputs      #could move common data to fields outside of dict 
-    tsteps::Vector{}
+    tsteps::Vector{Float64} #don't specify type? 
     fault_data::Dict{String, Dict{Symbol, Any}}
 end
 

@@ -43,6 +43,9 @@ function initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
     tspan = (tsteps[1], tsteps[end])
     surr_func = ODEFunction(surr, mass_matrix = M)
     surr_prob = ODEProblem(surr_func, x₀_surr, tspan, p)
+    @warn length(p_nn)
+    @warn length(p_fixed)
+    @warn length(p)
     return res_surr.zero, surr_prob, p_nn, p_fixed
 end
 
@@ -148,6 +151,8 @@ function train(params::NODETrainParams)
         JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
 
     tsteps = TrainInputs.tsteps
+    @warn tsteps
+    @warn typeof(tsteps[1])
     fault_data = TrainInputs.fault_data
     pvss = collect(get_components(PeriodicVariableSource, sys))
     Ir_scale, Ii_scale = calculate_loss_function_scaling(params, fault_data)
@@ -171,10 +176,16 @@ function train(params::NODETrainParams)
         Vm, Vθ = Source_to_function_of_time(pvs)
         surr = instantiate_surr(params, nn, Vm, Vθ)
         fault_dict = fault_data[get_name(pvs)]
-
+        @warn tsteps[1]
+        @warn typeof(tsteps[1])
         u₀, surr_prob_node_off, p_nn, p_fixed =
             initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
         @warn p_fixed
+        @warn typeof(tsteps)
+        @warn typeof(surr_prob_node_off)
+        @warn typeof(params)
+        @warn typeof(u₀)
+
         (params.verify_psid_node_off) &&
             verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
 
