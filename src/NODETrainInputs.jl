@@ -48,6 +48,7 @@ function NODETrainDataParams(;
     )
 end
 
+#TODO - break up this function for ease of understanding/debugging 
 function generate_train_data(sys_train, NODETrainDataParams)
     tspan = NODETrainDataParams.tspan
     steps = NODETrainDataParams.steps
@@ -59,8 +60,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
     reltol = NODETrainDataParams.solver_tols[2]
     fault_data = Dict{String, Dict{Symbol, Any}}()
 
-    n_sources = length(collect(get_components(PeriodicVariableSource, sys_train)))
-    for i in 1:n_sources
+    for pvs in collect(get_components(PeriodicVariableSource, sys_train))
         available_source = activate_next_source!(sys_train)
         set_bus_from_source(available_source) #Bus voltage is used in power flow, not source voltage. Need to set bus voltage from soure internal voltage
 
@@ -88,7 +88,6 @@ function generate_train_data(sys_train, NODETrainDataParams)
         #################### BUILD INITIALIZATION SYSTEM ###############################
         sys_init, p_inv = build_sys_init(sys_train) #returns p_inv, the set of average parameters 
         transformer = collect(get_components(Transformer2W, sys_init))[1]
-        pvs = collect(get_components(PeriodicVariableSource, sys_init))[1]
         p_fixed = [get_x(transformer) + get_X_th(pvs), get_r(transformer) + get_R_th(pvs)]
         x₀, refs, Vr0, Vi0 = initialize_sys!(sys_init, "gen1")
         Vm, Vθ = Source_to_function_of_time(get_dynamic_injector(active_source))
@@ -115,7 +114,7 @@ function generate_train_data(sys_train, NODETrainDataParams)
         )
 
         avgmodel_data = get_total_current_series(sim_simp)
-
+        @warn get_name(pvs)
         fault_data[get_name(pvs)] = Dict(
             :x₀ => x₀,
             :p_ode => p_ode,
