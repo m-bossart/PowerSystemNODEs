@@ -144,8 +144,6 @@ function full_array_pred_function(
         surr_prob = fault_data[pvs_name][:surr_problem]
         u₀ = Float64.(fault_data[pvs_name][:u₀])
         p_fixed = Float64.(fault_data[pvs_name][:p_fixed])
-        @warn typeof(u₀)
-        @warn typeof(p_fixed)
         if i > 1
             full_array = hcat(
                 full_array,

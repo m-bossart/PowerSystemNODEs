@@ -73,36 +73,36 @@ function turn_node_on(surr_prob_node_off, params, fault_dict, p_nn)
     return surr_prob, p_fixed
 end
 
-function calculate_final_loss(params, θ, solver, nn, M, pvss, d, sensealg)
-    final_loss_for_comparison = 0.0
-    n_pvs = length(pvss)
-    for pvs in pvss
-        id, tsteps, i_true, i_ver, p_ode, x₀, p_V₀ = read_input_data(pvs, d)
-        Vm, Vθ = Source_to_function_of_time(pvs)
-        surr = instantiate_surr(params, nn, Vm, Vθ)
+function calculate_final_loss(
+    params,
+    θ,
+    solver,
+    nn,
+    M,
+    pvs_names,
+    fault_data,
+    tsteps,
+    sensealg,
+    Ir_scale,
+    Ii_scale,
+)
+    pred_function = instantiate_pred_function(
+        solver,
+        pvs_names,
+        fault_data,
+        params.solver_tols,
+        sensealg,
+    )
+    loss_function = instantiate_loss_function(
+        params.loss_function_weights,
+        Ir_scale,
+        Ii_scale,
+        pred_function,
+    )
+    i_true = concatonate_i_true(fault_data, pvs_names, :)
+    final_loss_for_comparison = loss_function(θ, i_true, tsteps)
 
-        u₀, surr_prob_node_off, p_nn, p_fixed =
-            initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
-        surr_prob, p_fixed = turn_node_on(surr_prob_node_off, params, fault_dict, p_nn)
-
-        pred_function = instantiate_pred_function(
-            p_fixed,
-            solver,
-            surr_prob,
-            params.solver_tols,
-            sensealg,
-            u₀,
-        )
-        loss_function = instantiate_loss_function(
-            (1.0, 0.0), #mae only
-            1.0,        #no scaling
-            1.0,
-            pred_function,
-        )
-        final_loss_for_comparison += loss_function(θ, i_true, tsteps)[1]
-    end
-
-    return final_loss_for_comparison / n_pvs
+    return final_loss_for_comparison[1]
 end
 
 function get_init_surr(p, ir_filter, ii_filter, surr)
@@ -166,7 +166,6 @@ function train(params::NODETrainParams)
     per_solve_maxiters =
         calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss)) #TODO check logic holds for parallel train 
 
-    #At keys to fault_data with surrogate, u0, etc. 
     for pvs in pvss
         Vm, Vθ = Source_to_function_of_time(pvs)
         surr = instantiate_surr(params, nn, Vm, Vθ)
@@ -185,46 +184,59 @@ function train(params::NODETrainParams)
     end
 
     min_θ = initial_params(nn)
-    #try
-    total_time = @elapsed begin
-        for group_pvs in partition(pvss, params.groupsize_faults)
-            @info "start of fault" min_θ[end]
-            @show pvs_names_subset = get_name.(group_pvs)
 
-            #Could get subset of fault_data dictionary to pass to _train, more straightforward to pass the full thing?
-            res, output = _train(
-                min_θ,
-                params,
-                sensealg,
-                solver,
-                optimizer,
-                Ir_scale,
-                Ii_scale,
-                output,
-                tsteps,
-                pvs_names_subset,
-                fault_data,  #p_ode should come out of fault_data eventually
-                per_solve_maxiters,
-            )
+    try
+        total_time = @elapsed begin
+            for group_pvs in partition(pvss, params.groupsize_faults)
+                @info "start of fault" min_θ[end]
+                @show pvs_names_subset = get_name.(group_pvs)
 
-            min_θ = copy(res.u)
-            @info "end of fault" min_θ[end]
+                #Could get subset of fault_data dictionary to pass to _train, more straightforward to pass the full thing?
+                res, output = _train(
+                    min_θ,
+                    params,
+                    sensealg,
+                    solver,
+                    optimizer,
+                    Ir_scale,
+                    Ii_scale,
+                    output,
+                    tsteps,
+                    pvs_names_subset,
+                    fault_data,  #p_ode should come out of fault_data eventually
+                    per_solve_maxiters,
+                )
+
+                min_θ = copy(res.u)
+                @info "end of fault" min_θ[end]
+            end
+
+            #TRAIN ADJUSTMENTS GO HERE (TO DO)
         end
+        @info "min_θ[end] (end of training)" min_θ[end]
+        output["total_time"] = total_time
 
-        #TRAIN ADJUSTMENTS GO HERE (TO DO)
+        pvs_names = get_name.(pvss)
+        final_loss_for_comparison = calculate_final_loss(
+            params,
+            res.u,
+            solver,
+            nn,
+            M,
+            pvs_names,
+            fault_data,
+            tsteps,
+            sensealg,
+            Ir_scale,
+            Ii_scale,
+        )
+        output["final_loss"] = final_loss_for_comparison
+
+        capture_output(output, params.output_data_path, params.train_id)
+        return true
+    catch
+        return false
     end
-    @info "min_θ[end] (end of training)" min_θ[end]
-    output["total_time"] = total_time
-
-    final_loss_for_comparison = 0.0 #TODO calculate_final_loss needs to be rewritten... a bunch of the subfunctions changed. 
-    #calculate_final_loss(params, res.u, solver, nn, M, pvss, d, sensealg)
-    output["final_loss"] = final_loss_for_comparison
-
-    capture_output(output, params.output_data_path, params.train_id)
-    return true
-    #catch
-    #    return false
-    #end
 end
 
 # TODO: We want to add types in here to make the function performant
