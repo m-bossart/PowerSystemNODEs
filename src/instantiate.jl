@@ -136,17 +136,17 @@ function full_array_pred_function(
 )
     pvs_name = pvs_names_subset[1]
     surr_prob = fault_data[pvs_name][:surr_problem]
-    u₀ = Float64.(fault_data[pvs_name][:u₀])  
-    p_fixed =  Float64.(fault_data[pvs_name][:p_fixed]) 
+    u₀ = Float64.(fault_data[pvs_name][:u₀])
+    p_fixed = Float64.(fault_data[pvs_name][:p_fixed])
     full_array = _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)
 
     for (i, pvs_name) in enumerate(pvs_names_subset)
         surr_prob = fault_data[pvs_name][:surr_problem]
-        u₀ = Float64.(fault_data[pvs_name][:u₀])  
-        p_fixed =  Float64.(fault_data[pvs_name][:p_fixed]) 
+        u₀ = Float64.(fault_data[pvs_name][:u₀])
+        p_fixed = Float64.(fault_data[pvs_name][:p_fixed])
         @warn typeof(u₀)
         @warn typeof(p_fixed)
-        if i>1 
+        if i > 1
             full_array = hcat(
                 full_array,
                 _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀),
