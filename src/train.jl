@@ -119,10 +119,12 @@ function calculate_per_solve_maxiters(params, tsteps, n_faults)
     n_timesteps = length(tsteps)
     total_maxiters = params.maxiters
     groupsize_steps = params.groupsize_steps
+    groupsize_faults = params.groupsize_faults
     factor_ranges = ceil(n_timesteps / groupsize_steps)
+    factor_faults = ceil(n_faults/groupsize_faults)
     factor_batches = ceil(1 / params.batch_factor)
     per_solve_maxiters =
-        Int(floor(total_maxiters / factor_ranges / factor_batches / n_faults))
+        Int(floor(total_maxiters * factor_faults / factor_ranges / factor_batches / n_faults))
     @info "per solve maxiters" per_solve_maxiters
     if per_solve_maxiters == 0
         @error "maxiters is too low. The calculated maxiters per solve is 0! cannot train"
@@ -191,7 +193,6 @@ function train(params::NODETrainParams)
                 @info "start of fault" min_θ[end]
                 @show pvs_names_subset = get_name.(group_pvs)
 
-                #Could get subset of fault_data dictionary to pass to _train, more straightforward to pass the full thing?
                 res, output = _train(
                     min_θ,
                     params,
