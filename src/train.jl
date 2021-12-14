@@ -121,10 +121,11 @@ function calculate_per_solve_maxiters(params, tsteps, n_faults)
     groupsize_steps = params.groupsize_steps
     groupsize_faults = params.groupsize_faults
     factor_ranges = ceil(n_timesteps / groupsize_steps)
-    factor_faults = ceil(n_faults/groupsize_faults)
+    factor_faults = ceil(n_faults / groupsize_faults)
     factor_batches = ceil(1 / params.batch_factor)
-    per_solve_maxiters =
-        Int(floor(total_maxiters * factor_faults / factor_ranges / factor_batches / n_faults))
+    per_solve_maxiters = Int(
+        floor(total_maxiters * factor_faults / factor_ranges / factor_batches / n_faults),
+    )
     @info "per solve maxiters" per_solve_maxiters
     if per_solve_maxiters == 0
         @error "maxiters is too low. The calculated maxiters per solve is 0! cannot train"
@@ -156,7 +157,11 @@ function train(params::NODETrainParams)
 
     res = nothing
     output = Dict{String, Any}(
-        "loss" => DataFrame(PVS_name =  Vector{String}[], RangeCount = Int[], Loss = Float64[]),
+        "loss" => DataFrame(
+            PVS_name = Vector{String}[],
+            RangeCount = Int[],
+            Loss = Float64[],
+        ),
         "parameters" => DataFrame(Parameters = Vector{Any}[]),
         "predictions" =>
             DataFrame(ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
@@ -166,7 +171,7 @@ function train(params::NODETrainParams)
         "train_id" => params.train_id,
     )
     per_solve_maxiters =
-        calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss)) 
+        calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss))
 
     #PREPARE SURROGATES FOR EACH FAULT 
     for pvs in pvss
@@ -235,7 +240,7 @@ function train(params::NODETrainParams)
         output["final_loss"] = final_loss_for_comparison
 
         capture_output(output, params.output_data_path, params.train_id)
-        params.graphical_report && visualize_training(params) 
+        params.graphical_report && visualize_training(params)
         return true
     catch
         return false
@@ -278,11 +283,11 @@ function _train(
     range_count = 1
     for range in ranges
         @info "start of range" min_θ[end]
-        i_current_range = concatonate_i_true(fault_data, pvs_names_subset, range)   
+        i_current_range = concatonate_i_true(fault_data, pvs_names_subset, range)
         t_current_range = concatonate_t(tsteps, pvs_names_subset, range)
 
         batchsize = Int(floor(length(i_current_range[1, :]) * params.batch_factor))
-        train_loader = Flux.Data.DataLoader(    
+        train_loader = Flux.Data.DataLoader(
             (i_current_range, t_current_range),
             batchsize = batchsize,   #TODO - IMPLEMENT BATCHING
         )
@@ -291,7 +296,13 @@ function _train(
             GalacticOptim.AutoForwardDiff(),
         )
         optprob = OptimizationProblem(optfun, min_θ)
-        cb = instantiate_cb!(output, params.lb_loss, params.output_mode, range_count, pvs_names_subset)
+        cb = instantiate_cb!(
+            output,
+            params.lb_loss,
+            params.output_mode,
+            range_count,
+            pvs_names_subset,
+        )
         range_count += 1
 
         res = GalacticOptim.solve(

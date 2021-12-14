@@ -16,16 +16,14 @@ function visualize_training(params::NODETrainParams)
         plots = visualize_2(params, path_to_output, path_to_input)
         for p in plots
             png(p, path_to_output)
-        end 
-        return 
+        end
+        return
     elseif params.output_mode == 3
         plots = visualize_3(params, path_to_output, path_to_input)
-        @warn length(plots)
 
-        for (i,p) in enumerate(plots)
-            @warn joinpath(path_to_output, string("plot_", i ))
-            png(p, joinpath(path_to_output, string("plot_", i )))
-        end 
+        for (i, p) in enumerate(plots)
+            png(p, joinpath(path_to_output, string("plot_", i)))
+        end
         return
     end
 end
@@ -49,23 +47,21 @@ function visualize_3(params, path_to_output, path_to_input)
     output_dict =
         JSON3.read(read(joinpath(path_to_output, "high_level_outputs")), Dict{String, Any})
     PVS_name = df_loss.PVS_name[:]
-    transition_indices = find_transition_indices(PVS_name)
-    @warn transition_indices
-    transition_indices = find_transition_indices(df_loss.RangeCount)
-    @warn transition_indices
-    
+    #transition_indices = find_transition_indices(PVS_name)
+    transition_indices = find_transition_indices(df_loss.RangeCount)  #TODO formalize which to use for transition_indices 
+
     df_predictions = DataFrame(Arrow.Table(joinpath(path_to_output, "predictions")))
     TrainInputs =
-    JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
+        JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
     fault_data = TrainInputs.fault_data
 
     for i in transition_indices
         ir_pred = df_predictions[i, "ir_prediction"]
         ii_pred = df_predictions[i, "ii_prediction"]
 
-        i_true = concatonate_i_true(fault_data, df_loss[i,:PVS_name],:)
-        ir_true = i_true[1,:]
-        ii_true = i_true[2,:]
+        i_true = concatonate_i_true(fault_data, df_loss[i, :PVS_name], :)
+        ir_true = i_true[1, :]
+        ii_true = i_true[2, :]
         p3 = plot(ir_pred, label = "prediction")
         plot!(p3, ir_true, label = "truth")
         p4 = plot(ii_pred, label = "prediction")
@@ -73,7 +69,7 @@ function visualize_3(params, path_to_output, path_to_input)
         p = plot(
             p3,
             p4,
-            title = string(df_loss[i,:PVS_name], " loss: ", output_dict["final_loss"]),
+            title = string(df_loss[i, :PVS_name], " loss: ", output_dict["final_loss"]),
             layout = (2, 1),
         )
         push!(list_plots, p)
