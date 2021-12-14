@@ -267,7 +267,7 @@ function _train(
         Ii_scale,
         pred_function,
     )
-    #TRAIN ON A SINGLE FAULT USING EXTENDING TIME RANGES.
+
     datasize = length(tsteps)
     ranges = extending_ranges(datasize, params.groupsize_steps)
     res = nothing
@@ -275,12 +275,12 @@ function _train(
     range_count = 1
     for range in ranges
         @info "start of range" min_θ[end]
-        i_curr = concatonate_i_true(fault_data, pvs_names_subset, range)    #TODO bad naming 
-        t_curr = concatonate_t(tsteps, pvs_names_subset, range)
+        i_current_range = concatonate_i_true(fault_data, pvs_names_subset, range)   
+        t_current_range = concatonate_t(tsteps, pvs_names_subset, range)
 
-        batchsize = Int(floor(length(i_curr[1, :]) * params.batch_factor))
-        train_loader = Flux.Data.DataLoader(    #need to pass i,t from multiple faults
-            (i_curr, t_curr),
+        batchsize = Int(floor(length(i_current_range[1, :]) * params.batch_factor))
+        train_loader = Flux.Data.DataLoader(    
+            (i_current_range, t_current_range),
             batchsize = batchsize,   #TODO - IMPLEMENT BATCHING
         )
         optfun = OptimizationFunction(
@@ -300,8 +300,8 @@ function _train(
         min_θ = copy(res.u)
         @info "end of range" min_θ[end]
         if params.batch_factor == 1.0
-            @assert res.minimum == loss_function(res.u, i_curr, t_curr)[1]
-            @assert res.minimum == loss_function(min_θ, i_curr, t_curr)[1]
+            @assert res.minimum == loss_function(res.u, i_current_range, t_current_range)[1]
+            @assert res.minimum == loss_function(min_θ, i_current_range, t_current_range)[1]
         end
     end
     return res, output
