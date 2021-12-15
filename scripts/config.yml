@@ -17,7 +17,7 @@ FaultParameters:
       DeviceName: # ["BUS 7-BUS 8-i_11","BUS 10-BUS 11-i_15"]
       Multiplier: 1.0
     ControlReferenceChange:
-      DeviceName: ["generator-15-1"]
+      DeviceName: ["generator-15-1", "generator-18-1"]
       RefValue: 0.8
     GeneratorTrip:
       DeviceName: #["generator-18-1"]

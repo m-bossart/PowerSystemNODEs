@@ -9,10 +9,38 @@
 # 1-10
 # NOTE: Input dimension of nn =  <nn_external_inputs> + <#_feedback_states>
 
+function none_v_t_0(dx, x, p, t, nn, Vm, Vθ)
+    #PARAMETERS
+    n_weights_nn = p[end]
+    p_nn = p[Int(1):Int(n_weights_nn)]
+    p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
+
+    Xtrans = p_fixed[1]
+    Rtrans = p_fixed[2]
+    V_scale = p_fixed[3]
+    nn_scale = p_fixed[4]
+    Vr0 = p_fixed[35]
+    Vi0 = p_fixed[6]
+
+    #STATE INDEX AND STATES
+    i__ir_nn, ir_nn = 20, x[1]
+    i__ii_nn, ii_nn = 21, x[2]
+
+    Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
+    Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
+
+    #NN INPUT
+    nn_input = [(Vr_pcc - Vr0) * V_scale, (Vi_pcc - Vi0) * V_scale, ir_nn, ii_nn]
+
+    #NN CURRENT SOURCE
+    dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
+    dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
+end
+
 function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     #PARAMETERS
     n_weights_nn = p[end]
-    p_nn = p[Int(1):Int(n_weights_nn)]  #n_weights_nn must be defined in global scope prior to training
+    p_nn = p[Int(1):Int(n_weights_nn)]
     p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
 
     ω_lp = p_fixed[1]

@@ -8,10 +8,11 @@ serialize(NODETrainParams(), "input_data/sample_train_parameters.json")
 
 train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
 train_params = NODETrainParams(train_params_file)
+train_params.graphical_report = true
+train_params.groupsize_faults = 2
+status = train(train_params)    #compare to previous serial version 
 
-status = train(train_params)
-
-if train_params.graphical_report
-    plots = visualize_training(train_params_1)
-    #TODO save plots, and move inside train() function 
-end
+#LOCAL TEST OF MULTIPLE RUNS BELOW FOR TESTING summarize_trains.jl
+#= train_params.train_id = "train_instance_2"
+train_params.groupsize_faults = 2 
+status = train(train_params) =#

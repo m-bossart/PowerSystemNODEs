@@ -25,7 +25,7 @@ if (!(isfile(train_system_path)) || !(isfile(train_data_path)) || force_generate
     sys_surr = remove_area(sys_full, "1")
     sys_train = build_train_system(sys_surr, sys_pvs, "surrogate")
     to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "system.json"), force = true)
-    d = generate_train_data(sys_train, NODETrainDataParams())   #BUG - only works for single fault
+    d = generate_train_data(sys_train, NODETrainDataParams())
     serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 end
 
