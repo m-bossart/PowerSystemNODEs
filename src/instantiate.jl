@@ -6,6 +6,7 @@ const sensealg_map = Dict("ForwardDiffSensitivity" => ForwardDiffSensitivity)
 
 const surr_map = Dict(
     "vsm_v_t_0" => vsm_v_t_0,
+    "none_v_t_0" => none_v_t_0,
     #=  "vsm_v_t_3" => vsm_v_t_3,
         "vsm_v_t_4" => vsm_v_t_4,
         "vsm_v_t_5" => vsm_v_t_5,
@@ -85,12 +86,25 @@ function instantiate_surr(inputs::NODETrainParams, nn, Vm, Vθ)
                 surr = surr_map[string("vsm_v_t_", inputs.node_feedback_states)]
                 return instantiate_surr(surr, nn, Vm, Vθ)
             else
-                return surr_map[string("vsm_v_f_", inputs.node_feedback_states)]
+                surr = surr_map[string("vsm_v_f_", inputs.node_feedback_states)]
+                return instantiate_surr(surr, nn, Vm, Vθ)
             end
         else
             @warn "node input type not found during surrogate instantiatiion"
         end
-    else
+    elseif inputs.ode_model == "none"
+        if inputs.node_inputs == "voltage"
+            if inputs.node_feedback_current
+                surr = surr_map[string("none_v_t_", inputs.node_feedback_states)]
+                return instantiate_surr(surr, nn, Vm, Vθ) 
+            else 
+                surr = surr_map[string("none_v_f_", inputs.node_feedback_states)]
+                return instantiate_surr(surr, nn, Vm, Vθ) 
+            end 
+        else 
+            @warn "node input type not found during surrogate instantiatiion"
+        end
+    else 
         @warn "ode model not found during surrogate instantiatiion"
     end
 end
