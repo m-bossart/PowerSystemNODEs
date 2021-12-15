@@ -95,7 +95,16 @@ function instantiate_surr(inputs::NODETrainParams, nn, Vm, Vθ)
     end
 end
 
-function _loss_function(θ, y_actual, tsteps, weights, Ir_scale, Ii_scale, pred_function, pvs_names)    #same or similar, pass the dictionary 
+function _loss_function(
+    θ,
+    y_actual,
+    tsteps,
+    weights,
+    Ir_scale,
+    Ii_scale,
+    pred_function,
+    pvs_names,
+)    #same or similar, pass the dictionary 
     y_predicted = pred_function(θ, tsteps, pvs_names)                                                  #Careful of dict ordering.                     
     loss =
         (mae(y_predicted[1, :], y_actual[1, :]) / Ir_scale) +
@@ -106,8 +115,16 @@ function _loss_function(θ, y_actual, tsteps, weights, Ir_scale, Ii_scale, pred_
 end
 
 function instantiate_loss_function(weights, Ir_scale, Ii_scale, pred_function)
-    return (θ, y_actual, tsteps, pvs_names) ->
-        _loss_function(θ, y_actual, tsteps, weights, Ir_scale, Ii_scale, pred_function, pvs_names)
+    return (θ, y_actual, tsteps, pvs_names) -> _loss_function(
+        θ,
+        y_actual,
+        tsteps,
+        weights,
+        Ir_scale,
+        Ii_scale,
+        pred_function,
+        pvs_names,
+    )
 end
 
 function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)  #stays same 
@@ -122,7 +139,7 @@ function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, 
         save_idxs = [I__IR_OUT, I__II_OUT, I__IR_FILTER, I__II_FILTER, I__IR_NN, I__II_NN], #first two for loss function, rest for data export TODO - should not be constant, depends on surrogate model 
         sensealg = ForwardDiffSensitivity(),
     )
-    return Array(sol)  
+    return Array(sol)
 end
 
 function full_array_pred_function(
@@ -135,21 +152,38 @@ function full_array_pred_function(
     sensealg,
     pvs_names,
 )
-
-    full_array = [] 
+    full_array = []
     for (i, pvs_name) in enumerate(pvs_names_subset)
         surr_prob = fault_data[pvs_name][:surr_problem]
         u₀ = Float64.(fault_data[pvs_name][:u₀])
         p_fixed = Float64.(fault_data[pvs_name][:p_fixed])
         selector = [pvs_name .== name for name in pvs_names]
-        t_steps_subset =  tsteps[selector]
+        t_steps_subset = tsteps[selector]
 
-        if i == 1 
-            full_array = _pred_function(θ, t_steps_subset, p_fixed, solver, surr_prob, tols, sensealg, u₀) 
+        if i == 1
+            full_array = _pred_function(
+                θ,
+                t_steps_subset,
+                p_fixed,
+                solver,
+                surr_prob,
+                tols,
+                sensealg,
+                u₀,
+            )
         else
             full_array = hcat(
                 full_array,
-                _pred_function(θ, t_steps_subset, p_fixed, solver, surr_prob, tols, sensealg, u₀), #don't use full tsteps 
+                _pred_function(
+                    θ,
+                    t_steps_subset,
+                    p_fixed,
+                    solver,
+                    surr_prob,
+                    tols,
+                    sensealg,
+                    u₀,
+                ), #don't use full tsteps 
             )
         end
     end
@@ -171,11 +205,14 @@ end
 
 function instantiate_cb!(output, lb_loss, exportmode, range_count, pvs_names, t_prediction)
     if exportmode == 3
-        return (p, l, pred) -> _cb3!(p, l, pred, output, lb_loss, range_count, pvs_names, t_prediction)
+        return (p, l, pred) ->
+            _cb3!(p, l, pred, output, lb_loss, range_count, pvs_names, t_prediction)
     elseif exportmode == 2
-        return (p, l, pred) -> _cb2!(p, l, pred, output, lb_loss, range_count, pvs_names, t_prediction)
+        return (p, l, pred) ->
+            _cb2!(p, l, pred, output, lb_loss, range_count, pvs_names, t_prediction)
     elseif exportmode == 1
-        return (p, l, pred) -> _cb1!(p, l, pred, output, lb_loss, range_count, pvs_names, t_prediction)
+        return (p, l, pred) ->
+            _cb1!(p, l, pred, output, lb_loss, range_count, pvs_names, t_prediction)
     end
 end
 

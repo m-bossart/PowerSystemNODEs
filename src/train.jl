@@ -100,7 +100,7 @@ function calculate_final_loss(
         pred_function,
     )
     i_true = concatonate_i_true(fault_data, pvs_names, :)
-    t_current = concatonate_t(tsteps, pvs_names,:)
+    t_current = concatonate_t(tsteps, pvs_names, :)
     pvs_names = concatonate_pvs_names(pvs_names, length(tsteps))
     final_loss_for_comparison = loss_function(θ, i_true, t_current, pvs_names)
 
@@ -124,7 +124,7 @@ function calculate_per_solve_maxiters(params, tsteps, n_faults)
     groupsize_faults = params.groupsize_faults
     factor_ranges = ceil(n_timesteps / groupsize_steps)
     factor_faults = ceil(groupsize_faults)
-    @warn factor_faults 
+    @warn factor_faults
     factor_batches = ceil(1 / params.batch_factor)
     per_solve_maxiters = Int(
         floor(total_maxiters * factor_faults / factor_ranges / factor_batches / n_faults),
@@ -166,8 +166,11 @@ function train(params::NODETrainParams)
             Loss = Float64[],
         ),
         "parameters" => DataFrame(Parameters = Vector{Any}[]),
-        "predictions" =>
-            DataFrame(t_prediction = Vector{Any}[], ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
+        "predictions" => DataFrame(
+            t_prediction = Vector{Any}[],
+            ir_prediction = Vector{Any}[],
+            ii_prediction = Vector{Any}[],
+        ),
         "total_time" => [],
         "total_iterations" => 0,
         "final_loss" => [],
@@ -197,54 +200,54 @@ function train(params::NODETrainParams)
     min_θ = initial_params(nn)
 
     #try
-        total_time = @elapsed begin
-            for group_pvs in partition(pvss, params.groupsize_faults)
-                @info "start of fault" min_θ[end]
-                @show pvs_names_subset = get_name.(group_pvs)
+    total_time = @elapsed begin
+        for group_pvs in partition(pvss, params.groupsize_faults)
+            @info "start of fault" min_θ[end]
+            @show pvs_names_subset = get_name.(group_pvs)
 
-                res, output = _train(
-                    min_θ,
-                    params,
-                    sensealg,
-                    solver,
-                    optimizer,
-                    Ir_scale,
-                    Ii_scale,
-                    output,
-                    tsteps,
-                    pvs_names_subset,
-                    fault_data,  #p_ode should come out of fault_data eventually
-                    per_solve_maxiters,
-                )
+            res, output = _train(
+                min_θ,
+                params,
+                sensealg,
+                solver,
+                optimizer,
+                Ir_scale,
+                Ii_scale,
+                output,
+                tsteps,
+                pvs_names_subset,
+                fault_data,  #p_ode should come out of fault_data eventually
+                per_solve_maxiters,
+            )
 
-                min_θ = copy(res.u)
-                @info "end of fault" min_θ[end]
-            end
-
-            #TRAIN ADJUSTMENTS GO HERE (TODO)
+            min_θ = copy(res.u)
+            @info "end of fault" min_θ[end]
         end
-        @info "min_θ[end] (end of training)" min_θ[end]
-        output["total_time"] = total_time
 
-        pvs_names = get_name.(pvss)
-        final_loss_for_comparison = calculate_final_loss(
-            params,
-            res.u,
-            solver,
-            nn,
-            M,
-            pvs_names,
-            fault_data,
-            tsteps,
-            sensealg,
-            Ir_scale,
-            Ii_scale,
-        )
-        output["final_loss"] = final_loss_for_comparison
+        #TRAIN ADJUSTMENTS GO HERE (TODO)
+    end
+    @info "min_θ[end] (end of training)" min_θ[end]
+    output["total_time"] = total_time
 
-        capture_output(output, params.output_data_path, params.train_id)
-        params.graphical_report && visualize_training(params)
-        return true
+    pvs_names = get_name.(pvss)
+    final_loss_for_comparison = calculate_final_loss(
+        params,
+        res.u,
+        solver,
+        nn,
+        M,
+        pvs_names,
+        fault_data,
+        tsteps,
+        sensealg,
+        Ir_scale,
+        Ii_scale,
+    )
+    output["final_loss"] = final_loss_for_comparison
+
+    capture_output(output, params.output_data_path, params.train_id)
+    params.graphical_report && visualize_training(params)
+    return true
     #catch
     #    return false
     #end
@@ -292,10 +295,12 @@ function _train(
         batchsize = Int(floor(length(i_current_range[1, :]) * params.batch_factor))
         train_loader = Flux.Data.DataLoader(
             (i_current_range, t_current_range, pvs_names_current_range),
-            batchsize = batchsize)   #TODO - default for shuffle is false, make new parameter? 
+            batchsize = batchsize,
+        )   #TODO - default for shuffle is false, make new parameter? 
 
         optfun = OptimizationFunction(
-            (θ, p, batch, time_batch, pvs_name_batch) -> loss_function(θ, batch, time_batch, pvs_name_batch),
+            (θ, p, batch, time_batch, pvs_name_batch) ->
+                loss_function(θ, batch, time_batch, pvs_name_batch),
             GalacticOptim.AutoForwardDiff(),
         )
         optprob = OptimizationProblem(optfun, min_θ)
@@ -318,8 +323,18 @@ function _train(
         min_θ = copy(res.u)
         @info "end of range" min_θ[end]
         if params.batch_factor == 1.0   #check that the minimum value is returned as expected. 
-            @assert res.minimum == loss_function(res.u, i_current_range, t_current_range, pvs_names_current_range)[1]
-            @assert res.minimum == loss_function(min_θ, i_current_range, t_current_range, pvs_names_current_range)[1]
+            @assert res.minimum == loss_function(
+                res.u,
+                i_current_range,
+                t_current_range,
+                pvs_names_current_range,
+            )[1]
+            @assert res.minimum == loss_function(
+                min_θ,
+                i_current_range,
+                t_current_range,
+                pvs_names_current_range,
+            )[1]
         end
     end
     return res, output
@@ -343,16 +358,17 @@ function concatonate_i_true(fault_data, pvs_names_subset, range)
 end
 
 function concatonate_pvs_names(pvs_names_subset, length_range)
-    concatonated_pvs_names_list = [] 
-    for (i,pvs_name) in enumerate(pvs_names_subset)
-        if i == 1 
-            concatonated_pvs_names_list  = fill(pvs_name, length_range)
+    concatonated_pvs_names_list = []
+    for (i, pvs_name) in enumerate(pvs_names_subset)
+        if i == 1
+            concatonated_pvs_names_list = fill(pvs_name, length_range)
         else
-            concatonated_pvs_names_list = vcat(concatonated_pvs_names_list, fill(pvs_name, length_range))
-        end 
-    end 
+            concatonated_pvs_names_list =
+                vcat(concatonated_pvs_names_list, fill(pvs_name, length_range))
+        end
+    end
     return concatonated_pvs_names_list
-end 
+end
 
 function concatonate_t(tsteps, pvs_names_subset, range)
     t = []

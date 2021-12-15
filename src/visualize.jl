@@ -65,7 +65,7 @@ function visualize_3(params, path_to_output, path_to_input)
         ii_true = i_true[2, :]
         t_all = vec(Float64.(concatonate_t(tsteps, df_loss[i, :PVS_name], :))) #TODO fix this syntax 
         p3 = scatter(t_pred, ir_pred, ms = 2, msw = 0, label = "prediction")
-        scatter!(p3, t_all, ir_true, ms = 2, msw =0,  label = "truth")
+        scatter!(p3, t_all, ir_true, ms = 2, msw = 0, label = "truth")
         p4 = scatter(t_pred, ii_pred, ms = 2, msw = 0, label = "prediction")
         scatter!(p4, t_all, ii_true, ms = 2, msw = 0, label = "truth")
         p = plot(
