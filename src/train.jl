@@ -59,7 +59,7 @@ function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
         saveat = tsteps,
     )
     @show mae(sol[22, :], i_ver[1, :])
-    @assert mae(sol[22, :], i_ver[1, :]) < 0.01#1e-3 # was 5e-5 with sequential train. need to double check
+    @assert mae(sol[22, :], i_ver[1, :]) < 0.01#1e-3 # was 5e-5 with sequential train. need to double check visually 
 end
 
 function turn_node_on(surr_prob_node_off, params, fault_dict, p_nn)
@@ -100,7 +100,9 @@ function calculate_final_loss(
         pred_function,
     )
     i_true = concatonate_i_true(fault_data, pvs_names, :)
-    final_loss_for_comparison = loss_function(θ, i_true, tsteps)
+    t_current = concatonate_t(tsteps, pvs_names,:)
+    pvs_names = concatonate_pvs_names(pvs_names, length(tsteps))
+    final_loss_for_comparison = loss_function(θ, i_true, t_current, pvs_names)
 
     return final_loss_for_comparison[1]
 end
@@ -165,7 +167,7 @@ function train(params::NODETrainParams)
         ),
         "parameters" => DataFrame(Parameters = Vector{Any}[]),
         "predictions" =>
-            DataFrame(ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
+            DataFrame(t_prediction = Vector{Any}[], ir_prediction = Vector{Any}[], ii_prediction = Vector{Any}[]),
         "total_time" => [],
         "total_iterations" => 0,
         "final_loss" => [],
@@ -219,7 +221,7 @@ function train(params::NODETrainParams)
                 @info "end of fault" min_θ[end]
             end
 
-            #TRAIN ADJUSTMENTS GO HERE (TO DO)
+            #TRAIN ADJUSTMENTS GO HERE (TODO)
         end
         @info "min_θ[end] (end of training)" min_θ[end]
         output["total_time"] = total_time
@@ -285,18 +287,15 @@ function _train(
     for range in ranges
         @info "start of range" min_θ[end]
         i_current_range = concatonate_i_true(fault_data, pvs_names_subset, range)
-        #t_current_range = concatonate_t(tsteps, pvs_names_subset, range)
-
+        t_current_range = concatonate_t(tsteps, pvs_names_subset, range)
+        pvs_names_current_range = concatonate_pvs_names(pvs_names_subset, length(range))
         batchsize = Int(floor(length(i_current_range[1, :]) * params.batch_factor))
         train_loader = Flux.Data.DataLoader(
-            (i_current_range, tsteps[range]),
-            batchsize = batchsize,   #TODO - IMPLEMENT BATCHING
-        )
-        @warn size(i_current_range)
-        @warn size(t_current_range)
-        @warn t_current_range
+            (i_current_range, t_current_range, pvs_names_current_range),
+            batchsize = batchsize)   #TODO - default for shuffle is false, make new parameter? 
+
         optfun = OptimizationFunction(
-            (θ, p, batch, time_batch) -> loss_function(θ, batch, time_batch),
+            (θ, p, batch, time_batch, pvs_name_batch) -> loss_function(θ, batch, time_batch, pvs_name_batch),
             GalacticOptim.AutoForwardDiff(),
         )
         optprob = OptimizationProblem(optfun, min_θ)
@@ -306,6 +305,7 @@ function _train(
             params.output_mode,
             range_count,
             pvs_names_subset,
+            t_current_range,
         )
         range_count += 1
 
@@ -317,9 +317,9 @@ function _train(
         )
         min_θ = copy(res.u)
         @info "end of range" min_θ[end]
-        if params.batch_factor == 1.0
-            @assert res.minimum == loss_function(res.u, i_current_range, t_current_range)[1]
-            @assert res.minimum == loss_function(min_θ, i_current_range, t_current_range)[1]
+        if params.batch_factor == 1.0   #check that the minimum value is returned as expected. 
+            @assert res.minimum == loss_function(res.u, i_current_range, t_current_range, pvs_names_current_range)[1]
+            @assert res.minimum == loss_function(min_θ, i_current_range, t_current_range, pvs_names_current_range)[1]
         end
     end
     return res, output
@@ -341,6 +341,18 @@ function concatonate_i_true(fault_data, pvs_names_subset, range)
     end
     return i_true
 end
+
+function concatonate_pvs_names(pvs_names_subset, length_range)
+    concatonated_pvs_names_list = [] 
+    for (i,pvs_name) in enumerate(pvs_names_subset)
+        if i == 1 
+            concatonated_pvs_names_list  = fill(pvs_name, length_range)
+        else
+            concatonated_pvs_names_list = vcat(concatonated_pvs_names_list, fill(pvs_name, length_range))
+        end 
+    end 
+    return concatonated_pvs_names_list
+end 
 
 function concatonate_t(tsteps, pvs_names_subset, range)
     t = []

@@ -53,19 +53,21 @@ function visualize_3(params, path_to_output, path_to_input)
     df_predictions = DataFrame(Arrow.Table(joinpath(path_to_output, "predictions")))
     TrainInputs =
         JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
+    tsteps = TrainInputs.tsteps
     fault_data = TrainInputs.fault_data
 
     for i in transition_indices
         ir_pred = df_predictions[i, "ir_prediction"]
         ii_pred = df_predictions[i, "ii_prediction"]
-
+        t_pred = df_predictions[i, "t_prediction"]
         i_true = concatonate_i_true(fault_data, df_loss[i, :PVS_name], :)
         ir_true = i_true[1, :]
         ii_true = i_true[2, :]
-        p3 = plot(ir_pred, label = "prediction")
-        plot!(p3, ir_true, label = "truth")
-        p4 = plot(ii_pred, label = "prediction")
-        plot!(p4, ii_true, label = "truth")
+        t_all = vec(Float64.(concatonate_t(tsteps, df_loss[i, :PVS_name], :))) #TODO fix this syntax 
+        p3 = scatter(t_pred, ir_pred, ms = 2, msw = 0, label = "prediction")
+        scatter!(p3, t_all, ir_true, ms = 2, msw =0,  label = "truth")
+        p4 = scatter(t_pred, ii_pred, ms = 2, msw = 0, label = "prediction")
+        scatter!(p4, t_all, ii_true, ms = 2, msw = 0, label = "truth")
         p = plot(
             p3,
             p4,
