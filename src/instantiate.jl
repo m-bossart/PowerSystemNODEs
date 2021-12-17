@@ -57,7 +57,7 @@ function instantiate_nn(inputs)
     nn_hidden = inputs.node_layers
     nn_width = inputs.node_width
 
-    nn_input = 0
+    nn_input = 4   #P_pf, Q_pf, V_pf, θ_pf
     nn_output = 2
 
     (inputs.node_inputs == "voltage") && (nn_input += 2)
@@ -69,6 +69,13 @@ function instantiate_nn(inputs)
 end
 
 function instantiate_M(inputs)
+    if inputs.ode_model == "vsm"
+        ODE_ORDER = 19
+    elseif inputs.ode_model == "none"
+        ODE_ORDER = 0 
+    else 
+        @error "ODE order unknown for ODE model provided"
+    end 
     n_differential = ODE_ORDER + 2 + inputs.node_feedback_states
     n_algebraic = 2
 
@@ -81,25 +88,29 @@ end
 
 function instantiate_surr(inputs::NODETrainParams, nn, Vm, Vθ)
     if inputs.ode_model == "vsm"
+        N_ALGEBRAIC_STATES = 2 
+        ODE_ORDER = 19
         if inputs.node_inputs == "voltage"
             if inputs.node_feedback_current
                 surr = surr_map[string("vsm_v_t_", inputs.node_feedback_states)]
-                return instantiate_surr(surr, nn, Vm, Vθ)
+                return instantiate_surr(surr, nn, Vm, Vθ), N_ALGEBRAIC_STATES , ODE_ORDER 
             else
                 surr = surr_map[string("vsm_v_f_", inputs.node_feedback_states)]
-                return instantiate_surr(surr, nn, Vm, Vθ)
+                return instantiate_surr(surr, nn, Vm, Vθ), N_ALGEBRAIC_STATES , ODE_ORDER 
             end
         else
             @warn "node input type not found during surrogate instantiatiion"
         end
     elseif inputs.ode_model == "none"
+        N_ALGEBRAIC_STATES = 0 
+        ODE_ORDER = 0 
         if inputs.node_inputs == "voltage"
             if inputs.node_feedback_current
                 surr = surr_map[string("none_v_t_", inputs.node_feedback_states)]
-                return instantiate_surr(surr, nn, Vm, Vθ) 
+                return instantiate_surr(surr, nn, Vm, Vθ), N_ALGEBRAIC_STATES , ODE_ORDER 
             else 
                 surr = surr_map[string("none_v_f_", inputs.node_feedback_states)]
-                return instantiate_surr(surr, nn, Vm, Vθ) 
+                return instantiate_surr(surr, nn, Vm, Vθ) , N_ALGEBRAIC_STATES , ODE_ORDER 
             end 
         else 
             @warn "node input type not found during surrogate instantiatiion"
@@ -141,9 +152,12 @@ function instantiate_loss_function(weights, Ir_scale, Ii_scale, pred_function)
     )
 end
 
-function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)  #stays same 
-    p = vcat(θ, p_fixed)
-    _prob = remake(surr_prob, p = p, u0 = eltype(p).(u₀))   #remake u0 as eltype(p)eltype(p).([1.0,1.0])
+function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)  
+    @warn "type p_fixed", typeof(p_fixed)
+    @warn "type theta", typeof(θ)  
+    p = vcat(θ, p_fixed)  
+    @warn "type p vectorized", typeof(p)
+    _prob = remake(surr_prob, p = p, u0 = eltype(p).(u₀))   
     sol = solve(
         _prob,
         solver,
@@ -170,7 +184,8 @@ function full_array_pred_function(
     for (i, pvs_name) in enumerate(pvs_names_subset)
         surr_prob = fault_data[pvs_name][:surr_problem]
         u₀ = Float64.(fault_data[pvs_name][:u₀])
-        p_fixed = Float64.(fault_data[pvs_name][:p_fixed])
+        P = fault_data[pvs_name][:P]
+        p_fixed = vectorize_fixed_only(P)
         selector = [pvs_name .== name for name in pvs_names]
         t_steps_subset = tsteps[selector]
 
@@ -257,3 +272,4 @@ function _cb1!(p, l, pred, output, lb_loss, range_count, pvs_names, t_prediction
     (l > lb_loss) && return false
     return true
 end
+ 

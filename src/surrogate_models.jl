@@ -9,6 +9,30 @@
 # 1-10
 # NOTE: Input dimension of nn =  <nn_external_inputs> + <#_feedback_states>
 
+mutable struct SurrParams
+    nn::Vector{Float64}
+    ode::Vector{Float64}
+    pf::Vector{Float64}
+    network::Vector{Float64}
+    scale::Vector{Float64}
+    n_weights::Vector{Float64}
+end 
+
+function vectorize(P::SurrParams)
+    return vcat(P.nn,P.ode,P.pf,P.network,P.scale,P.n_weights)
+end 
+    
+function vectorize_fixed_only(P::SurrParams)
+    return vcat(P.ode,P.pf,P.network,P.scale,P.n_weights)
+end 
+    
+
+
+function SurrParams(;)
+    SurrParams(
+        [],[],[],[],[],[])
+
+end 
 function none_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     #PARAMETERS
     n_weights_nn = p[end]
@@ -70,12 +94,14 @@ function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     ωref = p_fixed[25]
     Pref = p_fixed[26]
     Qref = p_fixed[27]
-    Xtrans = p_fixed[28]
-    Rtrans = p_fixed[29]
-    V_scale = p_fixed[30]
-    nn_scale = p_fixed[31]
-    Vr0 = p_fixed[32]
-    Vi0 = p_fixed[33]
+    P_pf = p_fixed[28]
+    Q_pf = p_fixed[29]
+    V_pf = p_fixed[30]
+    θ_pf = p_fixed[31]
+    Xtrans = p_fixed[32]
+    Rtrans = p_fixed[33]
+    V_scale = p_fixed[34]
+    nn_scale = p_fixed[35]
 
     #STATE INDEX AND STATES
     i__vi_filter, vi_filter = 1, x[1]
@@ -194,9 +220,10 @@ function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     dx[i__ii_filter] =
         +(ω_base / lg) *                                            #docs:(5f)
         (vi_filter - Vi_pcc - rg * ii_filter - ω_sys * lg * ir_filter)
-
     #NN INPUT
-    nn_input = [(Vr_pcc - Vr0) * V_scale, (Vi_pcc - Vi0) * V_scale, ir_nn, ii_nn]
+    Vr0 = V_pf * cos(θ_pf)
+    Vi0 = V_pf * sin(θ_pf)
+    nn_input = [P_pf, Q_pf, V_pf, θ_pf, (Vr_pcc - Vr0) * V_scale, (Vi_pcc - Vi0) * V_scale, ir_nn, ii_nn]
 
     #NN CURRENT SOURCE
     dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
