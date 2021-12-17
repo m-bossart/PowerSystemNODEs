@@ -15,5 +15,5 @@ status = train(train_params)    #compare to previous serial version
 ## 
 #LOCAL TEST OF MULTIPLE RUNS BELOW FOR TESTING summarize_trains.jl
 train_params.train_id = "train_instance_2"
-train_params.maxiters = 6 
-status = train(train_params) 
+train_params.maxiters = 6
+status = train(train_params)

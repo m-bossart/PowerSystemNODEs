@@ -16,17 +16,15 @@ mutable struct SurrParams
     network::Vector{Float64}
     scale::Vector{Float64}
     n_weights::Vector{Float64}
-end 
+end
 
 function vectorize(P::SurrParams)
-    return vcat(P.nn,P.ode,P.pf,P.network,P.scale,P.n_weights)
-end 
-    
-function SurrParams(;)
-    SurrParams(
-        [],[],[],[],[],[])
+    return vcat(P.nn, P.ode, P.pf, P.network, P.scale, P.n_weights)
+end
 
-end 
+function SurrParams(;)
+    SurrParams([], [], [], [], [], [])
+end
 function none_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     #PARAMETERS
     n_weights_nn = p[end]
@@ -217,7 +215,16 @@ function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     #NN INPUT
     Vr0 = V_pf * cos(θ_pf)
     Vi0 = V_pf * sin(θ_pf)
-    nn_input = [P_pf, Q_pf, V_pf, θ_pf, (Vr_pcc - Vr0) * V_scale, (Vi_pcc - Vi0) * V_scale, ir_nn, ii_nn]
+    nn_input = [
+        P_pf,
+        Q_pf,
+        V_pf,
+        θ_pf,
+        (Vr_pcc - Vr0) * V_scale,
+        (Vi_pcc - Vi0) * V_scale,
+        ir_nn,
+        ii_nn,
+    ]
 
     #NN CURRENT SOURCE
     dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale

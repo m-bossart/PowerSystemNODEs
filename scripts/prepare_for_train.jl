@@ -9,7 +9,7 @@ train_data_path = joinpath(INPUT_FOLDER_NAME, "data.json")
 train_system_path = joinpath(INPUT_FOLDER_NAME, "system.json")
 full_system_path = joinpath(INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
 
-SURROGATE_BUS = 16 
+SURROGATE_BUS = 16
 
 if (!(isfile(full_system_path)) || force_generate_inputs)
     @warn "Rebuilding full system"
@@ -27,7 +27,11 @@ if (!(isfile(train_system_path)) || !(isfile(train_data_path)) || force_generate
     sys_surr = remove_area(sys_full, "1")
     sys_train = build_train_system(sys_surr, sys_pvs, "surrogate")
     to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "system.json"), force = true)
-    d = generate_train_data(sys_train, NODETrainDataParams(ode_model="vsm"), SURROGATE_BUS)
+    d = generate_train_data(
+        sys_train,
+        NODETrainDataParams(ode_model = "vsm"),
+        SURROGATE_BUS,
+    )
     serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
 end
 

@@ -25,53 +25,62 @@ function turn_node_on(surr_prob_node_off, params, P)
     return surr_prob
 end
 
-function initialize_surrogate(params, nn, M, tsteps, fault_dict, surr, N_ALGEBRAIC_STATES, ODE_ORDER)
+function initialize_surrogate(
+    params,
+    nn,
+    M,
+    tsteps,
+    fault_dict,
+    surr,
+    N_ALGEBRAIC_STATES,
+    ODE_ORDER,
+)
     #Determine Order of the Surrogate 
     order_surr = ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES    #2 states for the node current
     x₀_surr = zeros(order_surr)
 
     #Build Surrogate Vector 
-    P = SurrParams() 
-    if  (params.ode_model == "none") &&  (length(p_ode) != 0)
+    P = SurrParams()
+    if (params.ode_model == "none") && (length(p_ode) != 0)
         @warn "ODE model is not present in surrogate, yet parameters for an ode are provided in train data. Check for mismatch."
-    end 
-    P.ode = fault_dict[:p_ode]  
+    end
+    P.ode = fault_dict[:p_ode]
     P.pf = fault_dict[:p_pf]
     P.network = fault_dict[:p_network]
     P.nn = initial_params(nn)
     P.n_weights = [Float64(length(P.nn))]
     if params.ode_model == "none"
-        P.scale = [params.node_input_scale, params.node_output_scale] 
+        P.scale = [params.node_input_scale, params.node_output_scale]
         #x₀_surr[1:(end-2)] = 0.0  - initialized to zero already 
     else
-        P.scale = [params.node_input_scale, 0.0]  
-        x₀ = fault_dict[:x₀]  
-        x₀_surr[1:ODE_ORDER] = x₀    
-    end 
+        P.scale = [params.node_input_scale, 0.0]
+        x₀ = fault_dict[:x₀]
+        x₀_surr[1:ODE_ORDER] = x₀
+    end
     p = vectorize(P)
 
     P_pf, Q_pf, V_pf, θ_pf = P.pf
-    Vr_pf = V_pf*cos(θ_pf)
-    Vi_pf = V_pf*sin(θ_pf)
-    Ir_pf = (P_pf*Vr_pf + Q_pf*Vi_pf)/(Vr_pf^2+Vi_pf^2)
-    Ii_pf = (P_pf*Vi_pf-Q_pf*Vr_pf)/(Vi_pf^2+Vr_pf^2)
+    Vr_pf = V_pf * cos(θ_pf)
+    Vi_pf = V_pf * sin(θ_pf)
+    Ir_pf = (P_pf * Vr_pf + Q_pf * Vi_pf) / (Vr_pf^2 + Vi_pf^2)
+    Ii_pf = (P_pf * Vi_pf - Q_pf * Vr_pf) / (Vi_pf^2 + Vr_pf^2)
 
     x₀_surr[(end - 1):end] = [Ir_pf, Ii_pf]
 
     if params.ode_model != "none"   #only do an NL solve if there is an ODE part. Otherwise, set initial conditions and try to solve.
         @warn "Power flow results", P.pf
-        h = get_init_surr(p, Ir_pf, Ii_pf, surr)    
+        h = get_init_surr(p, Ir_pf, Ii_pf, surr)
         res_surr = nlsolve(h, x₀_surr)
         @assert converged(res_surr)
         dx = similar(x₀_surr)
         surr(dx, res_surr.zero, p, 0.0)
         @assert all(isapprox.(dx, 0.0; atol = 1e-8))
-    end 
+    end
 
     tspan = (tsteps[1], tsteps[end])
     surr_func = ODEFunction(surr, mass_matrix = M)
-    surr_prob = ODEProblem(surr_func, res_surr.zero, tspan, p)    
-    return  surr_prob, P
+    surr_prob = ODEProblem(surr_func, res_surr.zero, tspan, p)
+    return surr_prob, P
 end
 
 function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
@@ -89,8 +98,6 @@ function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
     @show mae(sol[22, :], i_ver[1, :])
     @assert mae(sol[22, :], i_ver[1, :]) < 1e-3 # was 5e-5 with sequential train. need to double check visually 
 end
-
-
 
 function calculate_final_loss(
     params,
@@ -128,8 +135,8 @@ end
 
 function get_init_surr(p, Ir_pf, Ii_pf, surr)
     return (dx, x) -> begin
-        dx[end-1] = 0 
-        x[end-1] = Ir_pf
+        dx[end - 1] = 0
+        x[end - 1] = Ir_pf
         dx[end] = 0
         x[end] = Ii_pf
         surr(dx, x, p, 0.0)
@@ -205,14 +212,22 @@ function train(params::NODETrainParams)
         @warn N_ALGEBRAIC_STATES
         @warn ODE_ORDER
         fault_dict = fault_data[get_name(pvs)]
-        surr_prob_node_off, P =
-            initialize_surrogate(params, nn, M, tsteps, fault_dict, surr, N_ALGEBRAIC_STATES, ODE_ORDER)
+        surr_prob_node_off, P = initialize_surrogate(
+            params,
+            nn,
+            M,
+            tsteps,
+            fault_dict,
+            surr,
+            N_ALGEBRAIC_STATES,
+            ODE_ORDER,
+        )
 
-        if (params.ode_model != "none")    
+        if (params.ode_model != "none")
             (params.verify_psid_node_off) &&
                 verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
             surr_prob = turn_node_on(surr_prob_node_off, params, P)
-        end 
+        end
 
         fault_data[get_name(pvs)][:surr_problem] = surr_prob
         fault_data[get_name(pvs)][:P] = P   #parameters are stored in surr_prob, but as a single vector. The P struct allows for easier handling. 
@@ -237,7 +252,7 @@ function train(params::NODETrainParams)
                 output,
                 tsteps,
                 pvs_names_subset,
-                fault_data,  
+                fault_data,
                 per_solve_maxiters,
             )
 

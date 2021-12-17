@@ -1,10 +1,9 @@
 # TODO: Use Dict temporarily during dev while the fields are defined
 # WHich things change with fault? 
 struct NODETrainInputs      #could move common data to fields outside of dict 
-    tsteps::Vector{Float64}  
+    tsteps::Vector{Float64}
     fault_data::Dict{String, Dict{Symbol, Any}}
 end
-
 
 function serialize(inputs::NODETrainInputs, file_path::String)
     open(file_path, "w") do io
@@ -83,7 +82,7 @@ function generate_train_data(sys_train, NODETrainDataParams, SURROGATE_BUS)
         )
         active_source =
             collect(get_components(Source, sys_train, x -> PSY.get_available(x)))[1]
-        ode_data = get_total_current_series(sim_full) 
+        ode_data = get_total_current_series(sim_full)
 
         transformer = collect(get_components(Transformer2W, sys_train))[1]
         p_network = [get_x(transformer) + get_X_th(pvs), get_r(transformer) + get_R_th(pvs)]
@@ -92,22 +91,22 @@ function generate_train_data(sys_train, NODETrainDataParams, SURROGATE_BUS)
         bus_results = solve_powerflow(sys_train)["bus_results"]
         @info "full system", bus_results
         surrogate_bus_result = bus_results[in([SURROGATE_BUS]).(bus_results.bus_number), :]
-#=         if flow_results[1,:bus_from] == SURROGATE_BUS
-            P_pf = flow_results[1,:P_from_to]      
-            Q_pf = flow_results[1,:Q_from_to]
-        elseif flow_results[1,:bus_to] == SURROGATE_BUS
-            P_pf = flow_results[1,:P_to_from]     
-            Q_pf = flow_results[1,:Q_to_from]
-        else 
-            @error "Surrogate bus not found in the system"
-        end  =#
-        P_pf = surrogate_bus_result[1,:P_gen]/get_base_power(sys_train)   #TODO- divide by base power  
-        Q_pf = surrogate_bus_result[1,:Q_gen]/get_base_power(sys_train) 
-        V_pf = surrogate_bus_result[1,:Vm]             
-        θ_pf = surrogate_bus_result[1,:θ]
+        #=         if flow_results[1,:bus_from] == SURROGATE_BUS
+                    P_pf = flow_results[1,:P_from_to]      
+                    Q_pf = flow_results[1,:Q_from_to]
+                elseif flow_results[1,:bus_to] == SURROGATE_BUS
+                    P_pf = flow_results[1,:P_to_from]     
+                    Q_pf = flow_results[1,:Q_to_from]
+                else 
+                    @error "Surrogate bus not found in the system"
+                end  =#
+        P_pf = surrogate_bus_result[1, :P_gen] / get_base_power(sys_train)   #TODO- divide by base power  
+        Q_pf = surrogate_bus_result[1, :Q_gen] / get_base_power(sys_train)
+        V_pf = surrogate_bus_result[1, :Vm]
+        θ_pf = surrogate_bus_result[1, :θ]
 
-        @info collect(get_components(Bus,sys_train))
-        @warn "P*", P_pf, "Q*", Q_pf, "V*", V_pf, "θ*", θ_pf 
+        @info collect(get_components(Bus, sys_train))
+        @warn "P*", P_pf, "Q*", Q_pf, "V*", V_pf, "θ*", θ_pf
 
         fault_data[get_name(pvs)] = Dict(
             :p_network => p_network,
@@ -115,7 +114,7 @@ function generate_train_data(sys_train, NODETrainDataParams, SURROGATE_BUS)
             :ir_ground_truth => ode_data[1, :],
             :ii_ground_truth => ode_data[2, :],
         )
-        if NODETrainDataParams.ode_model == "vsm"     
+        if NODETrainDataParams.ode_model == "vsm"
             #################### BUILD INITIALIZATION SYSTEM ###############################
             sys_init, p_inv = build_sys_init(sys_train) #returns p_inv, the set of average parameters 
 
@@ -150,9 +149,7 @@ function generate_train_data(sys_train, NODETrainDataParams, SURROGATE_BUS)
             fault_data[get_name(pvs)][:x₀] = x₀
             fault_data[get_name(pvs)][:ir_node_off] = avgmodel_data[1, :]
             fault_data[get_name(pvs)][:ii_node_off] = avgmodel_data[2, :]
-
-        end 
-    
+        end
     end
     return NODETrainInputs(tsteps, fault_data)
 end
