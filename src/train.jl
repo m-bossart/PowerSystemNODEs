@@ -26,6 +26,10 @@ function turn_node_on(surr_prob_node_off, params, P)
 end
 
 function initialize_surrogate(params, nn, M, tsteps, fault_dict, surr, N_ALGEBRAIC_STATES, ODE_ORDER)
+    #Determine Order of the Surrogate 
+    order_surr = ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES    #2 states for the node current
+    x₀_surr = zeros(order_surr)
+
     #Build Surrogate Vector 
     P = SurrParams() 
     if  (params.ode_model == "none") &&  (length(p_ode) != 0)
@@ -38,42 +42,36 @@ function initialize_surrogate(params, nn, M, tsteps, fault_dict, surr, N_ALGEBRA
     P.n_weights = [Float64(length(P.nn))]
     if params.ode_model == "none"
         P.scale = [params.node_input_scale, params.node_output_scale] 
+        #x₀_surr[1:(end-2)] = 0.0  - initialized to zero already 
     else
-        P.scale = [params.node_input_scale, 0.0]    
+        P.scale = [params.node_input_scale, 0.0]  
+        x₀ = fault_dict[:x₀]  
+        x₀_surr[1:ODE_ORDER] = x₀    
     end 
-    @warn "pscale", P.scale
     p = vectorize(P)
 
-
-    #Determine Order of the Surrogate 
-    order_surr = ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES    #2 states for the node current
-    x₀_surr = zeros(order_surr)
-
-
-    
     P_pf, Q_pf, V_pf, θ_pf = P.pf
     Vr_pf = V_pf*cos(θ_pf)
     Vi_pf = V_pf*sin(θ_pf)
     Ir_pf = (P_pf*Vr_pf + Q_pf*Vi_pf)/(Vr_pf^2+Vi_pf^2)
     Ii_pf = (P_pf*Vi_pf-Q_pf*Vr_pf)/(Vi_pf^2+Vr_pf^2)
-    
-    x₀ = fault_dict[:x₀]  #TODO - only if using ode model
-    x₀_surr[1:ODE_ORDER] = x₀   
+
     x₀_surr[(end - 1):end] = [Ir_pf, Ii_pf]
-    @warn x₀_surr[(end - 1):end]   
-    @warn P.pf
-    @warn Ir_pf, Ii_pf
-    h = get_init_surr(p, Ii_pf, Ii_pf, surr) 
-    res_surr = nlsolve(h, x₀_surr)
-    @assert converged(res_surr)
-    dx = similar(x₀_surr)
-    surr(dx, res_surr.zero, p, 0.0)
-    @assert all(isapprox.(dx, 0.0; atol = 1e-8))
+
+    if params.ode_model != "none"   #only do an NL solve if there is an ODE part. Otherwise, set initial conditions and try to solve.
+        @warn "Power flow results", P.pf
+        h = get_init_surr(p, Ir_pf, Ii_pf, surr)    
+        res_surr = nlsolve(h, x₀_surr)
+        @assert converged(res_surr)
+        dx = similar(x₀_surr)
+        surr(dx, res_surr.zero, p, 0.0)
+        @assert all(isapprox.(dx, 0.0; atol = 1e-8))
+    end 
 
     tspan = (tsteps[1], tsteps[end])
     surr_func = ODEFunction(surr, mass_matrix = M)
-    surr_prob = ODEProblem(surr_func, x₀_surr, tspan, p)
-    return res_surr.zero, surr_prob, P
+    surr_prob = ODEProblem(surr_func, res_surr.zero, tspan, p)    
+    return  surr_prob, P
 end
 
 function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
@@ -89,7 +87,7 @@ function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
         saveat = tsteps,
     )
     @show mae(sol[22, :], i_ver[1, :])
-    @assert mae(sol[22, :], i_ver[1, :]) < 0.01#1e-3 # was 5e-5 with sequential train. need to double check visually 
+    @assert mae(sol[22, :], i_ver[1, :]) < 1e-3 # was 5e-5 with sequential train. need to double check visually 
 end
 
 
@@ -207,19 +205,17 @@ function train(params::NODETrainParams)
         @warn N_ALGEBRAIC_STATES
         @warn ODE_ORDER
         fault_dict = fault_data[get_name(pvs)]
-        u₀, surr_prob_node_off, P =
+        surr_prob_node_off, P =
             initialize_surrogate(params, nn, M, tsteps, fault_dict, surr, N_ALGEBRAIC_STATES, ODE_ORDER)
 
-
-        if (params.ode_model != "none" || params.ode_model != "constant")   #TODO-check logic 
+        if (params.ode_model != "none")    
             (params.verify_psid_node_off) &&
                 verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
             surr_prob = turn_node_on(surr_prob_node_off, params, P)
         end 
 
         fault_data[get_name(pvs)][:surr_problem] = surr_prob
-        fault_data[get_name(pvs)][:u₀] = u₀     #TODO - different than u0 stored in problem? remake instead?
-        fault_data[get_name(pvs)][:P] = P
+        fault_data[get_name(pvs)][:P] = P   #parameters are stored in surr_prob, but as a single vector. The P struct allows for easier handling. 
     end
 
     min_θ = initial_params(nn)
@@ -241,7 +237,7 @@ function train(params::NODETrainParams)
                 output,
                 tsteps,
                 pvs_names_subset,
-                fault_data,  #p_ode should come out of fault_data eventually
+                fault_data,  
                 per_solve_maxiters,
             )
 

@@ -152,11 +152,9 @@ function instantiate_loss_function(weights, Ir_scale, Ii_scale, pred_function)
     )
 end
 
-function _pred_function(θ, tsteps, p_fixed, solver, surr_prob, tols, sensealg, u₀)  
-    @warn "type p_fixed", typeof(p_fixed)
-    @warn "type theta", typeof(θ)  
-    p = vcat(θ, p_fixed)  
-    @warn "type p vectorized", typeof(p)
+function _pred_function(θ, tsteps, P, solver, surr_prob, tols, sensealg, u₀)  
+    P.nn = θ
+    p = vectorize(P)
     _prob = remake(surr_prob, p = p, u0 = eltype(p).(u₀))   
     sol = solve(
         _prob,
@@ -183,9 +181,8 @@ function full_array_pred_function(
     full_array = []
     for (i, pvs_name) in enumerate(pvs_names_subset)
         surr_prob = fault_data[pvs_name][:surr_problem]
-        u₀ = Float64.(fault_data[pvs_name][:u₀])
+        u₀ = surr_prob.u0
         P = fault_data[pvs_name][:P]
-        p_fixed = vectorize_fixed_only(P)
         selector = [pvs_name .== name for name in pvs_names]
         t_steps_subset = tsteps[selector]
 
@@ -193,7 +190,7 @@ function full_array_pred_function(
             full_array = _pred_function(
                 θ,
                 t_steps_subset,
-                p_fixed,
+                P,
                 solver,
                 surr_prob,
                 tols,
@@ -206,13 +203,13 @@ function full_array_pred_function(
                 _pred_function(
                     θ,
                     t_steps_subset,
-                    p_fixed,
+                    P,
                     solver,
                     surr_prob,
                     tols,
                     sensealg,
                     u₀,
-                ), #don't use full tsteps 
+                ),
             )
         end
     end

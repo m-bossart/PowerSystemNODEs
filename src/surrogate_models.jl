@@ -10,7 +10,7 @@
 # NOTE: Input dimension of nn =  <nn_external_inputs> + <#_feedback_states>
 
 mutable struct SurrParams
-    nn::Vector{Float64}
+    nn::Vector{}                    #needs to accept dual numbers during training 
     ode::Vector{Float64}
     pf::Vector{Float64}
     network::Vector{Float64}
@@ -22,12 +22,6 @@ function vectorize(P::SurrParams)
     return vcat(P.nn,P.ode,P.pf,P.network,P.scale,P.n_weights)
 end 
     
-function vectorize_fixed_only(P::SurrParams)
-    return vcat(P.ode,P.pf,P.network,P.scale,P.n_weights)
-end 
-    
-
-
 function SurrParams(;)
     SurrParams(
         [],[],[],[],[],[])
