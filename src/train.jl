@@ -41,7 +41,7 @@ function initialize_surrogate(
 
     #Build Surrogate Vector 
     P = SurrParams()
-    if (params.ode_model == "none") && (length(p_ode) != 0)
+    if (params.ode_model == "none") && (length(P.ode) != 0)
         @warn "ODE model is not present in surrogate, yet parameters for an ode are provided in train data. Check for mismatch."
     end
     P.ode = fault_dict[:p_ode]
@@ -75,11 +75,12 @@ function initialize_surrogate(
         dx = similar(x₀_surr)
         surr(dx, res_surr.zero, p, 0.0)
         @assert all(isapprox.(dx, 0.0; atol = 1e-8))
+        x₀_surr = res_surr.zero 
     end
-
+    @warn "x0 surr", x₀_surr
     tspan = (tsteps[1], tsteps[end])
     surr_func = ODEFunction(surr, mass_matrix = M)
-    surr_prob = ODEProblem(surr_func, res_surr.zero, tspan, p)
+    surr_prob = ODEProblem(surr_func, x₀_surr, tspan, p)
     return surr_prob, P
 end
 
@@ -209,10 +210,8 @@ function train(params::NODETrainParams)
     for pvs in pvss
         Vm, Vθ = Source_to_function_of_time(pvs)
         surr, N_ALGEBRAIC_STATES, ODE_ORDER = instantiate_surr(params, nn, Vm, Vθ)
-        @warn N_ALGEBRAIC_STATES
-        @warn ODE_ORDER
         fault_dict = fault_data[get_name(pvs)]
-        surr_prob_node_off, P = initialize_surrogate(
+        surr_prob_node_off, P = initialize_surrogate(   #change naming
             params,
             nn,
             M,
@@ -227,6 +226,8 @@ function train(params::NODETrainParams)
             (params.verify_psid_node_off) &&
                 verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
             surr_prob = turn_node_on(surr_prob_node_off, params, P)
+        else 
+            surr_prob = surr_prob_node_off
         end
 
         fault_data[get_name(pvs)][:surr_problem] = surr_prob

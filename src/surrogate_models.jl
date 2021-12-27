@@ -25,30 +25,48 @@ end
 function SurrParams(;)
     SurrParams([], [], [], [], [], [])
 end
-function none_v_t_0(dx, x, p, t, nn, Vm, Vθ)
+function none_v_t_0(dx, x, p, t, nn, Vm, Vθ) 
     #PARAMETERS
     n_weights_nn = p[end]
     p_nn = p[Int(1):Int(n_weights_nn)]
     p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
 
-    Xtrans = p_fixed[1]
-    Rtrans = p_fixed[2]
-    V_scale = p_fixed[3]
-    nn_scale = p_fixed[4]
-    Vr0 = p_fixed[35]
-    Vi0 = p_fixed[6]
+    P_pf = p_fixed[1]
+    Q_pf = p_fixed[2]
+    V_pf = p_fixed[3]
+    θ_pf = p_fixed[4]
+    Xtrans = p_fixed[5]
+    Rtrans = p_fixed[6]
+    V_scale = p_fixed[7]
+    nn_scale = p_fixed[8]
 
     #STATE INDEX AND STATES
-    i__ir_nn, ir_nn = 20, x[1]
-    i__ii_nn, ii_nn = 21, x[2]
+    i__ir_nn, ir_nn = 1, x[1]
+    i__ii_nn, ii_nn = 2, x[2]
 
     Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
     Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
 
     #NN INPUT
-    nn_input = [(Vr_pcc - Vr0) * V_scale, (Vi_pcc - Vi0) * V_scale, ir_nn, ii_nn]
+    Vr0 = V_pf * cos(θ_pf)
+    Vi0 = V_pf * sin(θ_pf)
+
+     nn_input = [
+        P_pf,
+        Q_pf,
+        V_pf,
+        θ_pf,
+        (Vr_pcc - Vr0) * V_scale,
+        (Vi_pcc - Vi0) * V_scale,
+        ir_nn, #derivative of output should be constant (but isn't at start)
+        ii_nn,
+    ]
+ 
+    
+
 
     #NN CURRENT SOURCE
+    #@warn "derivative of real current", real(nn(nn_input, p_nn)[1] * nn_scale)
     dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
     dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
 end
