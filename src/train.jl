@@ -18,32 +18,75 @@ function calculate_loss_function_scaling(params, fault_data)
     end
     return Ir_scale, Ii_scale
 end
+function turn_node_on(surr_prob_node_off, params, P)
+    P.scale[2] = params.node_output_scale
+    p = vectorize(P)
+    surr_prob = remake(surr_prob_node_off, p = p)
+    return surr_prob
+end
 
-function initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
-    p_ode = fault_dict[:p_ode]
-    x₀ = fault_dict[:x₀]
-    p_V₀ = fault_dict[:V₀]
-
-    p_scale = [params.node_input_scale, 0.0]     #turn off the nn
-    p_nn = initial_params(nn)
-    n_weights_nn = length(p_nn)
-    p_fixed = vcat(p_ode, p_scale, p_V₀, n_weights_nn)
-    p = vcat(p_nn, p_fixed)
-    order_surr = ODE_ORDER + 2 + params.node_feedback_states + 2   #2 states for the node current, 2 algebraic states
+function initialize_surrogate(
+    params,
+    nn,
+    M,
+    tsteps,
+    fault_dict,
+    surr,
+    N_ALGEBRAIC_STATES,
+    ODE_ORDER,
+)
+    #Determine Order of the Surrogate 
+    order_surr = ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES    #2 states for the node current
     x₀_surr = zeros(order_surr)
-    x₀_surr[1:ODE_ORDER] = x₀
-    x₀_surr[(end - 1):end] = [x₀[I__IR_FILTER], x₀[I__II_FILTER]]
-    h = get_init_surr(p, x₀[I__IR_FILTER], x₀[I__II_FILTER], surr) #make generic! get rid of hard code
-    res_surr = nlsolve(h, x₀_surr)
-    @assert converged(res_surr)
-    dx = similar(x₀_surr)
-    surr(dx, res_surr.zero, p, 0.0)
-    @assert all(isapprox.(dx, 0.0; atol = 1e-8))
 
+    #Build Surrogate Vector 
+    P = SurrParams()
+    if params.ode_model == "none"
+        if !(isempty(fault_dict[:p_ode]))
+            @warn "ODE model is not present in surrogate, yet parameters for an ode are provided in train data. These parameters will be ignored"
+        end
+        P.ode = []
+    else
+        P.ode = fault_dict[:p_ode]
+    end
+    P.pf = fault_dict[:p_pf]
+    P.network = fault_dict[:p_network]
+    P.nn = initial_params(nn)
+    P.n_weights = [Float64(length(P.nn))]
+    if params.ode_model == "none"
+        P.scale = [params.node_input_scale, params.node_output_scale]
+        #x₀_surr[1:(end-2)] = 0.0  - initialized to zero already 
+    else
+        P.scale = [params.node_input_scale, 0.0]
+        x₀ = fault_dict[:x₀]
+        x₀_surr[(2 + params.node_feedback_states + N_ALGEBRAIC_STATES):(ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES)] =
+            x₀
+    end
+    p = vectorize(P)
+
+    P_pf, Q_pf, V_pf, θ_pf = P.pf
+    Vr_pf = V_pf * cos(θ_pf)
+    Vi_pf = V_pf * sin(θ_pf)
+    Ir_pf = (P_pf * Vr_pf + Q_pf * Vi_pf) / (Vr_pf^2 + Vi_pf^2)
+    Ii_pf = (P_pf * Vi_pf - Q_pf * Vr_pf) / (Vi_pf^2 + Vr_pf^2)
+
+    x₀_surr[1:2] = [Ir_pf, Ii_pf]
+
+    if params.ode_model != "none"   #only do an NL solve if there is an ODE part. Otherwise, set initial conditions and try to solve.
+        @warn "Power flow results", P.pf
+        h = get_init_surr(p, Ir_pf, Ii_pf, surr)
+        res_surr = nlsolve(h, x₀_surr)
+        @assert converged(res_surr)
+        dx = similar(x₀_surr)
+        surr(dx, res_surr.zero, p, 0.0)
+        @assert all(isapprox.(dx, 0.0; atol = 1e-8))
+        x₀_surr = res_surr.zero
+    end
+    @warn "x0 surr", x₀_surr
     tspan = (tsteps[1], tsteps[end])
     surr_func = ODEFunction(surr, mass_matrix = M)
     surr_prob = ODEProblem(surr_func, x₀_surr, tspan, p)
-    return res_surr.zero, surr_prob, p_nn, p_fixed
+    return surr_prob, P
 end
 
 function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
@@ -59,18 +102,7 @@ function verify_psid_node_off(surr_prob, params, solver, tsteps, fault_dict)
         saveat = tsteps,
     )
     @show mae(sol[22, :], i_ver[1, :])
-    @assert mae(sol[22, :], i_ver[1, :]) < 0.01#1e-3 # was 5e-5 with sequential train. need to double check visually 
-end
-
-function turn_node_on(surr_prob_node_off, params, fault_dict, p_nn)
-    p_ode = fault_dict[:p_ode]
-    p_V₀ = fault_dict[:V₀]
-    n_weights_nn = length(p_nn)
-    p_scale = [params.node_input_scale, params.node_output_scale]
-    p_fixed = vcat(p_ode, p_scale, p_V₀, n_weights_nn)
-    p = vcat(p_nn, p_fixed)
-    surr_prob = remake(surr_prob_node_off, p = p)
-    return surr_prob, p_fixed
+    @assert mae(sol[22, :], i_ver[1, :]) < 1e-3 # was 5e-5 with sequential train. need to double check visually 
 end
 
 function calculate_final_loss(
@@ -107,12 +139,12 @@ function calculate_final_loss(
     return final_loss_for_comparison[1]
 end
 
-function get_init_surr(p, ir_filter, ii_filter, surr)
+function get_init_surr(p, Ir_pf, Ii_pf, surr)
     return (dx, x) -> begin
-        dx[22] = 0
-        x[22] = ir_filter
-        dx[23] = 0
-        x[23] = ii_filter
+        dx[1] = 0
+        x[1] = Ir_pf
+        dx[2] = 0
+        x[2] = Ii_pf
         surr(dx, x, p, 0.0)
     end
 end
@@ -179,78 +211,87 @@ function train(params::NODETrainParams)
     per_solve_maxiters =
         calculate_per_solve_maxiters(params, TrainInputs.tsteps, length(pvss))
 
-    #PREPARE SURROGATES FOR EACH FAULT 
+    #PREPARE SURROGATES FOR EACH FAULT - this is what is different for pure NODE 
     for pvs in pvss
         Vm, Vθ = Source_to_function_of_time(pvs)
-        surr = instantiate_surr(params, nn, Vm, Vθ)
+        surr, N_ALGEBRAIC_STATES, ODE_ORDER = instantiate_surr(params, nn, Vm, Vθ)
         fault_dict = fault_data[get_name(pvs)]
-        u₀, surr_prob_node_off, p_nn, p_fixed =
-            initialize_surrogate(params, nn, M, tsteps, fault_dict, surr)
+        surr_prob_node_off, P = initialize_surrogate(   #change naming
+            params,
+            nn,
+            M,
+            tsteps,
+            fault_dict,
+            surr,
+            N_ALGEBRAIC_STATES,
+            ODE_ORDER,
+        )
 
-        (params.verify_psid_node_off) &&
-            verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
-
-        surr_prob, p_fixed = turn_node_on(surr_prob_node_off, params, fault_dict, p_nn)
+        if (params.ode_model != "none")
+            (params.verify_psid_node_off) &&
+                verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
+            surr_prob = turn_node_on(surr_prob_node_off, params, P)
+        else
+            surr_prob = surr_prob_node_off
+        end
 
         fault_data[get_name(pvs)][:surr_problem] = surr_prob
-        fault_data[get_name(pvs)][:u₀] = u₀     #different than u0 stored in problem? remake instead?
-        fault_data[get_name(pvs)][:p_fixed] = p_fixed
+        fault_data[get_name(pvs)][:P] = P   #parameters are stored in surr_prob, but as a single vector. The P struct allows for easier handling. 
     end
 
     min_θ = initial_params(nn)
+    try
+        total_time = @elapsed begin
+            for group_pvs in partition(pvss, params.groupsize_faults)
+                @info "start of fault" min_θ[end]
+                @show pvs_names_subset = get_name.(group_pvs)
 
-    #try
-    total_time = @elapsed begin
-        for group_pvs in partition(pvss, params.groupsize_faults)
-            @info "start of fault" min_θ[end]
-            @show pvs_names_subset = get_name.(group_pvs)
+                res, output = _train(
+                    min_θ,
+                    params,
+                    sensealg,
+                    solver,
+                    optimizer,
+                    Ir_scale,
+                    Ii_scale,
+                    output,
+                    tsteps,
+                    pvs_names_subset,
+                    fault_data,
+                    per_solve_maxiters,
+                )
 
-            res, output = _train(
-                min_θ,
-                params,
-                sensealg,
-                solver,
-                optimizer,
-                Ir_scale,
-                Ii_scale,
-                output,
-                tsteps,
-                pvs_names_subset,
-                fault_data,  #p_ode should come out of fault_data eventually
-                per_solve_maxiters,
-            )
+                min_θ = copy(res.u)
+                @info "end of fault" min_θ[end]
+            end
 
-            min_θ = copy(res.u)
-            @info "end of fault" min_θ[end]
+            #TRAIN ADJUSTMENTS GO HERE (TODO)
         end
+        @info "min_θ[end] (end of training)" min_θ[end]
+        output["total_time"] = total_time
 
-        #TRAIN ADJUSTMENTS GO HERE (TODO)
+        pvs_names = get_name.(pvss)
+        final_loss_for_comparison = calculate_final_loss(
+            params,
+            res.u,
+            solver,
+            nn,
+            M,
+            pvs_names,
+            fault_data,
+            tsteps,
+            sensealg,
+            Ir_scale,
+            Ii_scale,
+        )
+        output["final_loss"] = final_loss_for_comparison
+
+        capture_output(output, params.output_data_path, params.train_id)
+        (params.graphical_report_mode != 0) && visualize_training(params)
+        return true
+    catch
+        return false
     end
-    @info "min_θ[end] (end of training)" min_θ[end]
-    output["total_time"] = total_time
-
-    pvs_names = get_name.(pvss)
-    final_loss_for_comparison = calculate_final_loss(
-        params,
-        res.u,
-        solver,
-        nn,
-        M,
-        pvs_names,
-        fault_data,
-        tsteps,
-        sensealg,
-        Ir_scale,
-        Ii_scale,
-    )
-    output["final_loss"] = final_loss_for_comparison
-
-    capture_output(output, params.output_data_path, params.train_id)
-    params.graphical_report && visualize_training(params)
-    return true
-    #catch
-    #    return false
-    #end
 end
 
 # TODO: We want to add types in here to make the function performant
@@ -275,6 +316,7 @@ function _train(
         params.solver_tols,
         sensealg,
     )
+
     loss_function = instantiate_loss_function(
         params.loss_function_weights,
         Ir_scale,

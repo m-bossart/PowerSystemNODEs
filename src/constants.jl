@@ -6,7 +6,8 @@ const I__II_FILTER = 19
 const I__IR_NN = 20
 const I__II_NN = 21
 
-const ODE_ORDER = 19
+#const ODE_ORDER = 19
+#const N_ALGEBRAIC_STATES = 2 
 
 const INPUT_FOLDER_NAME = "input_data"
 const OUTPUT_FOLDER_NAME = "output_data"
