@@ -47,8 +47,15 @@ function visualize_3(params, path_to_output, path_to_input)
     output_dict =
         JSON3.read(read(joinpath(path_to_output, "high_level_outputs")), Dict{String, Any})
     PVS_name = df_loss.PVS_name[:]
-    #transition_indices = find_transition_indices(PVS_name)
-    transition_indices = find_transition_indices(df_loss.RangeCount)  #TODO formalize which to use for transition_indices 
+    if params.graphical_report_mode == 1
+        transition_indices = find_transition_indices(PVS_name)  #LEVEL 1: plot when moving to new fault(s)
+    elseif params.graphical_report_mode == 2
+        transition_indices = find_transition_indices(df_loss.RangeCount)  #LEVEL 2: plot when moving to new data range
+    elseif params.graphical_report_mode == 3
+        transition_indices = collect(1:length(PVS_name))
+    else
+        @warn "Invalid value for parameter graphical_report_mode"
+    end
 
     df_predictions = DataFrame(Arrow.Table(joinpath(path_to_output, "predictions")))
     TrainInputs =

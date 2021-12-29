@@ -25,7 +25,8 @@ end
 function SurrParams(;)
     SurrParams([], [], [], [], [], [])
 end
-function none_v_t_0(dx, x, p, t, nn, Vm, Vθ) 
+
+function none_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     #PARAMETERS
     n_weights_nn = p[end]
     p_nn = p[Int(1):Int(n_weights_nn)]
@@ -47,28 +48,260 @@ function none_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
     Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
 
-    #NN INPUT
-    Vr0 = V_pf * cos(θ_pf)
-    Vi0 = V_pf * sin(θ_pf)
-
-     nn_input = [
+    nn_input = [
         P_pf,
         Q_pf,
         V_pf,
         θ_pf,
-        (Vr_pcc - Vr0) * V_scale,
-        (Vi_pcc - Vi0) * V_scale,
-        ir_nn, #derivative of output should be constant (but isn't at start)
+        (Vr_pcc - V_pf * cos(θ_pf)) * V_scale,
+        (Vi_pcc - V_pf * sin(θ_pf)) * V_scale,
+        ir_nn,
         ii_nn,
     ]
- 
-    
 
-
-    #NN CURRENT SOURCE
-    #@warn "derivative of real current", real(nn(nn_input, p_nn)[1] * nn_scale)
+    #NODE   
     dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
     dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
+end
+
+function none_v_t_1(dx, x, p, t, nn, Vm, Vθ)
+    #PARAMETERS
+    n_weights_nn = p[end]
+    p_nn = p[Int(1):Int(n_weights_nn)]
+    p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
+
+    P_pf = p_fixed[1]
+    Q_pf = p_fixed[2]
+    V_pf = p_fixed[3]
+    θ_pf = p_fixed[4]
+    Xtrans = p_fixed[5]
+    Rtrans = p_fixed[6]
+    V_scale = p_fixed[7]
+    nn_scale = p_fixed[8]
+
+    #STATE INDEX AND STATES
+
+    i__ir_nn, ir_nn = 1, x[1]
+    i__ii_nn, ii_nn = 2, x[2]
+    i__fb1, fb1 = 3, x[3]
+
+    Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
+    Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
+
+    nn_input = [
+        P_pf,
+        Q_pf,
+        V_pf,
+        θ_pf,
+        (Vr_pcc - V_pf * cos(θ_pf)) * V_scale,
+        (Vi_pcc - V_pf * sin(θ_pf)) * V_scale,
+        ir_nn,
+        ii_nn,
+        fb1,
+    ]
+
+    #NODE   
+    dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
+    dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
+    dx[i__fb1] = nn(nn_input, p_nn)[3]
+end
+
+function none_v_t_2(dx, x, p, t, nn, Vm, Vθ)
+    #PARAMETERS
+    n_weights_nn = p[end]
+    p_nn = p[Int(1):Int(n_weights_nn)]
+    p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
+
+    P_pf = p_fixed[1]
+    Q_pf = p_fixed[2]
+    V_pf = p_fixed[3]
+    θ_pf = p_fixed[4]
+    Xtrans = p_fixed[5]
+    Rtrans = p_fixed[6]
+    V_scale = p_fixed[7]
+    nn_scale = p_fixed[8]
+
+    #STATE INDEX AND STATES
+
+    i__ir_nn, ir_nn = 1, x[1]
+    i__ii_nn, ii_nn = 2, x[2]
+    i__fb1, fb1 = 3, x[3]
+    i__fb2, fb2 = 4, x[4]
+
+    Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
+    Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
+
+    nn_input = [
+        P_pf,
+        Q_pf,
+        V_pf,
+        θ_pf,
+        (Vr_pcc - V_pf * cos(θ_pf)) * V_scale,
+        (Vi_pcc - V_pf * sin(θ_pf)) * V_scale,
+        ir_nn,
+        ii_nn,
+        fb1,
+        fb2,
+    ]
+
+    #NODE   
+    dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
+    dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
+    dx[i__fb1] = nn(nn_input, p_nn)[3]
+    dx[i__fb2] = nn(nn_input, p_nn)[4]
+end
+
+function none_v_t_3(dx, x, p, t, nn, Vm, Vθ)
+    #PARAMETERS
+    n_weights_nn = p[end]
+    p_nn = p[Int(1):Int(n_weights_nn)]
+    p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
+
+    P_pf = p_fixed[1]
+    Q_pf = p_fixed[2]
+    V_pf = p_fixed[3]
+    θ_pf = p_fixed[4]
+    Xtrans = p_fixed[5]
+    Rtrans = p_fixed[6]
+    V_scale = p_fixed[7]
+    nn_scale = p_fixed[8]
+
+    #STATE INDEX AND STATES
+
+    i__ir_nn, ir_nn = 1, x[1]
+    i__ii_nn, ii_nn = 2, x[2]
+    i__fb1, fb1 = 3, x[3]
+    i__fb2, fb2 = 4, x[4]
+    i__fb3, fb3 = 5, x[5]
+
+    Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
+    Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
+
+    nn_input = [
+        P_pf,
+        Q_pf,
+        V_pf,
+        θ_pf,
+        (Vr_pcc - V_pf * cos(θ_pf)) * V_scale,
+        (Vi_pcc - V_pf * sin(θ_pf)) * V_scale,
+        ir_nn,
+        ii_nn,
+        fb1,
+        fb2,
+        fb3,
+    ]
+
+    #NODE   
+    dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
+    dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
+    dx[i__fb1] = nn(nn_input, p_nn)[3]
+    dx[i__fb2] = nn(nn_input, p_nn)[4]
+    dx[i__fb3] = nn(nn_input, p_nn)[5]
+end
+
+function none_v_t_4(dx, x, p, t, nn, Vm, Vθ)
+    #PARAMETERS
+    n_weights_nn = p[end]
+    p_nn = p[Int(1):Int(n_weights_nn)]
+    p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
+
+    P_pf = p_fixed[1]
+    Q_pf = p_fixed[2]
+    V_pf = p_fixed[3]
+    θ_pf = p_fixed[4]
+    Xtrans = p_fixed[5]
+    Rtrans = p_fixed[6]
+    V_scale = p_fixed[7]
+    nn_scale = p_fixed[8]
+
+    #STATE INDEX AND STATES
+
+    i__ir_nn, ir_nn = 1, x[1]
+    i__ii_nn, ii_nn = 2, x[2]
+    i__fb1, fb1 = 3, x[3]
+    i__fb2, fb2 = 4, x[4]
+    i__fb3, fb3 = 5, x[5]
+    i__fb4, fb4 = 6, x[6]
+
+    Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
+    Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
+
+    nn_input = [
+        P_pf,
+        Q_pf,
+        V_pf,
+        θ_pf,
+        (Vr_pcc - V_pf * cos(θ_pf)) * V_scale,
+        (Vi_pcc - V_pf * sin(θ_pf)) * V_scale,
+        ir_nn,
+        ii_nn,
+        fb1,
+        fb2,
+        fb3,
+        fb4,
+    ]
+
+    #NODE   
+    dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
+    dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
+    dx[i__fb1] = nn(nn_input, p_nn)[3]
+    dx[i__fb2] = nn(nn_input, p_nn)[4]
+    dx[i__fb3] = nn(nn_input, p_nn)[5]
+    dx[i__fb4] = nn(nn_input, p_nn)[6]
+end
+
+function none_v_t_5(dx, x, p, t, nn, Vm, Vθ)
+    #PARAMETERS
+    n_weights_nn = p[end]
+    p_nn = p[Int(1):Int(n_weights_nn)]
+    p_fixed = p[(Int(n_weights_nn) + 1):(end - 1)]
+
+    P_pf = p_fixed[1]
+    Q_pf = p_fixed[2]
+    V_pf = p_fixed[3]
+    θ_pf = p_fixed[4]
+    Xtrans = p_fixed[5]
+    Rtrans = p_fixed[6]
+    V_scale = p_fixed[7]
+    nn_scale = p_fixed[8]
+
+    #STATE INDEX AND STATES
+
+    i__ir_nn, ir_nn = 1, x[1]
+    i__ii_nn, ii_nn = 2, x[2]
+    i__fb1, fb1 = 3, x[3]
+    i__fb2, fb2 = 4, x[4]
+    i__fb3, fb3 = 5, x[5]
+    i__fb4, fb4 = 6, x[6]
+    i__fb5, fb5 = 7, x[7]
+
+    Vr_pcc = Vm(t) * cos(Vθ(t)) + (ir_nn * Rtrans - ii_nn * Xtrans)
+    Vi_pcc = Vm(t) * sin(Vθ(t)) + (ir_nn * Xtrans + ii_nn * Rtrans)
+
+    nn_input = [
+        P_pf,
+        Q_pf,
+        V_pf,
+        θ_pf,
+        (Vr_pcc - V_pf * cos(θ_pf)) * V_scale,
+        (Vi_pcc - V_pf * sin(θ_pf)) * V_scale,
+        ir_nn,
+        ii_nn,
+        fb1,
+        fb2,
+        fb3,
+        fb4,
+        fb5,
+    ]
+
+    #NODE   
+    dx[i__ir_nn] = nn(nn_input, p_nn)[1] * nn_scale
+    dx[i__ii_nn] = nn(nn_input, p_nn)[2] * nn_scale
+    dx[i__fb1] = nn(nn_input, p_nn)[3]
+    dx[i__fb2] = nn(nn_input, p_nn)[4]
+    dx[i__fb3] = nn(nn_input, p_nn)[5]
+    dx[i__fb4] = nn(nn_input, p_nn)[6]
+    dx[i__fb5] = nn(nn_input, p_nn)[7]
 end
 
 function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
@@ -114,29 +347,29 @@ function vsm_v_t_0(dx, x, p, t, nn, Vm, Vθ)
     nn_scale = p_fixed[35]
 
     #STATE INDEX AND STATES
-    i__vi_filter, vi_filter = 1, x[1]
-    i__γd_ic, γd_ic = 2, x[2]
-    i__vq_pll, vq_pll = 3, x[3]
-    i__γq_ic, γq_ic = 4, x[4]
-    i__ir_filter, ir_filter = 5, x[5]
-    i__ξd_ic, ξd_ic = 6, x[6]
-    i__ϕd_ic, ϕd_ic = 7, x[7]
-    i__ε_pll, ε_pll = 8, x[8]
-    i__ir_cnv, ir_cnv = 9, x[9]
-    i__vr_filter, vr_filter = 10, x[10]
-    i__ω_oc, ω_oc = 11, x[11]
-    i__ξq_ic, ξq_ic = 12, x[12]
-    i__vd_pll, vd_pll = 13, x[13]
-    i__q_oc, q_oc = 14, x[14]
-    i__ϕq_ic, ϕq_ic = 15, x[15]
-    i__θ_pll, θ_pll = 16, x[16]
-    i__θ_oc, θ_oc = 17, x[17]
-    i__ii_cnv, ii_cnv = 18, x[18]
-    i__ii_filter, ii_filter = 19, x[19]
-    i__ir_nn, ir_nn = 20, x[20]
-    i__ii_nn, ii_nn = 21, x[21]
-    i__ir_out, ir_out = 22, x[22]
-    i__ii_out, ii_out = 23, x[23]
+    i__ir_out, ir_out = 1, x[1]
+    i__ii_out, ii_out = 2, x[2]
+    i__ir_nn, ir_nn = 3, x[3]
+    i__ii_nn, ii_nn = 4, x[4]
+    i__vi_filter, vi_filter = 5, x[5]
+    i__γd_ic, γd_ic = 6, x[6]
+    i__vq_pll, vq_pll = 7, x[7]
+    i__γq_ic, γq_ic = 8, x[8]
+    i__ir_filter, ir_filter = 9, x[9]
+    i__ξd_ic, ξd_ic = 10, x[10]
+    i__ϕd_ic, ϕd_ic = 11, x[11]
+    i__ε_pll, ε_pll = 12, x[12]
+    i__ir_cnv, ir_cnv = 13, x[13]
+    i__vr_filter, vr_filter = 14, x[14]
+    i__ω_oc, ω_oc = 15, x[15]
+    i__ξq_ic, ξq_ic = 16, x[16]
+    i__vd_pll, vd_pll = 17, x[17]
+    i__q_oc, q_oc = 18, x[18]
+    i__ϕq_ic, ϕq_ic = 19, x[19]
+    i__θ_pll, θ_pll = 20, x[20]
+    i__θ_oc, θ_oc = 21, x[21]
+    i__ii_cnv, ii_cnv = 22, x[22]
+    i__ii_filter, ii_filter = 23, x[23]
 
     ω_base = 60.0 * 2 * pi
     ω_sys = 1.0

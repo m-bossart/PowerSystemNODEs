@@ -41,10 +41,14 @@ function initialize_surrogate(
 
     #Build Surrogate Vector 
     P = SurrParams()
-    if (params.ode_model == "none") && (length(P.ode) != 0)
-        @warn "ODE model is not present in surrogate, yet parameters for an ode are provided in train data. Check for mismatch."
+    if params.ode_model == "none"
+        if !(isempty(fault_dict[:p_ode]))
+            @warn "ODE model is not present in surrogate, yet parameters for an ode are provided in train data. These parameters will be ignored"
+        end
+        P.ode = []
+    else
+        P.ode = fault_dict[:p_ode]
     end
-    P.ode = fault_dict[:p_ode]
     P.pf = fault_dict[:p_pf]
     P.network = fault_dict[:p_network]
     P.nn = initial_params(nn)
@@ -55,7 +59,8 @@ function initialize_surrogate(
     else
         P.scale = [params.node_input_scale, 0.0]
         x₀ = fault_dict[:x₀]
-        x₀_surr[1:ODE_ORDER] = x₀
+        x₀_surr[(2 + params.node_feedback_states + N_ALGEBRAIC_STATES):(ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES)] =
+            x₀
     end
     p = vectorize(P)
 
@@ -65,7 +70,7 @@ function initialize_surrogate(
     Ir_pf = (P_pf * Vr_pf + Q_pf * Vi_pf) / (Vr_pf^2 + Vi_pf^2)
     Ii_pf = (P_pf * Vi_pf - Q_pf * Vr_pf) / (Vi_pf^2 + Vr_pf^2)
 
-    x₀_surr[(end - 1):end] = [Ir_pf, Ii_pf]
+    x₀_surr[1:2] = [Ir_pf, Ii_pf]
 
     if params.ode_model != "none"   #only do an NL solve if there is an ODE part. Otherwise, set initial conditions and try to solve.
         @warn "Power flow results", P.pf
@@ -75,7 +80,7 @@ function initialize_surrogate(
         dx = similar(x₀_surr)
         surr(dx, res_surr.zero, p, 0.0)
         @assert all(isapprox.(dx, 0.0; atol = 1e-8))
-        x₀_surr = res_surr.zero 
+        x₀_surr = res_surr.zero
     end
     @warn "x0 surr", x₀_surr
     tspan = (tsteps[1], tsteps[end])
@@ -136,10 +141,10 @@ end
 
 function get_init_surr(p, Ir_pf, Ii_pf, surr)
     return (dx, x) -> begin
-        dx[end - 1] = 0
-        x[end - 1] = Ir_pf
-        dx[end] = 0
-        x[end] = Ii_pf
+        dx[1] = 0
+        x[1] = Ir_pf
+        dx[2] = 0
+        x[2] = Ii_pf
         surr(dx, x, p, 0.0)
     end
 end
@@ -226,7 +231,7 @@ function train(params::NODETrainParams)
             (params.verify_psid_node_off) &&
                 verify_psid_node_off(surr_prob_node_off, params, solver, tsteps, fault_dict)
             surr_prob = turn_node_on(surr_prob_node_off, params, P)
-        else 
+        else
             surr_prob = surr_prob_node_off
         end
 
@@ -235,59 +240,58 @@ function train(params::NODETrainParams)
     end
 
     min_θ = initial_params(nn)
+    try
+        total_time = @elapsed begin
+            for group_pvs in partition(pvss, params.groupsize_faults)
+                @info "start of fault" min_θ[end]
+                @show pvs_names_subset = get_name.(group_pvs)
 
-    #try
-    total_time = @elapsed begin
-        for group_pvs in partition(pvss, params.groupsize_faults)
-            @info "start of fault" min_θ[end]
-            @show pvs_names_subset = get_name.(group_pvs)
+                res, output = _train(
+                    min_θ,
+                    params,
+                    sensealg,
+                    solver,
+                    optimizer,
+                    Ir_scale,
+                    Ii_scale,
+                    output,
+                    tsteps,
+                    pvs_names_subset,
+                    fault_data,
+                    per_solve_maxiters,
+                )
 
-            res, output = _train(
-                min_θ,
-                params,
-                sensealg,
-                solver,
-                optimizer,
-                Ir_scale,
-                Ii_scale,
-                output,
-                tsteps,
-                pvs_names_subset,
-                fault_data,
-                per_solve_maxiters,
-            )
+                min_θ = copy(res.u)
+                @info "end of fault" min_θ[end]
+            end
 
-            min_θ = copy(res.u)
-            @info "end of fault" min_θ[end]
+            #TRAIN ADJUSTMENTS GO HERE (TODO)
         end
+        @info "min_θ[end] (end of training)" min_θ[end]
+        output["total_time"] = total_time
 
-        #TRAIN ADJUSTMENTS GO HERE (TODO)
+        pvs_names = get_name.(pvss)
+        final_loss_for_comparison = calculate_final_loss(
+            params,
+            res.u,
+            solver,
+            nn,
+            M,
+            pvs_names,
+            fault_data,
+            tsteps,
+            sensealg,
+            Ir_scale,
+            Ii_scale,
+        )
+        output["final_loss"] = final_loss_for_comparison
+
+        capture_output(output, params.output_data_path, params.train_id)
+        (params.graphical_report_mode != 0) && visualize_training(params)
+        return true
+    catch
+        return false
     end
-    @info "min_θ[end] (end of training)" min_θ[end]
-    output["total_time"] = total_time
-
-    pvs_names = get_name.(pvss)
-    final_loss_for_comparison = calculate_final_loss(
-        params,
-        res.u,
-        solver,
-        nn,
-        M,
-        pvs_names,
-        fault_data,
-        tsteps,
-        sensealg,
-        Ir_scale,
-        Ii_scale,
-    )
-    output["final_loss"] = final_loss_for_comparison
-
-    capture_output(output, params.output_data_path, params.train_id)
-    params.graphical_report && visualize_training(params)
-    return true
-    #catch
-    #    return false
-    #end
 end
 
 # TODO: We want to add types in here to make the function performant
@@ -312,6 +316,7 @@ function _train(
         params.solver_tols,
         sensealg,
     )
+
     loss_function = instantiate_loss_function(
         params.loss_function_weights,
         Ir_scale,

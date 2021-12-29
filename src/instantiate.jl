@@ -7,6 +7,12 @@ const sensealg_map = Dict("ForwardDiffSensitivity" => ForwardDiffSensitivity)
 const surr_map = Dict(
     "vsm_v_t_0" => vsm_v_t_0,
     "none_v_t_0" => none_v_t_0,
+    "none_v_t_1" => none_v_t_1,
+    "none_v_t_2" => none_v_t_2,
+    "none_v_t_3" => none_v_t_3,
+    "none_v_t_4" => none_v_t_4,
+    "none_v_t_5" => none_v_t_5,
+
     #=  "vsm_v_t_3" => vsm_v_t_3,
         "vsm_v_t_4" => vsm_v_t_4,
         "vsm_v_t_5" => vsm_v_t_5,
@@ -65,22 +71,22 @@ function instantiate_nn(inputs)
     nn_output += inputs.node_feedback_states
     nn_input += inputs.node_feedback_states
     Random.seed!(inputs.rng_seed)
-    @warn "NN size parameters" nn_input, nn_output, nn_width, nn_hidden 
+    @warn "NN size parameters" nn_input, nn_output, nn_width, nn_hidden
     return build_nn(nn_input, nn_output, nn_width, nn_hidden, nn_activation)
 end
 
 function instantiate_M(inputs)
     if inputs.ode_model == "vsm"
         ODE_ORDER = 19
-        N_ALGEBRIC = 2 
+        N_ALGEBRIC = 2
     elseif inputs.ode_model == "none"
         ODE_ORDER = 0
-        N_ALGEBRAIC = 0 
+        N_ALGEBRAIC = 0
     else
         @error "ODE order unknown for ODE model provided"
     end
     n_differential = ODE_ORDER + 2 + inputs.node_feedback_states
-   
+
     return MassMatrix(n_differential, N_ALGEBRAIC)
 end
 
@@ -131,13 +137,20 @@ function _loss_function(
     Ii_scale,
     pred_function,
     pvs_names,
-)    #same or similar, pass the dictionary 
+)
     y_predicted = pred_function(θ, tsteps, pvs_names)     #Careful of dict ordering?                  
-    loss =
-        (mae(y_predicted[1, :], y_actual[1, :]) / Ir_scale) +
-        (mae(y_predicted[2, :], y_actual[2, :]) / Ii_scale) * weights[1] +
-        (mse(y_predicted[1, :], y_actual[1, :]) / Ir_scale) +
-        (mse(y_predicted[2, :], y_actual[2, :]) / Ii_scale) * weights[2]
+
+    if size(y_predicted) == size(y_actual)
+        loss =
+            (mae(y_predicted[1, :], y_actual[1, :]) / Ir_scale) +
+            (mae(y_predicted[2, :], y_actual[2, :]) / Ii_scale) * weights[1] +
+            (mse(y_predicted[1, :], y_actual[1, :]) / Ir_scale) +
+            (mse(y_predicted[2, :], y_actual[2, :]) / Ii_scale) * weights[2]
+    else
+        loss = Inf
+        @warn "Unstable run detected, assigning infinite loss"
+    end
+
     return loss, y_predicted
 end
 
@@ -164,7 +177,7 @@ function _pred_function(θ, tsteps, P, solver, surr_prob, tols, sensealg, u₀)
         abstol = tols[1],
         reltol = tols[2],
         saveat = tsteps,
-        save_idxs = [(length(u₀) -1), length(u₀)  ],  #Last 2 states always the output currents?  , I__II_OUT, I__IR_FILTER, I__II_FILTER, I__IR_NN, I__II_NN], #first two for loss function, rest for data export TODO - should not be constant, depends on surrogate model 
+        save_idxs = [1, 2],  #First 2 states always the output currents?  , I__II_OUT, I__IR_FILTER, I__II_FILTER, I__IR_NN, I__II_NN], #first two for loss function, rest for data export TODO - should not be constant, depends on surrogate model 
         sensealg = ForwardDiffSensitivity(),
     )
     #@warn "sol", Array(sol)
@@ -185,11 +198,9 @@ function full_array_pred_function(
     for (i, pvs_name) in enumerate(pvs_names_subset)
         surr_prob = fault_data[pvs_name][:surr_problem]
         u₀ = surr_prob.u0
-        @warn "u0" ,  u₀
         P = fault_data[pvs_name][:P]
         selector = [pvs_name .== name for name in pvs_names]
         t_steps_subset = tsteps[selector]
-
         if i == 1
             full_array =
                 _pred_function(θ, t_steps_subset, P, solver, surr_prob, tols, sensealg, u₀)
