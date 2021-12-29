@@ -35,7 +35,7 @@
 - `input_data_path:String`: From `base_path`, the directory for input data.
 - `output_data_path:String`: From `base_path`, the directory for saving output data.
 - `verify_psid_node_off:Bool`: `true`: before training, check that the surrogate with NODE turned off matches the data provided from PSID simulation.
-- `graphical_report:Bool`: `true`: save plots with graphical reports of the training
+- `graphical_report_mode:Int64`: `0`: do not generate plots. `1`: plot for transitions between faults. `2`: plot for transitions between ranges. `3`: plot for every train iteration.
 """
 mutable struct NODETrainParams
     train_id::String
@@ -69,7 +69,7 @@ mutable struct NODETrainParams
     input_data_path::String
     output_data_path::String
     verify_psid_node_off::Bool
-    graphical_report::Bool
+    graphical_report_mode::Int64
 end
 
 StructTypes.StructType(::Type{NODETrainParams}) = StructTypes.Struct()
@@ -106,7 +106,7 @@ function NODETrainParams(;
     input_data_path = joinpath(base_path, "input_data"),
     output_data_path = joinpath(base_path, "output_data"),
     verify_psid_node_off = true,
-    graphical_report = false,
+    graphical_report_mode = 0,
 )
 
     #HERE IS THE LOGIC OF FILLING IN SOME OF THE PARAMETERS THAT MIGHT NOT MAKE SENSE
@@ -142,7 +142,7 @@ function NODETrainParams(;
         input_data_path,
         output_data_path,
         verify_psid_node_off,
-        graphical_report,
+        graphical_report_mode,
     )
 end
 
