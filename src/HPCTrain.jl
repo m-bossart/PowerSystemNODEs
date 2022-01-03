@@ -102,6 +102,8 @@ function SummitHPCTrain(;
     n_tasks = 1,
     force_generate_inputs = false,
 )
+    # Default until we parallelize training code
+    n_cpus_per_task = 1
     return HPCTrain(
         username,
         "ucb-general", # Get allocation
@@ -177,3 +179,4 @@ function run_parallel_train(train::HPCTrain)
     bash_file = train.train_bash_file
     return run(`sbatch $bash_file`)
 end
+
