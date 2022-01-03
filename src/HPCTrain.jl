@@ -117,7 +117,7 @@ function SummitHPCTrain(;
         n_cpus_per_task,
         params_data,
         time_limit,
-        joinpath(scratch_path, username, project_folder, HPC_TRAIN_FILE),
+        joinpath(scratch_path, project_folder, HPC_TRAIN_FILE),
         force_generate_inputs,
     )
 end
