@@ -113,11 +113,11 @@ function SummitHPCTrain(;
         scratch_path,
         "gnu_parallel",
         n_tasks,
-        n_cpus_per_task,
         nothing, # Default to nothing on Summit since it doesn't dispatch on ssh login
+        n_cpus_per_task,
         params_data,
         time_limit,
-        HPC_TRAIN_FILE,
+        joinpath(scratch_path, username, project_folder, HPC_TRAIN_FILE),
         force_generate_inputs,
     )
 end
