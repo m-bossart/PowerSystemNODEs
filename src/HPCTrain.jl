@@ -179,4 +179,3 @@ function run_parallel_train(train::HPCTrain)
     bash_file = train.train_bash_file
     return run(`sbatch $bash_file`)
 end
-
