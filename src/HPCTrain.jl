@@ -14,8 +14,11 @@ const bash_file_template = """
 # Partition:
 #SBATCH --partition={{partition}}
 #
-#SBATCH --nodes={{n_nodes}}
-#SBATCH --cpus-per-task=1
+# Number of MPI tasks requested:
+#SBATCH --ntasks={{n_tasks}} \n{{#n_nodes}}#\n#SBATCH --nodes={{n_nodes}} \n {{/n_nodes}}
+#
+# Processors per task (for future parallel training code):
+#SBATCH --cpus-per-task={{n_cpus_per_task}}
 #
 #SBATCH --time={{time_limit}}
 #SBATCH --output={{{project_path}}}/job_output_%j.o
@@ -23,16 +26,17 @@ const bash_file_template = """
 
 # Check Dependencies
 julia --project={{{project_path}}} -e 'using Pkg; Pkg.instantiate()'
-julia --project={{{project_path}}} {{{project_path}}}/scripts/prepare_for_train.jl {{force_generate_inputs}}
+{{#force_generate_inputs}} julia --project={{{project_path}}} {{{project_path}}}/scripts/prepare_for_train.jl "true" {{/force_generate_inputs}}
 
 # Load Parallel
 module load {{gnu_parallel_name}}
 
-echo \$SLURM_JOB_NODELIST |sed s/\\,/\\\\n/g > hostfile
-
+{{#n_nodes}}
 # --slf is needed to parallelize across all the cores on multiple nodes
-parallel --jobs \$SLURM_CPUS_ON_NODE \\
-    --slf hostfile \\
+dataecho \$SLURM_JOB_NODELIST |sed s/\\,/\\\\n/g > hostfile
+{{/n_nodes}}
+
+{{#n_nodes}}parallel --jobs \$SLURM_CPUS_ON_NODE --slf hostfile \\ {{/n_nodes}}{{^n_nodes}}parallel --jobs \$SLURM_NPROCS \\{{/n_nodes}}
     --wd {{{project_path}}} \\
     --progress -a {{{train_set_file}}}\\
     --joblog {{{project_path}}}/hpc_train.log \\
@@ -48,11 +52,13 @@ struct HPCTrain
     # TODO: Coordinate properly with the data in the inputs vector base_path field
     scratch_path::String
     gnu_parallel_name::String
-    n_nodes::Int
+    n_tasks::Int
+    n_nodes::Union{Int, Nothing}
+    n_cpus_per_task::Int
     params_data::Vector # TODO: return to Vector{NODETrainParams} after testing
     time_limit::String
     train_bash_file::String
-    force_generate_inputs::String
+    force_generate_inputs::Bool
 end
 
 function SavioHPCTrain(;
@@ -61,8 +67,13 @@ function SavioHPCTrain(;
     project_folder = "PowerSystemNODEs",
     scratch_path = "/global/scratch/users",
     time_limit = "24:00:00",
-    n_nodes = 1,
+    n_tasks = 1,
+    force_generate_inputs = false,
+    n_nodes = nothing, # Use with caution in Savio, it can lead to over subscription of nodes
 )
+
+    # Default until we parallelize training code
+    n_cpus_per_task = 1
     return HPCTrain(
         username,
         "fc_emac",
@@ -71,11 +82,13 @@ function SavioHPCTrain(;
         project_folder,
         scratch_path,
         "gnu-parallel",
+        n_tasks,
         n_nodes,
+        n_cpus_per_task,
         params_data,
         time_limit,
-        HPC_TRAIN_FILE,
-        "false",
+        joinpath(scratch_path, project_folder, HPC_TRAIN_FILE),
+        force_generate_inputs,
     )
 end
 
@@ -86,21 +99,26 @@ function SummitHPCTrain(;
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/",
     time_limit = "24:00:00",
-    n_nodes = 1,
+    n_tasks = length(params_data),  #default to parallelize across all tasks 
+    force_generate_inputs = false,
 )
+    # Default until we parallelize training code
+    n_cpus_per_task = 1
     return HPCTrain(
         username,
-        "ucb-general", # Get allocation 
+        "ucb-general", # Get allocation
         "normal",
         "shas",
         project_folder,
         scratch_path,
         "gnu_parallel",
-        n_nodes,
+        n_tasks,
+        nothing, # Default to nothing on Summit since it doesn't dispatch on ssh login
+        n_cpus_per_task,
         params_data,
         time_limit,
-        HPC_TRAIN_FILE,
-        "false",
+        joinpath(scratch_path, project_folder, HPC_TRAIN_FILE),
+        force_generate_inputs,
     )
 end
 
@@ -119,11 +137,21 @@ function generate_train_files(train::HPCTrain)
     data["partition"] = train.partition
     data["gnu_parallel_name"] = train.gnu_parallel_name
     data["project_path"] = joinpath(train.scratch_path, train.project_folder)
+    data["n_tasks"] = train.n_tasks
+    data["n_cpus_per_task"] = train.n_cpus_per_task
+
     data["n_nodes"] = train.n_nodes
+    if !isnothing(train.n_nodes)
+        data["n_nodes"] = train.n_nodes
+    end
+
     data["force_generate_inputs"] = train.force_generate_inputs
-    data["train_set_file"] =
-        joinpath(train.scratch_path, train.project_folder, "train_files.lst")
-    touch(data["train_set_file"])
+    train_set_folder = joinpath(train.scratch_path, train.project_folder)
+    if !ispath(train_set_folder)
+        mkpath(train_set_folder)
+    end
+    data["train_set_file"] = joinpath(train_set_folder, "train_files.lst")
+
     open(data["train_set_file"], "w") do file
         for param in train.params_data
             param_file_path = joinpath(
@@ -132,14 +160,16 @@ function generate_train_files(train::HPCTrain)
                 INPUT_FOLDER_NAME,
                 "train_$(param.train_id).json",
             )
-            touch(param_file_path)
+            if !isfile(param_file_path)
+                mkpath(param_file_path)
+            end
             serialize(param, param_file_path)
             write(file, "$param_file_path\n")
         end
     end
 
-    filename = HPC_TRAIN_FILE
-    open(filename, "w") do io
+    data["force_generate_inputs"] = train.force_generate_inputs
+    open(train.train_bash_file, "w") do io
         write(io, Mustache.render(bash_file_template, data))
     end
     return
