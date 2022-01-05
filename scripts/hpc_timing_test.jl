@@ -1,5 +1,5 @@
 using Dates
-open(string("timing",rand()), "w") do io
+open(string("timing", rand()), "w") do io
     print(io, now())
     print(io, "\n")
     sleep(10)
@@ -12,4 +12,4 @@ open(string("timing",rand()), "w") do io
     print(io, now())
     print(io, "\n")
     sleep(10)
-end 
+end
