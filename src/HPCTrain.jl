@@ -118,6 +118,7 @@ function SummitHPCTrain(;
         params_data,
         time_limit,
         joinpath(scratch_path, project_folder, HPC_TRAIN_FILE),
+        force_generate_inputs,
     )
 end
 
