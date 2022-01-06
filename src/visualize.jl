@@ -116,7 +116,17 @@ function visualize_summary(output_data_path)
             label = value["train_id"],
             xlabel = "total time (s)",
             ylabel = "final loss",
+            markersize = 3,
+            markerstrokewidth=0,
         )
+        annotate!(value["total_time"], value["final_loss"], text(value["train_id"], :red, 8))
     end
     return p
 end
+
+#= using Plots, Random
+vals = rand(10,2)
+p = scatter(vals[:,1], vals[:,2],xlim=[0,1.1])
+some_labels=randstring.(fill(5,10))
+annotate!.(vals[:,1].+0.01, vals[:,2], text.(some_labels, :red, :left,11))
+p =#
