@@ -118,7 +118,7 @@ function SummitHPCTrain(;
         params_data,
         time_limit,
         joinpath(scratch_path, project_folder, HPC_TRAIN_FILE),
-        force_generate_inputs,
+        ,
     )
 end
 
@@ -161,7 +161,7 @@ function generate_train_files(train::HPCTrain)
                 "train_$(param.train_id).json",
             )
             if !isfile(param_file_path)
-                mkpath(param_file_path)
+                touch(param_file_path)
             end
             serialize(param, param_file_path)
             write(file, "$param_file_path\n")
