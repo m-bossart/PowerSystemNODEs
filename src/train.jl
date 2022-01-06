@@ -59,7 +59,7 @@ function initialize_surrogate(
     else
         P.scale = [params.node_input_scale, 0.0]
         x₀ = fault_dict[:x₀]
-        x₀_surr[(2 + params.node_feedback_states + N_ALGEBRAIC_STATES):(ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES)] =
+        x₀_surr[(3 + params.node_feedback_states + N_ALGEBRAIC_STATES):(ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES)] =
             x₀
     end
     p = vectorize(P)
