@@ -8,16 +8,8 @@ serialize(NODETrainParams(), "input_data/sample_train_parameters.json")
 
 train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
 train_params = NODETrainParams(train_params_file)
-train_params.graphical_report_mode = 3
-train_params.groupsize_faults = 2
-train_params.ode_model = "none"
-train_params.maxiters = 100
-train_params.node_feedback_states = 5
-
+#train_params.graphical_report_mode = 3
+#train_params.groupsize_faults = 2
+#train_params.ode_model = "none"
 status = train(train_params)
 
-## 
-#LOCAL TEST OF MULTIPLE RUNS BELOW FOR TESTING summarize_trains.jl
-train_params.train_id = "train_instance_2"
-train_params.maxiters = 6
-status = train(train_params)
