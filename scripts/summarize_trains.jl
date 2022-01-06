@@ -4,4 +4,4 @@ include("../src/constants.jl")
 include("../src/HPCTrain.jl")
 
 p = visualize_summary(NODETrainParams().output_data_path)
-png(p, joinpath(NODETrainParams().output_data_path, "train_summary"))
+png(p, joinpath(NODETrainParams().base_path, "train_summary"))
