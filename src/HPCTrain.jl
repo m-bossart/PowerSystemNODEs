@@ -99,7 +99,7 @@ function SummitHPCTrain(;
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/",
     time_limit = "24:00:00",
-    n_tasks = length(params_data),  #default to parallelize across all tasks 
+    n_tasks = 1,  #default to parallelize across all tasks 
     force_generate_inputs = false,
 )
     # Default until we parallelize training code
