@@ -37,7 +37,6 @@ end
 
 function visualize_3(params, path_to_output, path_to_input, visualize_level)
     df_loss = DataFrame(Arrow.Table(joinpath(path_to_output, "loss")))
-    @show df_loss
     list_plots = []
     p1 = plot(df_loss.Loss, title = "Loss")
     p2 = plot(df_loss.RangeCount, title = "Range Count")
