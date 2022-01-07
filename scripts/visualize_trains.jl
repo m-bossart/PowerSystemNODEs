@@ -11,6 +11,6 @@ train_files = filter(
     readdir(joinpath(pwd(), INPUT_FOLDER_NAME), join = true),
 )
 for file in train_files
-    p = NODETrainParams(train_params_file)
+    p = NODETrainParams(file)
     visualize_training(p, visualize_level = visualize_level)
 end
