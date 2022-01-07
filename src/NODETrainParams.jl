@@ -35,7 +35,7 @@
 - `input_data_path:String`: From `base_path`, the directory for input data.
 - `output_data_path:String`: From `base_path`, the directory for saving output data.
 - `verify_psid_node_off:Bool`: `true`: before training, check that the surrogate with NODE turned off matches the data provided from PSID simulation.
-- `graphical_report_mode:Int64`: `0`: do not generate plots. `1`: plot for transitions between faults. `2`: plot for transitions between ranges. `3`: plot for every train iteration.
+- `graphical_report_mode:Int64`: `0`: do not generate plots. `1`: plot final result only. `2` plot for transitions between faults. `3`: plot for transitions between ranges. `4`: plot for every train iteration.
 """
 mutable struct NODETrainParams
     train_id::String
