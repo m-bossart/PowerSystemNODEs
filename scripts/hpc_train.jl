@@ -9,7 +9,7 @@ params_data = NODETrainParams[]
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "1",
         node_width = 2,
@@ -20,7 +20,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "2",
         node_width = 3,
@@ -31,7 +31,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "3",
         node_width = 4,
@@ -42,7 +42,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "4",
         node_width = 5,
@@ -53,7 +53,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "5",
         node_width = 2,
@@ -64,7 +64,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "6",
         node_width = 2,
@@ -75,7 +75,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "7",
         node_width = 2,
@@ -86,7 +86,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "8",
         node_width = 2,
@@ -97,7 +97,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "9",
         node_width = 2,
@@ -108,7 +108,7 @@ push!(
 push!(
     params_data,
     NODETrainParams(
-        maxiters = 1000, 
+        maxiters = 1000,
         ode_model = "none",
         train_id = "10",
         node_width = 2,
@@ -132,7 +132,7 @@ hpc_params = SummitHPCTrain(;
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/mabo4366",
     n_tasks = 10,
-    force_generate_inputs = true, 
+    force_generate_inputs = true,
 )
 
 generate_train_files(hpc_params)

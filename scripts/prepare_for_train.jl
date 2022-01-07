@@ -20,13 +20,8 @@ label_area!(sys_full, [SURROGATE_BUS], "surrogate")
 sys_surr = remove_area(sys_full, "1")
 sys_train = build_train_system(sys_surr, sys_pvs, "surrogate")
 to_json(sys_train, joinpath(INPUT_FOLDER_NAME, "system.json"), force = true)
-d = generate_train_data(
-    sys_train,
-    NODETrainDataParams(ode_model = "vsm"),
-    SURROGATE_BUS,
-)
+d = generate_train_data(sys_train, NODETrainDataParams(ode_model = "vsm"), SURROGATE_BUS)
 serialize(d, joinpath(INPUT_FOLDER_NAME, "data.json"))
-
 
 ######### POST TRAIN GENERATE PREDICTION DATA ########
 #= sys_rest = remove_area(sys_full, "surrogate")

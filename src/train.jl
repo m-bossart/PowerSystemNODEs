@@ -287,7 +287,8 @@ function train(params::NODETrainParams)
         output["final_loss"] = final_loss_for_comparison
 
         capture_output(output, params.output_data_path, params.train_id)
-        (params.graphical_report_mode != 0) && visualize_training(params)
+        (params.graphical_report_mode != 0) &&
+            visualize_training(params, visualize_level = params.graphical_report_mode)
         return true
     catch
         return false

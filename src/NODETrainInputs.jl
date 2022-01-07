@@ -80,7 +80,8 @@ function generate_train_data(sys_train, NODETrainDataParams, SURROGATE_BUS)
             reset_simulation = false,
             saveat = tsteps,
         )
-        active_source = collect(get_components(Source, sys_train, x -> PSY.get_available(x)))[1]
+        active_source =
+            collect(get_components(Source, sys_train, x -> PSY.get_available(x)))[1]
         ode_data = get_total_current_series(sim_full)
 
         transformer = collect(get_components(Transformer2W, sys_train))[1]
