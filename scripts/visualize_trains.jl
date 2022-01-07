@@ -4,7 +4,7 @@ include("../system_data/dynamic_components_data.jl")
 configure_logging(console_level = Logging.Info)
 #configure_logging(;filename = "train_node.log")
 
-visualize_level = isempty(ARGS) ? 1 : ARGS[1]
+visualize_level = isempty(ARGS) ? 1 : parse(Int64,ARGS[1])
 
 train_files = filter(
     x -> occursin("train_", x),
