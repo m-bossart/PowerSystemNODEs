@@ -59,7 +59,7 @@ function initialize_surrogate(
     else
         P.scale = [params.node_input_scale, 0.0]
         x₀ = fault_dict[:x₀]
-        x₀_surr[(2 + params.node_feedback_states + N_ALGEBRAIC_STATES):(ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES)] =
+        x₀_surr[(3 + params.node_feedback_states + N_ALGEBRAIC_STATES):(ODE_ORDER + 2 + params.node_feedback_states + N_ALGEBRAIC_STATES)] =
             x₀
     end
     p = vectorize(P)
@@ -117,7 +117,18 @@ function calculate_final_loss(
     sensealg,
     Ir_scale,
     Ii_scale,
+    output,
 )
+    t_concatonated = concatonate_t(tsteps, pvs_names, :)
+
+    cb = instantiate_cb!(
+        output,
+        params.lb_loss,
+        params.output_mode,
+        0,  #range_count
+        pvs_names,
+        t_concatonated,
+    )
     pred_function = instantiate_pred_function(
         solver,
         pvs_names,
@@ -136,6 +147,7 @@ function calculate_final_loss(
     pvs_names = concatonate_pvs_names(pvs_names, length(tsteps))
     final_loss_for_comparison = loss_function(θ, i_true, t_current, pvs_names)
 
+    cb(θ, final_loss_for_comparison[1], final_loss_for_comparison[2])     #Call the callback to record the prediction in output
     return final_loss_for_comparison[1]
 end
 
@@ -283,11 +295,13 @@ function train(params::NODETrainParams)
             sensealg,
             Ir_scale,
             Ii_scale,
+            output,
         )
         output["final_loss"] = final_loss_for_comparison
 
         capture_output(output, params.output_data_path, params.train_id)
-        (params.graphical_report_mode != 0) && visualize_training(params)
+        (params.graphical_report_mode != 0) &&
+            visualize_training(params, visualize_level = params.graphical_report_mode)
         return true
     catch
         return false

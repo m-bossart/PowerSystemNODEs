@@ -99,7 +99,7 @@ function SummitHPCTrain(;
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/",
     time_limit = "24:00:00",
-    n_tasks = length(params_data),  #default to parallelize across all tasks 
+    n_tasks = 1,  #default to parallelize across all tasks 
     force_generate_inputs = false,
 )
     # Default until we parallelize training code
@@ -161,7 +161,7 @@ function generate_train_files(train::HPCTrain)
                 "train_$(param.train_id).json",
             )
             if !isfile(param_file_path)
-                mkpath(param_file_path)
+                touch(param_file_path)
             end
             serialize(param, param_file_path)
             write(file, "$param_file_path\n")

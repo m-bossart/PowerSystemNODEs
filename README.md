@@ -22,3 +22,4 @@ train_parameters
     ...
 ```
 
+Note: to run on hpc, set environment variable  `ENV["GKSwstype"] = "100"` in startup file: `~/.julia/config/startup.jl`

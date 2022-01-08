@@ -1,4 +1,4 @@
-function visualize_training(params::NODETrainParams)
+function visualize_training(params::NODETrainParams; visualize_level = 1)
     @debug dump(params)
     path_to_input = joinpath(params.base_path, params.input_data_path)
     path_to_output = joinpath(params.base_path, params.output_data_path, params.train_id)
@@ -19,7 +19,7 @@ function visualize_training(params::NODETrainParams)
         end
         return
     elseif params.output_mode == 3
-        plots = visualize_3(params, path_to_output, path_to_input)
+        plots = visualize_3(params, path_to_output, path_to_input, visualize_level)
 
         for (i, p) in enumerate(plots)
             png(p, joinpath(path_to_output, string("plot_", i)))
@@ -35,9 +35,8 @@ function visualize_2(params, path_to_output, path_to_input)
     return plot(p1, p2, layout = (2, 1))
 end
 
-function visualize_3(params, path_to_output, path_to_input)
+function visualize_3(params, path_to_output, path_to_input, visualize_level)
     df_loss = DataFrame(Arrow.Table(joinpath(path_to_output, "loss")))
-    @show df_loss
     list_plots = []
     p1 = plot(df_loss.Loss, title = "Loss")
     p2 = plot(df_loss.RangeCount, title = "Range Count")
@@ -47,16 +46,17 @@ function visualize_3(params, path_to_output, path_to_input)
     output_dict =
         JSON3.read(read(joinpath(path_to_output, "high_level_outputs")), Dict{String, Any})
     PVS_name = df_loss.PVS_name[:]
-    if params.graphical_report_mode == 1
-        transition_indices = find_transition_indices(PVS_name)  #LEVEL 1: plot when moving to new fault(s)
-    elseif params.graphical_report_mode == 2
-        transition_indices = find_transition_indices(df_loss.RangeCount)  #LEVEL 2: plot when moving to new data range
-    elseif params.graphical_report_mode == 3
-        transition_indices = collect(1:length(PVS_name))
+    if visualize_level == 1
+        transition_indices = [length(PVS_name)]   #LEVEL 1: plot end result only (the result used to calculate final loss)
+    elseif visualize_level == 2
+        transition_indices = find_transition_indices(PVS_name)  #LEVEL 2: plot when moving to new fault(s)
+    elseif visualize_level == 3
+        transition_indices = find_transition_indices(df_loss.RangeCount)  #LEVEL 3: plot when moving to new data range
+    elseif visualize_level == 4
+        transition_indices = collect(1:length(PVS_name)) #LEVEL 4: plot every iteration moving to new data range
     else
-        @warn "Invalid value for parameter graphical_report_mode"
+        @warn "Invalid value for parameter visualize_level"
     end
-
     df_predictions = DataFrame(Arrow.Table(joinpath(path_to_output, "predictions")))
     TrainInputs =
         JSON3.read(read(joinpath(params.input_data_path, "data.json")), NODETrainInputs)
@@ -116,7 +116,21 @@ function visualize_summary(output_data_path)
             label = value["train_id"],
             xlabel = "total time (s)",
             ylabel = "final loss",
+            markersize = 3,
+            markerstrokewidth = 0,
+        )
+        annotate!(
+            value["total_time"],
+            value["final_loss"],
+            text(value["train_id"], :red, 8),
         )
     end
     return p
 end
+
+#= using Plots, Random
+vals = rand(10,2)
+p = scatter(vals[:,1], vals[:,2],xlim=[0,1.1])
+some_labels=randstring.(fill(5,10))
+annotate!.(vals[:,1].+0.01, vals[:,2], text.(some_labels, :red, :left,11))
+p =#

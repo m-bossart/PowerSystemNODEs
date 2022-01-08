@@ -78,7 +78,7 @@ end
 function instantiate_M(inputs)
     if inputs.ode_model == "vsm"
         ODE_ORDER = 19
-        N_ALGEBRIC = 2
+        N_ALGEBRAIC = 2
     elseif inputs.ode_model == "none"
         ODE_ORDER = 0
         N_ALGEBRAIC = 0

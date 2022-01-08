@@ -1,11 +1,11 @@
 CompleteSystemPath: "system_data/full_system.json" 
 SimulationParameters:
   TspanStart: 0.0
-  TspanEnd: 2.0
+  TspanEnd: 3.0
   StepSize: 0.001
   AbsTol: 1e-9
   RelTol: 1e-6
-  TFault: 0.1
+  TFault: 0.05
   DtMax: 0.02
   Solver: "Rodas4"  #TODO use this solver, currently hardcoded 
   FaultTime: 1.0 
@@ -17,7 +17,7 @@ FaultParameters:
       DeviceName: # ["BUS 7-BUS 8-i_11","BUS 10-BUS 11-i_15"]
       Multiplier: 1.0
     ControlReferenceChange:
-      DeviceName: ["generator-15-1", "generator-18-1"]
+      DeviceName: ["generator-15-1"] #["generator-15-1", "generator-18-1"]
       RefValue: 0.8
     GeneratorTrip:
       DeviceName: #["generator-18-1"]
@@ -35,8 +35,8 @@ OutputParameters:
     PVSBus: 2 
     PVSBranchName: "BUS 2-BUS 16-i_19" 
   OutputData: 
-    BusNumbers: [1,1,2, 2]
-    BusData: ["Vm","Vtheta","Vm", "Vtheta"]
+    BusNumbers: [2,2]  #[1,1,2, 2]
+    BusData: ["Vm","Vtheta"] #["Vm","Vtheta","Vm", "Vtheta"]
     DynamicDevices: #["gen2", "gen2"]
     States: #["ir_filter", "ii_filter"]
   
