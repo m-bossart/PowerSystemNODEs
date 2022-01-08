@@ -28,8 +28,8 @@ StructTypes.StructType(::Type{NODETrainInputs}) = StructTypes.Struct()
 function NODETrainDataParams(;
     solver = "Rodas4",
     solver_tols = (1e-6, 1e-9),
-    tspan = (0.0, 2.0),
-    steps = 150,
+    tspan = (0.0, 3.0),
+    steps = 300,
     tsteps_spacing = "linear",
     ode_model = "vsm",
     base_path = pwd(),
