@@ -122,7 +122,7 @@ function calculate_final_loss(
     t_concatonated = concatonate_t(tsteps, pvs_names, :)
 
     cb = instantiate_cb!(
-        output, 
+        output,
         params.lb_loss,
         params.output_mode,
         0,  #range_count

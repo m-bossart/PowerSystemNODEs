@@ -16,7 +16,7 @@ push!(
         node_width = 2,
         node_layers = 2,
         node_feedback_states = 0,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -29,7 +29,7 @@ push!(
         node_width = 3,
         node_layers = 2,
         node_feedback_states = 0,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -42,7 +42,7 @@ push!(
         node_width = 4,
         node_layers = 2,
         node_feedback_states = 0,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -55,7 +55,7 @@ push!(
         node_width = 5,
         node_layers = 2,
         node_feedback_states = 0,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -68,7 +68,7 @@ push!(
         node_width = 2,
         node_layers = 3,
         node_feedback_states = 0,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -81,7 +81,7 @@ push!(
         node_width = 2,
         node_layers = 4,
         node_feedback_states = 0,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -94,7 +94,7 @@ push!(
         node_width = 2,
         node_layers = 5,
         node_feedback_states = 0,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -107,7 +107,7 @@ push!(
         node_width = 2,
         node_layers = 2,
         node_feedback_states = 1,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -120,7 +120,7 @@ push!(
         node_width = 2,
         node_layers = 2,
         node_feedback_states = 2,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -133,7 +133,7 @@ push!(
         node_width = 2,
         node_layers = 2,
         node_feedback_states = 3,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 push!(
@@ -146,7 +146,7 @@ push!(
         node_width = 5,
         node_layers = 5,
         node_feedback_states = 3,
-        graphical_report_mode = 3, 
+        graphical_report_mode = 3,
     ),
 )
 

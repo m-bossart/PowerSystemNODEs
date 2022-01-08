@@ -52,7 +52,7 @@ function visualize_3(params, path_to_output, path_to_input, visualize_level)
         transition_indices = find_transition_indices(PVS_name)  #LEVEL 2: plot when moving to new fault(s)
     elseif visualize_level == 3
         transition_indices = find_transition_indices(df_loss.RangeCount)  #LEVEL 3: plot when moving to new data range
-    elseif visualize_level == 4 
+    elseif visualize_level == 4
         transition_indices = collect(1:length(PVS_name)) #LEVEL 4: plot every iteration moving to new data range
     else
         @warn "Invalid value for parameter visualize_level"

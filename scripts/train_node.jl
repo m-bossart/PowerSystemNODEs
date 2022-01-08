@@ -12,4 +12,3 @@ serialize(p, "input_data/sample_parameters.json")
 train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
 train_params = NODETrainParams(train_params_file)
 status = train(train_params)
-
