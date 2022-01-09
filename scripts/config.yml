@@ -8,7 +8,7 @@ SimulationParameters:
   TFault: 0.05
   DtMax: 0.02
   Solver: "Rodas4"  #TODO use this solver, currently hardcoded 
-  FaultTime: 1.0 
+  FaultTime: 0.1 
 
 FaultParameters:
     BranchTrip:
