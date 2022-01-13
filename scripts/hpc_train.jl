@@ -294,7 +294,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "23",
         node_width = 2,
@@ -307,7 +307,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "24",
         node_width = 3,
@@ -320,7 +320,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "25",
         node_width = 4,
@@ -333,7 +333,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "26",
         node_width = 5,
@@ -346,7 +346,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "27",
         node_width = 2,
@@ -359,7 +359,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "28",
         node_width = 2,
@@ -372,7 +372,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "29",
         node_width = 2,
@@ -385,7 +385,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "30",
         node_width = 2,
@@ -398,7 +398,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "31",
         node_width = 2,
@@ -411,7 +411,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "32",
         node_width = 2,
@@ -424,7 +424,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "33",
         node_width = 5,
@@ -438,7 +438,7 @@ push!(
     params_data,
     NODETrainParams(
         maxiters = 20000,
-        groupsize_steps = 2 ,
+        groupsize_steps = 2,
         ode_model = "none",
         train_id = "33_repeat",
         node_width = 5,
