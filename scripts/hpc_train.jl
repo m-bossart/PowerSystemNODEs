@@ -1,8 +1,4 @@
-using Mustache
-
-include("../src/PowerSystemNODEs.jl")
-include("../src/constants.jl")
-include("../src/HPCTrain.jl")
+using PowerSimulationNODE
 
 params_data = NODETrainParams[]
 

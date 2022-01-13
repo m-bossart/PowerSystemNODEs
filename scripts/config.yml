@@ -1,4 +1,3 @@
-CompleteSystemPath: "system_data/full_system.json" 
 SimulationParameters:
   TspanStart: 0.0
   TspanEnd: 3.0
