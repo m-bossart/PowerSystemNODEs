@@ -121,7 +121,7 @@ hpc_params = SummitHPCTrain(;
     params_data = params_data,
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/mabo4366",
-    n_tasks = 6,
+    n_tasks = 8,
     force_generate_inputs = true,
 )
 
