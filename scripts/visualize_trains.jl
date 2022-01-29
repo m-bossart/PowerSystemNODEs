@@ -1,4 +1,5 @@
 using PowerSimulationNODE
+using Plots
 using Logging
 include("../system_data/dynamic_components_data.jl")
 
