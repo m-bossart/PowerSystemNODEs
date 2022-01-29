@@ -1,5 +1,6 @@
 using Revise
 using PowerSimulationNODE
+using Plots
 using Logging
 include("../system_data/dynamic_components_data.jl")
 
@@ -15,9 +16,3 @@ train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
 
 train_params = NODETrainParams(train_params_file)
 status = train(train_params)
-
-
-
-
-
-
