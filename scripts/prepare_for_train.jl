@@ -1,9 +1,10 @@
 using PowerSimulationNODE
+using Serialization
 using Logging
 include("../system_data/dynamic_components_data.jl")
 configure_logging(console_level = Logging.Info, file_level = Logging.Info)
 
-train_data_path = joinpath(PowerSimulationNODE.INPUT_FOLDER_NAME, "data.json")
+train_data_path = joinpath(PowerSimulationNODE.INPUT_FOLDER_NAME, "data")
 train_system_path = joinpath(PowerSimulationNODE.INPUT_FOLDER_NAME, "system.json")
 full_system_path =
     joinpath(PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
@@ -31,10 +32,8 @@ d = generate_train_data(
     SURROGATE_BUS,
     inv_case78("aa"),
 )
-PowerSimulationNODE.serialize(
-    d,
-    joinpath(PowerSimulationNODE.INPUT_FOLDER_NAME, "data.json"),
-)
+
+Serialization.serialize(train_data_path, d)
 
 ######### POST TRAIN GENERATE PREDICTION DATA ########
 #= sys_rest = remove_area(sys_full, "surrogate")
