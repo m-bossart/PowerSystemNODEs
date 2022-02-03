@@ -86,9 +86,9 @@ version = "0.16.11"
 
 [[deps.BangBang]]
 deps = ["Compat", "ConstructionBase", "Future", "InitialValues", "LinearAlgebra", "Requires", "Setfield", "Tables", "ZygoteRules"]
-git-tree-sha1 = "a33794b483965bf49deaeec110378640609062b1"
+git-tree-sha1 = "d648adb5e01b77358511fb95ea2e4d384109fac9"
 uuid = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
-version = "0.3.34"
+version = "0.3.35"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -429,9 +429,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "24d26ca2197c158304ab2329af074fbe14c988e4"
+git-tree-sha1 = "2e97190dfd4382499a4ac349e8d316491c9db341"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.45"
+version = "0.25.46"
 
 [[deps.DistributionsAD]]
 deps = ["Adapt", "ChainRules", "ChainRulesCore", "Compat", "DiffRules", "Distributions", "FillArrays", "LinearAlgebra", "NaNMath", "PDMats", "Random", "Requires", "SpecialFunctions", "StaticArrays", "StatsBase", "StatsFuns", "ZygoteRules"]
@@ -475,9 +475,9 @@ version = "1.3.0"
 
 [[deps.Enzyme]]
 deps = ["Adapt", "CEnum", "Enzyme_jll", "GPUCompiler", "LLVM", "Libdl", "ObjectFile", "Test"]
-git-tree-sha1 = "96c732d6e2f5e0dac5ed4b6bc942b4bb39aa7125"
+git-tree-sha1 = "12c6cd04a12c7c88b09aa134b54fced750a57744"
 uuid = "7da242da-08ed-463a-9acd-ee780be4f1d9"
-version = "0.8.3"
+version = "0.8.4"
 
 [[deps.Enzyme_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1064,9 +1064,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LinearSolve]]
 deps = ["ArrayInterface", "DocStringExtensions", "IterativeSolvers", "KLU", "Krylov", "KrylovKit", "LinearAlgebra", "RecursiveFactorization", "Reexport", "Requires", "SciMLBase", "Setfield", "SparseArrays", "SuiteSparse", "UnPack"]
-git-tree-sha1 = "a050cd5581a204eeda3ad13c1d2aabdc3c451b4e"
+git-tree-sha1 = "a99995c9eec7d7961b3eabd403cb174c3d7fa3c3"
 uuid = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-version = "1.11.1"
+version = "1.11.2"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
@@ -1308,9 +1308,9 @@ version = "1.4.1"
 
 [[deps.OrdinaryDiffEq]]
 deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "ExponentialUtilities", "FastClosures", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "Logging", "LoopVectorization", "MacroTools", "MuladdMacro", "NLsolve", "NonlinearSolve", "Polyester", "PreallocationTools", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
-git-tree-sha1 = "1475c25a9dc4de848a5234543f2cb8601ada67d4"
+git-tree-sha1 = "df82fa0f9f90f669cc3cf9e3f0400e431e0704ac"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "6.6.5"
+version = "6.6.6"
 
 [[deps.PCRE_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1395,24 +1395,24 @@ uuid = "85a6dd25-e78a-55b7-8502-1745935b8125"
 version = "0.2.4"
 
 [[deps.PowerSimulationNODE]]
-deps = ["Arrow", "DataFrames", "DataStructures", "DiffEqBase", "DiffEqFlux", "DiffEqSensitivity", "FFTW", "Flux", "ForwardDiff", "GalacticOptim", "IterTools", "JSON3", "Logging", "Mustache", "NLsolve", "Optim", "OrdinaryDiffEq", "Plots", "PowerSimulationsDynamics", "PowerSystems", "Random", "Requires", "SciMLBase", "Serialization", "StatsBase", "StructTypes", "YAML"]
-git-tree-sha1 = "4731e2f35aeace7501abcf263ae25b4a0c5023ee"
+deps = ["Arrow", "DataFrames", "DataStructures", "DiffEqBase", "DiffEqFlux", "DiffEqSensitivity", "FFTW", "Flux", "ForwardDiff", "GalacticOptim", "IterTools", "JSON3", "Logging", "Mustache", "NLsolve", "Optim", "OrdinaryDiffEq", "Plots", "PowerSimulationsDynamics", "PowerSystems", "PrettyTables", "Random", "Requires", "SciMLBase", "Serialization", "StatsBase", "StructTypes", "YAML"]
+git-tree-sha1 = "4e6278146a55d223393b9b739ec53cd322501100"
 repo-rev = "generalize-surrogate-input-states"
 repo-url = "https://github.com/HodgeLab/PowerSimulationNODE"
 uuid = "4b7d6be9-769c-4710-86e6-88f799a27627"
 version = "0.1.0"
 
 [[deps.PowerSimulationsDynamics]]
-deps = ["DataStructures", "DelimitedFiles", "DiffEqBase", "DocStringExtensions", "ForwardDiff", "InfrastructureSystems", "LinearAlgebra", "Logging", "NLsolve", "PowerSystems", "PrettyTables", "Random", "SciMLBase", "SparseArrays", "TimerOutputs"]
-git-tree-sha1 = "833740bf329d15944b36db3b967a4a6db8ad8899"
+deps = ["DataStructures", "DelimitedFiles", "DocStringExtensions", "ForwardDiff", "InfrastructureSystems", "LinearAlgebra", "Logging", "NLsolve", "PowerSystems", "PrettyTables", "Random", "SciMLBase", "SparseArrays", "TimerOutputs"]
+git-tree-sha1 = "e9c9a64882e991edb50cdbf2b0294178753a2534"
 uuid = "398b2ede-47ed-4edc-b52e-69e4a48b4336"
-version = "0.8.5"
+version = "0.9.0"
 
 [[deps.PowerSystems]]
 deps = ["CSV", "DataFrames", "Dates", "DocStringExtensions", "InfrastructureSystems", "InteractiveUtils", "JSON3", "LinearAlgebra", "Logging", "NLsolve", "PrettyTables", "SparseArrays", "TimeSeries", "UUIDs", "YAML"]
-git-tree-sha1 = "a734015575bdf0efacab4b71f475da330fce6ee2"
+git-tree-sha1 = "9974bb208d6f351007d5369e6956adbbe7b84312"
 uuid = "bcd98974-b02a-5e2f-9ee0-a103f5c450dd"
-version = "1.18.2"
+version = "1.18.3"
 
 [[deps.PreallocationTools]]
 deps = ["Adapt", "ArrayInterface", "ForwardDiff", "LabelledArrays"]
@@ -1680,9 +1680,9 @@ version = "1.20.0"
 
 [[deps.SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "e6bf188613555c78062842777b116905a9f9dd49"
+git-tree-sha1 = "a4116accb1c84f0a8e1b9932d873654942b2364b"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.1.0"
+version = "2.1.1"
 
 [[deps.SplittablesBase]]
 deps = ["Setfield", "Test"]
@@ -1704,9 +1704,9 @@ version = "0.4.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "2884859916598f974858ff01df7dfc6c708dd895"
+git-tree-sha1 = "a635a9333989a094bddc9f940c04c549cd66afcf"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.3.3"
+version = "1.3.4"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1864,9 +1864,9 @@ version = "0.9.6"
 
 [[deps.Transducers]]
 deps = ["Adapt", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "Requires", "Setfield", "SplittablesBase", "Tables"]
-git-tree-sha1 = "a34f53c9e14d131b0ce114f591d3c5d428431ba0"
+git-tree-sha1 = "1cda71cc967e3ef78aa2593319f6c7379376f752"
 uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
-version = "0.4.69"
+version = "0.4.72"
 
 [[deps.Trapz]]
 git-tree-sha1 = "79eb0ed763084a3e7de81fe1838379ac6a23b6a0"
