@@ -28,7 +28,7 @@ to_json(
 )
 d = generate_train_data(
     sys_train,
-    NODETrainDataParams(ode_model = "vsm"),
+    NODETrainDataParams(ode_model = "none"),
     SURROGATE_BUS,
     inv_case78("aa"),
 )
