@@ -14,7 +14,7 @@ train_params = NODETrainParams(train_params_file)
 logger = configure_logging(
     console_level = PowerSimulationNODE.NODE_CONSOLE_LEVEL,
     file_level = PowerSimulationNODE.NODE_FILE_LEVEL,
-    filename = string("log_", train_params.train_id, ".txt"),
+    filename = string("log_", train_params.train_id, ".log"),
 )
 try
     with_logger(logger) do

@@ -26,13 +26,13 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS
-no_change_params[:maxiters] = 1000 #10
+no_change_params[:maxiters] = 750 #10
 no_change_params[:node_layers] = 3 #2 
 no_change_params[:graphical_report_mode] = 3
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
 change_params[:node_unobserved_states] = [0, 2, 4, 6, 8]
-change_params[:node_width] = [4, 8, 16] #2,3
+change_params[:node_width] = [4, 8, 16] #[2,3] 
 change_params[:training_groups] = [
     [(
         tspan = (0.0, 1.0),
@@ -98,7 +98,8 @@ hpc_params = SummitHPCTrain(;
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/mabo4366",
     n_tasks = length(params_data),
-    QoS = "long",   #"normal"
+    time_limit = "24:00:00",
+    QoS = "normal",  
     partition = "shas", #"shas-testing"
     force_generate_inputs = true,
 )

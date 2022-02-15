@@ -6,7 +6,7 @@ include("../system_data/dynamic_components_data.jl")
 logger = configure_logging(
     console_level = PowerSimulationNODE.NODE_CONSOLE_LEVEL,
     file_level = PowerSimulationNODE.NODE_FILE_LEVEL,
-    filename = "log_generatedata.txt",
+    filename = "log_generatedata.log",
 )
 
 try
