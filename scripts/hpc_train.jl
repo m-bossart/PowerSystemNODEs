@@ -32,7 +32,7 @@ no_change_params[:graphical_report_mode] = 3
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
 change_params[:node_unobserved_states] = [0, 2, 4, 6, 8]
-change_params[:node_width] = [8, 16] #2,3
+change_params[:node_width] = [4, 8, 16] #2,3
 change_params[:training_groups] = [
     [(
         tspan = (0.0, 1.0),
