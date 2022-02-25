@@ -26,15 +26,14 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS
-no_change_params[:maxiters] = 2000 
-no_change_params[:node_layers] = 3 
-
+no_change_params[:maxiters] = 2000
+no_change_params[:node_layers] = 3
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
 change_params[:node_unobserved_states] = [0, 2, 4, 6, 8]
-change_params[:node_width] = [4, 6, 8] 
-change_params[:optimizer_η] =  [0.001, 0.01]
-change_params[:training_groups] =
+change_params[:node_width] = [4, 6, 8]
+change_params[:optimizer_η] = [0.001, 0.01]
+change_params[:training_groups] = [
     [(
         tspan = (0.0, 1.0),
         shoot_times = [
@@ -99,7 +98,7 @@ hpc_params = SummitHPCTrain(;
     scratch_path = pwd(), #"/scratch/summit/mabo4366",
     n_tasks = length(params_data),
     time_limit = "24:00:00",
-    QoS = "normal",  
+    QoS = "normal",
     partition = "shas", #"shas-testing"
     force_generate_inputs = true,
     mb_per_cpu = 4800,

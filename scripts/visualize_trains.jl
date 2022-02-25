@@ -16,4 +16,4 @@ train_files = filter(
 for file in train_files
     visualize_training(file, visualize_level = visualize_level)
     animate_training(file, skip_frames = 10, fps = 10)
-end 
+end
