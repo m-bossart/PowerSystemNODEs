@@ -62,6 +62,7 @@ change_params[:training_groups] = [
     )],
     [(
         tspan = (0.0, 1.0),
+        shoot_times = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
         multiple_shoot_continuity_term = 100,
         batching_sample_factor = 1.0,
     )],
