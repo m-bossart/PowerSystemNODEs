@@ -6,7 +6,7 @@ include("../system_data/dynamic_components_data.jl")
 configure_logging(console_level = Logging.Info)
 #configure_logging(;filename = "train_node.log")
 
-visualize_level = isempty(ARGS) ? 1 : parse(Int64, ARGS[1])
+visualize_level = isempty(ARGS) ? 3 : parse(Int64, ARGS[1])
 
 train_files = filter(
     x -> occursin("train_", x),
@@ -14,6 +14,6 @@ train_files = filter(
 )
 
 for file in train_files
-    p = NODETrainParams(file)
-    visualize_training(p, visualize_level = visualize_level)
-end
+    visualize_training(file, visualize_level = visualize_level)
+    animate_training(file, skip_frames = 10, fps = 10)
+end 

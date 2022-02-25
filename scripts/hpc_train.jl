@@ -26,14 +26,15 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS
-no_change_params[:maxiters] = 750 #10
-no_change_params[:node_layers] = 3 #2 
-no_change_params[:graphical_report_mode] = 3
+no_change_params[:maxiters] = 2000 
+no_change_params[:node_layers] = 3 
+
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
 change_params[:node_unobserved_states] = [0, 2, 4, 6, 8]
-change_params[:node_width] = [4, 8, 16] #[2,3] 
-change_params[:training_groups] = [
+change_params[:node_width] = [4, 6, 8] 
+change_params[:optimizer_η]
+change_params[:training_groups] = [0.001, 0.01]
     [(
         tspan = (0.0, 1.0),
         shoot_times = [
@@ -62,7 +63,6 @@ change_params[:training_groups] = [
     )],
     [(
         tspan = (0.0, 1.0),
-        shoot_times = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
         multiple_shoot_continuity_term = 100,
         batching_sample_factor = 1.0,
     )],
@@ -96,12 +96,13 @@ hpc_params = SummitHPCTrain(;
     username = "mabo4366",
     params_data = params_data,
     project_folder = "PowerSystemNODEs",
-    scratch_path = "/scratch/summit/mabo4366",
+    scratch_path = pwd(), #"/scratch/summit/mabo4366",
     n_tasks = length(params_data),
     time_limit = "24:00:00",
     QoS = "normal",  
     partition = "shas", #"shas-testing"
     force_generate_inputs = true,
+    mb_per_cpu = 4800,
 )
 ##
 generate_train_files(hpc_params)
