@@ -16,10 +16,12 @@ logger = configure_logging(
     file_level = PowerSimulationNODE.NODE_FILE_LEVEL,
     filename = string("log_", train_params.train_id, ".log"),
 )
+#Don't get log file written if the process is killed externally... 
 try
     with_logger(logger) do
         status = train(train_params)
     end
+    #Add catch ? 
 finally
     close(logger)
 end
