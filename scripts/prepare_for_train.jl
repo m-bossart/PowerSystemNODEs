@@ -35,7 +35,7 @@ try
         )
         d = generate_train_data(
             sys_train,
-            NODETrainDataParams(ode_model = "none"),
+            NODETrainDataParams(tspan = (0.0, 1.0), ode_model = "none"),
             SURROGATE_BUS,
             inv_case78("aa"),
         )
