@@ -6,6 +6,8 @@ function build_params_list!(params_data, no_change_params, change_params)
     starting_dict = no_change_params
     dims = []
     for (k, v) in change_params
+        @warn k 
+        @warn length(v)
         push!(dims, length(v))
     end
     dims_tuple = tuple(dims...)
@@ -23,7 +25,7 @@ end
 
 function build_training_group(training_group_dict)
     training_group = []
-    for i in 1:training_group_dict[:training_groups]
+    for i in range(training_group_dict[:training_groups], 1, step = -1) 
         tspan = (training_group_dict[:tspan][1], training_group_dict[:tspan][2] / i)
         shoot_times = filter(x -> x < tspan[2], training_group_dict[:shoot_times])
         multiple_shoot_continuity_term =
@@ -46,6 +48,8 @@ function build_training_groups_list(no_change_fields, change_fields)
     starting_dict = no_change_fields
     dims = []
     for (k, v) in change_fields
+        @warn "training groups sub-category", k 
+        @warn length(v)
         push!(dims, length(v))
     end
     dims_tuple = tuple(dims...)
@@ -65,50 +69,14 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS
-no_change_params[:maxiters] = 2000
+no_change_params[:maxiters] = 200
 no_change_params[:node_layers] = 3
-no_change_params[:node_width] = 8
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:node_unobserved_states] = [0, 8]
-change_params[:optimizer_η] = [0.001, 0.01]
-change_params[:learn_initial_condition_unobserved_states] = [true, false]
+change_params[:node_unobserved_states] = [0, 4, 8]
+change_params[:node_width] = [2, 12, 22, 32, 42, 52, 62]
 
-#SPECIAL HANDLING TO BUILD ITERATOR FOR TRAINING GROUPS 
-no_change_fields = Dict{Symbol, Any}()
-change_fields = Dict{Symbol, Any}()
-no_change_fields[:tspan] = (0.0, 1.0)
-change_fields[:training_groups] = [1, 2]
-change_fields[:shoot_times] = [
-    [],
-    [0.2, 0.4, 0.6, 0.8],
-    [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-    [
-        0.05,
-        0.1,
-        0.15,
-        0.2,
-        0.25,
-        0.3,
-        0.35,
-        0.4,
-        0.45,
-        0.5,
-        0.55,
-        0.6,
-        0.65,
-        0.7,
-        0.75,
-        0.8,
-        0.85,
-        0.9,
-        0.95,
-    ],
-]
-change_fields[:multiple_shoot_continuity_term] = [10, 100]
-change_fields[:batching_sample_factor] = [0.5, 1.0]
-change_params[:training_groups] =
-    build_training_groups_list(no_change_fields, change_fields)
+
 
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
