@@ -69,13 +69,25 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS
-no_change_params[:maxiters] = 200
-no_change_params[:node_layers] = 3
-
+no_change_params[:maxiters] = 1500
+no_change_params[:node_layers] = 2
+no_change_params[:node_unobserved_states] = 8 
+no_change_params[:node_width] = 20 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:node_unobserved_states] = [0, 4, 8]
-change_params[:node_width] = [2, 12, 22, 32, 42, 52, 62]
 
+change_params[:optimizer_η] = [0.01, 0.005, 0.001, 0.0005]
+
+
+#SPECIAL HANDLING TO BUILD ITERATOR FOR TRAINING GROUPS 
+no_change_fields = Dict{Symbol, Any}()
+change_fields = Dict{Symbol, Any}()
+no_change_fields[:tspan] = (0.0, 1.0)
+no_change_fields[:training_groups] = 1 
+no_change_fields[:shoot_times] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+no_change_fields[:multiple_shoot_continuity_term] = 100
+change_fields[:batching_sample_factor] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+change_params[:training_groups] =
+    build_training_groups_list(no_change_fields, change_fields)
 
 
 build_params_list!(params_data, no_change_params, change_params)
@@ -102,6 +114,6 @@ hpc_params = SummitHPCTrain(;
     force_generate_inputs = true,
     mb_per_cpu = 4800,
 )
-
+##
 generate_train_files(hpc_params)
 run_parallel_train(hpc_params)
