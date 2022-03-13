@@ -6,7 +6,7 @@ function build_params_list!(params_data, no_change_params, change_params)
     starting_dict = no_change_params
     dims = []
     for (k, v) in change_params
-        @warn k 
+        @warn k
         @warn length(v)
         push!(dims, length(v))
     end
@@ -25,7 +25,7 @@ end
 
 function build_training_group(training_group_dict)
     training_group = []
-    for i in range(training_group_dict[:training_groups], 1, step = -1) 
+    for i in range(training_group_dict[:training_groups], 1, step = -1)
         tspan = (training_group_dict[:tspan][1], training_group_dict[:tspan][2] / i)
         shoot_times = filter(x -> x < tspan[2], training_group_dict[:shoot_times])
         multiple_shoot_continuity_term =
@@ -48,7 +48,7 @@ function build_training_groups_list(no_change_fields, change_fields)
     starting_dict = no_change_fields
     dims = []
     for (k, v) in change_fields
-        @warn "training groups sub-category", k 
+        @warn "training groups sub-category", k
         @warn length(v)
         push!(dims, length(v))
     end
@@ -69,30 +69,28 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS
-no_change_params[:maxiters] = 1500
+no_change_params[:maxiters] = 10
 no_change_params[:node_layers] = 2
-no_change_params[:node_unobserved_states] = 8 
-no_change_params[:node_width] = 20 
+no_change_params[:node_unobserved_states] = 19
+no_change_params[:node_width] = 25
+no_change_params[:optimizer_η] = 0.001
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-
-change_params[:optimizer_η] = [0.01, 0.005, 0.001, 0.0005]
-
 
 #SPECIAL HANDLING TO BUILD ITERATOR FOR TRAINING GROUPS 
 no_change_fields = Dict{Symbol, Any}()
 change_fields = Dict{Symbol, Any}()
 no_change_fields[:tspan] = (0.0, 1.0)
-no_change_fields[:training_groups] = 1 
+no_change_fields[:training_groups] = 1
 no_change_fields[:shoot_times] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-no_change_fields[:multiple_shoot_continuity_term] = 100
-change_fields[:batching_sample_factor] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+change_fields[:multiple_shoot_continuity_term] =
+    [(0.0, 100.0), (0.0, 10.0), (0.0, 1.0), (1000.0, 100.0), (100.0, 10.0), (10.0, 1.0)]
+change_fields[:batching_sample_factor] = [0.2, 0.4, 0.6, 0.8, 1.0]
 change_params[:training_groups] =
     build_training_groups_list(no_change_fields, change_fields)
 
-
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
-
+##
 #=
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
