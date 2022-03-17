@@ -13,7 +13,9 @@ train_files = filter(
     readdir(joinpath(pwd(), PowerSimulationNODE.INPUT_FOLDER_NAME), join = true),
 )
 
+train_files = filter(x->occursin("49", x), train_files)
+
 for file in train_files
-    visualize_training(file, visualize_level = visualize_level)
-    #animate_training(file, skip_frames = 1, fps = 10)
+    #visualize_training(file, visualize_level = visualize_level)
+    animate_training(file, skip_frames = 10, fps = 10)
 end

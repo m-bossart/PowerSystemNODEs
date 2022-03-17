@@ -73,7 +73,7 @@ no_change_params[:maxiters] = 10
 no_change_params[:node_layers] = 2
 no_change_params[:node_unobserved_states] = 19
 no_change_params[:node_width] = 25
-no_change_params[:optimizer_η] = 0.001
+change_params[:optimizer_η] = [0.001, 0.0005]
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
 
 #SPECIAL HANDLING TO BUILD ITERATOR FOR TRAINING GROUPS 
@@ -90,7 +90,7 @@ change_params[:training_groups] =
 
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
-##
+
 #=
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
@@ -104,7 +104,7 @@ hpc_params = SummitHPCTrain(;
     username = "mabo4366",
     params_data = params_data,
     project_folder = "PowerSystemNODEs",
-    scratch_path = "/scratch/summit/mabo4366",
+    scratch_path = pwd(), #"/scratch/summit/mabo4366",
     n_tasks = length(params_data),
     time_limit = "24:00:00",
     QoS = "normal",
@@ -112,6 +112,7 @@ hpc_params = SummitHPCTrain(;
     force_generate_inputs = true,
     mb_per_cpu = 4800,
 )
-##
+
 generate_train_files(hpc_params)
+##
 run_parallel_train(hpc_params)
