@@ -1,36 +1,36 @@
 using PowerSimulationNODE
 
-params_data = NODETrainParams[]
+params_data = TrainParams[]
 no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS
-no_change_params[:maxiters] = 10
-no_change_params[:node_layers] = 1
-no_change_params[:node_unobserved_states] = 8
-
-#change_params[:sensealg] = ["ForwardDiff", "Zygote" ]
-#change_params[:node_width] = [10, 200]
-no_change_params[:sensealg] = "ForwardDiff"
-no_change_params[:node_width] = 10
-
-change_params[:solver] = ["Tsit5", "Rodas4", "TRBDF2"]
-change_params[:solver_tols] = [(1e-5, 1e-2), (1e-7, 1e-4)]
-change_params[:solver_sensealg] =
-    ["InterpolatingAdjoint", "InterpolatingAdjoint_checkpointing"]
+no_change_params[:maxiters] = 100
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-
-#SPECIAL HANDLING TO BUILD ITERATOR FOR TRAINING GROUPS 
-no_change_fields = Dict{Symbol, Any}()
-change_fields = Dict{Symbol, Any}()
-no_change_fields[:tspan] = (0.0, 1.0)
-no_change_fields[:training_groups] = 1
-no_change_fields[:multiple_shoot_continuity_term] = (0.0, 1.0)
-no_change_fields[:batching_sample_factor] = 0.5
-change_fields[:shoot_times] = [[], [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]]
-change_params[:training_groups] =
-    build_training_groups_list(no_change_fields, change_fields)
+change_params[:optimizer] = [
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.0001,
+        adjust = "nothing",
+        adjust_η = 0.0,
+    ),
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.0001,
+        adjust = "nothing",
+        adjust_η = 0.0,
+    ),
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.0001,
+        adjust = "nothing",
+        adjust_η = 0.0,
+    ),
+]
 
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)

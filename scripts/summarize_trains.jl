@@ -1,5 +1,6 @@
 using PowerSimulationNODE
 using Plots
 
-p = visualize_summary(NODETrainParams().output_data_path)
-png(p, joinpath(NODETrainParams().base_path, "train_summary"))
+a = generate_summary(TrainParams().output_data_path)
+p = visualize_summary(a)
+png(p, joinpath(TrainParams().base_path, "train_summary"))

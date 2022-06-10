@@ -17,28 +17,27 @@ try
             joinpath(PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
         SURROGATE_BUS = 16
 
-        @warn "Rebuilding full system"
-        include("build_full_system.jl")
+        include("build_full_system.jl") #TODO make this more flexible, include multiple systems
 
-        @warn "Rebuilding input data files"
         sys_full = node_load_system(full_system_path)
-        pvs_data = fault_data_generator("scripts/config.yml", full_system_path)
-        sys_pvs = build_pvs(pvs_data)
         label_area!(sys_full, [SURROGATE_BUS], "surrogate")
-        @assert check_single_connecting_line_condition(sys_full)
-        sys_surr = remove_area(sys_full, "1")
-        sys_train = build_train_system(sys_surr, sys_pvs, "surrogate")
-        to_json(
-            sys_train,
-            joinpath(PowerSimulationNODE.INPUT_FOLDER_NAME, "system.json"),
-            force = true,
-        )
+
+        pvs_coeffs = Dict{Int, Array{NamedTuple}}()
+        pvs_coeffs[1] = [(
+            internal_voltage_frequencies = [2 * pi / 3],
+            internal_voltage_coefficients = [(0.001, 0.0)],
+            internal_angle_frequencies = [2 * pi / 3],
+            internal_angle_coefficients = [(0.0, 0.0)],
+        )]
+
+        pvs_data = generate_pvs_data(sys_full, pvs_coeffs, "surrogate")
+        sys_train = create_surrogate_training_system(sys_full, "surrogate", pvs_data)
         d = generate_train_data(
             sys_train,
-            NODETrainDataParams(tspan = (0.0, 1.0), ode_model = "none"),
-            SURROGATE_BUS,
-            inv_case78("aa"),
+            GenerateDataParams(tspan = (0.0, 4.0), steps = 400),
         )
+
+        PSY.to_json(sys_train, train_system_path, force = true)
 
         Serialization.serialize(train_data_path, d)
     end
