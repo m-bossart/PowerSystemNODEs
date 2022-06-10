@@ -21,6 +21,6 @@ try
     with_logger(logger) do
         status = train(train_params)
     end
-    #Add catch ? 
+catch 
     close(logger)
 end
