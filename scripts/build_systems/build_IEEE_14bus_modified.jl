@@ -1,14 +1,10 @@
 using PowerSystems
 using PowerSimulationsDynamics
 using PowerSimulationNODE
-include("../system_data/dynamic_components_data.jl")
-
-#BUG possible power flow issues using 14-bus system due to Fixed Admittance
-#raw_file_path = "cases/IEEE 14 bus_modified_33_RemoveFixedAdmittance.raw"
+include(joinpath(pwd(), "system_data", "dynamic_components_data.jl"))
 raw_file_path =
     joinpath(PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME, "IEEE 14 bus_modified_33.raw")
-base_system_path =
-    joinpath(PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
+base_system_path = joinpath("systems", "IEEE_14bus_modified.json")
 
 sys = node_load_system(raw_file_path)
 surrogate_bus_number = 16

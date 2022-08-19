@@ -49,14 +49,14 @@ hpc_params = SummitHPCTrain(;
     params_data = params_data,
     project_folder = "PowerSystemNODEs",
     scratch_path = "/scratch/summit/mabo4366",
-    time_limit_train = "23:59:59",       
-    time_limit_generate_data = "00:30:00", 
+    time_limit_train = "23:59:59",
+    time_limit_generate_data = "00:30:00",
     QoS = "normal",
     partition = "shas", #"shas-testing"
     force_generate_inputs = true,
     mb_per_cpu = 4800,
 )
 
-generate_train_files(hpc_params)   
+generate_train_files(hpc_params)
 ##                                   
 run_parallel_train(hpc_params)

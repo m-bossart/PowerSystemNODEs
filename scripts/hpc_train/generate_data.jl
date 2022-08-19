@@ -11,8 +11,8 @@ sample_train_parameters = "input_data/sample_parameters.json"
 p = TrainParams()
 PowerSimulationNODE.serialize(p, "input_data/sample_parameters.json")
 train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
-data_folder_name =  isempty(ARGS) ? "dataset_1" : ARGS[2]
-train_params = TrainParams(train_params_file)
+data_folder_name = isempty(ARGS) ? "dataset_1" : ARGS[2]       #TODO - use this value to write to the appropriate data folder - only one argument... error
+train_params = TrainParams(train_params_file)                   #TODO - use this value to determine how to generate the data. 
 
 logger = configure_logging(
     console_level = PowerSimulationNODE.NODE_CONSOLE_LEVEL,
@@ -26,10 +26,10 @@ try
         train_system_path = joinpath(train_params.input_data_path, "system.json")
         full_system_path =
             joinpath(PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME, "full_system.json")
+
+        #COMMON TO ALL TRAINS 
         SURROGATE_BUS = 16
-
         include("build_full_system.jl") #TODO make this more flexible, include multiple systems
-
         sys_full = node_load_system(full_system_path)
         label_area!(sys_full, [SURROGATE_BUS], "surrogate")
 
@@ -43,13 +43,12 @@ try
 
         pvs_data = generate_pvs_data(sys_full, pvs_coeffs, "surrogate")
         sys_train = create_surrogate_training_system(sys_full, "surrogate", pvs_data)
-        d = generate_train_data(
+        d = generate_train_data(        #TODO - add the ability to change the operating point of the surrogate and iterate with more data... 
             sys_train,
             GenerateDataParams(tspan = (0.0, 4.0), steps = 400),
         )
 
         PSY.to_json(sys_train, train_system_path, force = true)
-
         Serialization.serialize(train_data_path, d)
     end
 finally

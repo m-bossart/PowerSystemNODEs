@@ -12,8 +12,8 @@ train_files = filter(
     x -> occursin("train_", x),
     readdir(joinpath(pwd(), PowerSimulationNODE.INPUT_FOLDER_NAME), join = true),
 )
-
+##
 for file in train_files
-    visualize_training(file, skip = 1)
-    animate_training(file, skip = 1)
+    visualize_training(file, skip = 100)
+    #animate_training(file, skip = 100)
 end
