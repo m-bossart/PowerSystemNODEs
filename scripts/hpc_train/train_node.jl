@@ -1,14 +1,7 @@
 using Revise
 using PowerSimulationNODE
-#using Plots
 using Logging
-#include("../system_data/dynamic_components_data.jl")
 
-#sample_train_parameters = "input_data/sample_parameters.json"
-#p = TrainParams()
-
-#PowerSimulationNODE.serialize(p, sample_train_parameters)
-#train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
 train_params_file = ARGS[1]
 train_params = TrainParams(train_params_file)
 

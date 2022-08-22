@@ -18,7 +18,7 @@ scripts
         hpc_train.jl (the script that you run to do the training)
         generate_data.jl (called during hpc_train.jl)
         train_node.jl (called during hpc_train.jl)
-        NOTE: prepate_for_train.jl will be replaced by generate_data.jl
+        build_subsystems.jl (called during hpc_train.jl)
     visualize 
         summarize_trains.jl
         visualize_trains.jl 
