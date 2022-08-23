@@ -2,13 +2,37 @@ using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
 
-train_folder = "train_1"
+train_folder = "train_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+system_name = "full_system" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+
+#Copy the full system over to the training directory.
+mkpath(joinpath(pwd(), train_folder, PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME))
+cp(
+    joinpath(pwd(), "systems", string(system_name, ".json")),
+    joinpath(
+        pwd(),
+        train_folder,
+        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+        "system.json",
+    ),
+)
+cp(
+    joinpath(pwd(), "systems", string(system_name, "_validation_descriptors.json")),
+    joinpath(
+        pwd(),
+        train_folder,
+        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+        "system_validation_descriptors.json",
+    ),
+)
+
 params_data = TrainParams[]
 no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change)
 no_change_params[:maxiters] = 100
+no_change_params[:surrogate_buses] = [2]
 no_change_params[:base_path] = joinpath(pwd(), train_folder)
 no_change_params[:train_data] =
     (
