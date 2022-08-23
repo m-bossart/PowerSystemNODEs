@@ -34,32 +34,31 @@ change_params = Dict{Symbol, Any}()
 no_change_params[:maxiters] = 100
 no_change_params[:surrogate_buses] = [2]
 no_change_params[:base_path] = joinpath(pwd(), train_folder)
-no_change_params[:train_data] =
-    (
-        id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
-        perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
-        params = PSIDS.GenerateDataParams(),
-        system = "reduced",     #generate from the reduced system with sources to perturb or the full system
-    )
+no_change_params[:train_data] = (
+    id = "1",
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
+    perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
+    params = PSIDS.GenerateDataParams(),
+    system = "reduced",     #generate from the reduced system with sources to perturb or the full system
+)
 
-    #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-    change_params[:optimizer] = [
-        (
-            sensealg = "Zygote",
-            primary = "Adam",
-            primary_η = 0.0001,
-            adjust = "nothing",
-            adjust_η = 0.0,
-        ),
-        (
-            sensealg = "Zygote",
-            primary = "Adam",
-            primary_η = 0.0001,
-            adjust = "nothing",
-            adjust_η = 0.0,
-        ),
-    ]
+#INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
+change_params[:optimizer] = [
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.0001,
+        adjust = "nothing",
+        adjust_η = 0.0,
+    ),
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.0001,
+        adjust = "nothing",
+        adjust_η = 0.0,
+    ),
+]
 
 change_params[:test_data] = [
     (
