@@ -1,4 +1,4 @@
-using PowerSystems 
+using PowerSystems
 using PowerSimulationNODE
 using Serialization
 using Logging

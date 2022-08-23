@@ -10,33 +10,7 @@ change_params = Dict{Symbol, Any}()
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change)
 no_change_params[:maxiters] = 100
 no_change_params[:base_path] = joinpath(pwd(), train_folder)
-
-#INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:optimizer] = [
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.0001,
-        adjust = "nothing",
-        adjust_η = 0.0,
-    ),
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.0001,
-        adjust = "nothing",
-        adjust_η = 0.0,
-    ),
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.0001,
-        adjust = "nothing",
-        adjust_η = 0.0,
-    ),
-]
-
-change_params[:train_data] = [
+no_change_params[:train_data] =
     (
         id = "1",
         operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
@@ -44,21 +18,25 @@ change_params[:train_data] = [
         params = PSIDS.GenerateDataParams(),
         system = "reduced",     #generate from the reduced system with sources to perturb or the full system
     ),
-    (
-        id = "22",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
-        perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
-        params = PSIDS.GenerateDataParams(),
-        system = "reduced",     #generate from the reduced system with sources to perturb or the full system
-    ),
-    (
-        id = "22",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
-        perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
-        params = PSIDS.GenerateDataParams(),
-        system = "reduced",     #generate from the reduced system with sources to perturb or the full system
-    ),
-]
+
+    #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
+    change_params[:optimizer] = [
+        (
+            sensealg = "Zygote",
+            primary = "Adam",
+            primary_η = 0.0001,
+            adjust = "nothing",
+            adjust_η = 0.0,
+        ),
+        (
+            sensealg = "Zygote",
+            primary = "Adam",
+            primary_η = 0.0001,
+            adjust = "nothing",
+            adjust_η = 0.0,
+        ),
+    ]
+
 change_params[:test_data] = [
     (
         id = "1",
@@ -68,12 +46,6 @@ change_params[:test_data] = [
     ),
     (
         id = "2",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
-        perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
-        params = PSIDS.GenerateDataParams(),
-    ),
-    (
-        id = "22",
         operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
         perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
         params = PSIDS.GenerateDataParams(),

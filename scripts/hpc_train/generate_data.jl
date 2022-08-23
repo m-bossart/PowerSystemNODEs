@@ -1,10 +1,10 @@
-using PowerSystems 
+using PowerSystems
 using PowerSimulationNODE
 using Serialization
 using Logging
 
 train_params_file = split(ARGS[1], ",")[1]
-dataset_type =  split(ARGS[1], ",")[2]
+dataset_type = split(ARGS[1], ",")[2]
 p = TrainParams(train_params_file)
 
 logger = configure_logging(
