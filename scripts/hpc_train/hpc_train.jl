@@ -15,6 +15,7 @@ cp(
         PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
         "system.json",
     ),
+    force = true,
 )
 cp(
     joinpath(pwd(), "systems", string(system_name, "_validation_descriptors.json")),
@@ -24,6 +25,7 @@ cp(
         PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
         "system_validation_descriptors.json",
     ),
+    force = true,
 )
 
 params_data = TrainParams[]
