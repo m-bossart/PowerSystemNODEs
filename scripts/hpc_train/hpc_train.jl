@@ -2,12 +2,14 @@ using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
 
+train_folder = "train_1"
 params_data = TrainParams[]
 no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change)
 no_change_params[:maxiters] = 100
+no_change_params[:base_path] = joinpath(pwd(), train_folder)
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
 change_params[:optimizer] = [
@@ -94,11 +96,12 @@ hpc_params = SummitHPCTrain(;
     username = "mabo4366",
     params_data = params_data,
     project_folder = "PowerSystemNODEs",
-    scratch_path = pwd(),                    #Options: [pwd(), "/scratch/summit/mabo4366"]
-    time_limit_train = "00:30:00",           #Options: ["00:30:00", "23:59:59"]
+    train_folder = train_folder,
+    scratch_path = "/scratch/summit/mabo4366", #Options: [pwd(), "/scratch/summit/mabo4366"]
+    time_limit_train = "00:30:00",             #Options: ["00:30:00", "23:59:59"]
     time_limit_generate_data = "00:30:00",
     QoS = "normal",
-    partition = "shas-testing",              #Options: ["shas-testing", "shas"]
+    partition = "shas-testing",                #Options: ["shas-testing", "shas"]
     force_generate_inputs = true,
     mb_per_cpu = 4800,
 )
