@@ -1,7 +1,8 @@
+using PowerSystems
 using PowerSimulationNODE
 using Plots
 using Logging
-include("../system_data/dynamic_components_data.jl")
+#include("../system_data/dynamic_components_data.jl")
 
 configure_logging(console_level = Logging.Info)
 #configure_logging(;filename = "train_node.log")

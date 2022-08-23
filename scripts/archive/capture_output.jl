@@ -2,11 +2,12 @@
 #SCRIPT TO DEBUG ISSUES ON HPC WITH OUT OF MEMORY DUE TO DATA CAPTURE 
 
 using Revise
+using PowerSystems
 using PowerSimulationNODE
 import DataFrames
 using Plots
 using Logging
-include("../system_data/dynamic_components_data.jl")
+#include("../system_data/dynamic_components_data.jl")
 
 sample_train_parameters = "input_data/sample_parameters.json"
 p = NODETrainParams()
