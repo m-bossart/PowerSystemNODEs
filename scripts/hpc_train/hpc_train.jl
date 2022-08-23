@@ -41,7 +41,7 @@ no_change_params[:train_data] =
         perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
         params = PSIDS.GenerateDataParams(),
         system = "reduced",     #generate from the reduced system with sources to perturb or the full system
-    ),
+    )
 
     #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
     change_params[:optimizer] = [
