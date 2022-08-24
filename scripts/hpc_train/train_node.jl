@@ -14,6 +14,7 @@ logger = configure_logging(
 #TODO - We don't get log file written if the process is killed externally... 
 try
     with_logger(logger) do
+        @info train_params.train_id
         status = train(train_params)
     end
 catch
