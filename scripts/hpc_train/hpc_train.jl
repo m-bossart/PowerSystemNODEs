@@ -13,7 +13,7 @@ cp(
         pwd(),
         train_folder,
         PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
-        "system.json",
+        string(system_name, ".json"),
     ),
     force = true,
 )
@@ -23,7 +23,7 @@ cp(
         pwd(),
         train_folder,
         PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
-        "system_validation_descriptors.json",
+        string(system_name, "_validation_descriptors.json"),
     ),
     force = true,
 )
@@ -36,6 +36,12 @@ change_params = Dict{Symbol, Any}()
 no_change_params[:maxiters] = 100
 no_change_params[:surrogate_buses] = [2]
 no_change_params[:base_path] = joinpath(pwd(), train_folder)
+no_change_params[:system_path] = joinpath(
+    pwd(),
+    train_folder,
+    PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+    string(system_name, ".json"),
+)
 no_change_params[:train_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
