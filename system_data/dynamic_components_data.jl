@@ -97,14 +97,14 @@ filt_gfoll() = LCLFilter(lf = 0.009, rf = 0.016, cf = 2.5, lg = 0.002, rg = 0.00
 
 function inv_case78(static_device)
     return DynamicInverter(
-        static_device,
-        1.0, # ω_ref,
-        converter_high_power(), #converter
-        outer_control(), #outer control
-        inner_control(), #inner control voltage source
-        dc_source_lv(), #dc source
-        pll(), #pll
-        filt(), #filter
+        name = get_name(static_device),
+        ω_ref = 1.0, # ω_ref,
+        converter = converter_high_power(), #converter
+        outer_control = outer_control(), #outer control
+        inner_control = inner_control(), #inner control voltage source
+        dc_source = dc_source_lv(), #dc source
+        freq_estimator = pll(), #pll
+        filter = filt(), #filter
     )
 end
 function inv_darco_droop(static_device)
@@ -121,7 +121,7 @@ function inv_darco_droop(static_device)
 end
 function inv_gfoll(static_device)
     return DynamicInverter(
-        static_device,
+        get_name(static_device),
         1.0, #ω_ref
         converter_low_power(), #converter
         outer_control_gfoll(), #outercontrol

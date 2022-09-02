@@ -3,7 +3,7 @@ using PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
 
 train_folder = "train_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "full_system" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "CTESN_18bus_modified" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 
 #Copy the full system over to the training directory.
 mkpath(joinpath(pwd(), train_folder, PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME))
@@ -33,21 +33,114 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change)
-no_change_params[:maxiters] = 100
-no_change_params[:surrogate_buses] = [2]
+no_change_params[:surrogate_buses] = [20]
+no_change_params[:train_data] = (
+    id = "1",
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+        generation_scale = 1.0,
+        load_scale = 1.0,
+    ),],
+    perturbations = repeat(
+        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+        50,
+    ),
+    params = PSIDS.GenerateDataParams(
+        solver = "IDA",
+        solver_tols = (1e-9, 1e-6),
+        tspan = (0.0, 10.0),
+        steps = 1000,
+        tsteps_spacing = "linear",
+        formulation = "Residual",
+        all_lines_dynamic = false,
+        seed = 1,
+    ),
+    system = "full",
+)
+no_change_params[:validation_data] = (
+    id = "1",
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+        generation_scale = 1.0,
+        load_scale = 1.0,
+    ),],
+    perturbations = repeat(
+        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+        50,
+    ),
+    params = PSIDS.GenerateDataParams(
+        solver = "IDA",
+        solver_tols = (1e-9, 1e-6),
+        tspan = (0.0, 10.0),
+        steps = 1000,
+        tsteps_spacing = "linear",
+        formulation = "Residual",
+        all_lines_dynamic = false,
+        seed = 2,
+    ),
+)
+no_change_params[:test_data] = (
+    id = "1",
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+        generation_scale = 1.0,
+        load_scale = 1.0,
+    ),],
+    perturbations = repeat(
+        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+        50,
+    ),
+    params = PSIDS.GenerateDataParams(
+        solver = "IDA",
+        solver_tols = (1e-9, 1e-6),
+        tspan = (0.0, 10.0),
+        steps = 1000,
+        tsteps_spacing = "linear",
+        formulation = "Residual",
+        all_lines_dynamic = false,
+        seed = 3,
+    ),
+)
+no_change_params[:hidden_states] = 10
+no_change_params[:model_initializer] =
+    (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh")
+no_change_params[:model_node] = (
+    type = "dense",
+    n_layer = 1,
+    width_layers = 10,
+    activation = "hardtanh",
+    initialization = "default",
+)
+no_change_params[:model_observation] =
+    (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh")
+no_change_params[:input_normalization] = (
+    x_scale = [1.0, 1.0, 1.0, 1.0],
+    x_bias = [0.0, 0.0, 0.0, 0.0],
+    exogenous_scale = [1.0, 1.0],
+    exogenous_bias = [0.0, 0.0],
+)
+no_change_params[:steady_state_solver] = (
+    solver = "SSRootfind",
+    abstol = 1e-4,       #xtol, ftol  #High tolerance -> standard NODE with initializer and observation 
+    maxiters = 5,
+)
+no_change_params[:dynamic_solver] = (solver = "IDA", tols = (1e-9, 1e-6), maxiters = 1e3)   #TODO check order of tolerances in implementation. 
+no_change_params[:maxiters] = 5 #TODO - change, for test only 
+no_change_params[:lb_loss] = 0.0
+no_change_params[:curriculum] = "none"
+no_change_params[:curriculum_timespans] =
+    [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
+no_change_params[:validation_loss_every_n] = 100
+no_change_params[:loss_function] = (
+    component_weights = (A = 1.0, B = 1.0, C = 1.0),
+    type_weights = (rmse = 1.0, mae = 0.0),
+)
+no_change_params[:rng_seed] = 123
+no_change_params[:output_mode_skip] = 1
+no_change_params[:train_time_limit_seconds] = 1e9
 no_change_params[:base_path] = joinpath(pwd(), train_folder)
 no_change_params[:system_path] = joinpath(
     pwd(),
     train_folder,
     PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
     string(system_name, ".json"),
-)
-no_change_params[:train_data] = (
-    id = "1",
-    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
-    perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
-    params = PSIDS.GenerateDataParams(),
-    system = "reduced",     #generate from the reduced system with sources to perturb or the full system
 )
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
@@ -67,22 +160,6 @@ change_params[:optimizer] = [
         adjust_η = 0.0,
     ),
 ]
-
-change_params[:test_data] = [
-    (
-        id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
-        perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
-        params = PSIDS.GenerateDataParams(),
-    ),
-    (
-        id = "2",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale()],
-        perturbations = [[PSIDS.PVS(source_name = "InfBus")]],
-        params = PSIDS.GenerateDataParams(),
-    ),
-]
-
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
 
