@@ -1,14 +1,9 @@
 using Revise
+using PowerSystems
 using PowerSimulationNODE
-using Plots
 using Logging
-include("../system_data/dynamic_components_data.jl")
 
-sample_train_parameters = "input_data/sample_parameters.json"
-p = TrainParams()
-
-PowerSimulationNODE.serialize(p, "input_data/sample_parameters.json")
-train_params_file = isempty(ARGS) ? sample_train_parameters : ARGS[1]
+train_params_file = ARGS[1]
 train_params = TrainParams(train_params_file)
 
 logger = configure_logging(
@@ -16,11 +11,12 @@ logger = configure_logging(
     file_level = PowerSimulationNODE.NODE_FILE_LEVEL,
     filename = string("log_", train_params.train_id, ".log"),
 )
-#Don't get log file written if the process is killed externally... 
+#TODO - We don't get log file written if the process is killed externally... 
 try
     with_logger(logger) do
+        @info train_params.train_id
         status = train(train_params)
     end
-catch 
+catch
     close(logger)
 end
