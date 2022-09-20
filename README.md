@@ -9,19 +9,21 @@ The training should create the folder and all the inputs/outputs should be store
 
 ```
 scripts
+    analyze 
+        summarize_trains.jl
+        visualize_trains.jl 
+    archive (old scripts)
+    build_datasets (scripts for building specific datasets and examining properties independent of training)
     build_systems
         build_9bus.jl
         build_14bus.jl
-    local_train
-        one script with all of the commands (can easily jump back and forth)
     hpc_train
         hpc_train.jl (the script that you run to do the training)
         generate_data.jl (called during hpc_train.jl)
         train_node.jl (called during hpc_train.jl)
         build_subsystems.jl (called during hpc_train.jl)
-    visualize 
-        summarize_trains.jl
-        visualize_trains.jl 
+    local_train
+        localone script with all of the commands (can easily jump back and forth)
 system_data
     dynamic_components_data.jl
 systems

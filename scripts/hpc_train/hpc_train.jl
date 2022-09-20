@@ -4,13 +4,23 @@ const PSIDS = PowerSimulationsDynamicsSurrogates
 
 train_folder = "train_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
 system_name = "CTESN_18bus_modified" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+project_folder = "PowerSystemNODEs"
+scratch_path = joinpath(pwd(), "..")  #Options: [ joinpath(pwd(), ".."), "/scratch/summit/mabo4366"]
 
 #Copy the full system over to the training directory.
-mkpath(joinpath(pwd(), train_folder, PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME))
-cp(
-    joinpath(pwd(), "systems", string(system_name, ".json")),
+mkpath(
     joinpath(
-        pwd(),
+        scratch_path,
+        project_folder,
+        train_folder,
+        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+    ),
+)
+cp(
+    joinpath(scratch_path, project_folder, "systems", string(system_name, ".json")),
+    joinpath(
+        scratch_path,
+        project_folder,
         train_folder,
         PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
         string(system_name, ".json"),
@@ -18,9 +28,15 @@ cp(
     force = true,
 )
 cp(
-    joinpath(pwd(), "systems", string(system_name, "_validation_descriptors.json")),
     joinpath(
-        pwd(),
+        scratch_path,
+        project_folder,
+        "systems",
+        string(system_name, "_validation_descriptors.json"),
+    ),
+    joinpath(
+        scratch_path,
+        project_folder,
         train_folder,
         PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
         string(system_name, "_validation_descriptors.json"),
@@ -32,7 +48,7 @@ params_data = TrainParams[]
 no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
-#INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change)
+#INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change; train_id set automatically)
 no_change_params[:surrogate_buses] = [20]
 no_change_params[:train_data] = (
     id = "1",
@@ -106,22 +122,19 @@ no_change_params[:model_node] = (
     n_layer = 1,
     width_layers = 10,
     activation = "hardtanh",
-    initialization = "default",
+    σ2_initialization = 0.0,
 )
 no_change_params[:model_observation] =
     (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh")
-no_change_params[:input_normalization] = (
-    x_scale = [1.0, 1.0, 1.0, 1.0],
-    x_bias = [0.0, 0.0, 0.0, 0.0],
-    exogenous_scale = [1.0, 1.0],
-    exogenous_bias = [0.0, 0.0],
-)
+no_change_params[:scaling_limits] =
+    (input_limits = (-1.0, 1.0), target_limits = (-1.0, 1.0))
 no_change_params[:steady_state_solver] = (
     solver = "SSRootfind",
     abstol = 1e-4,       #xtol, ftol  #High tolerance -> standard NODE with initializer and observation 
     maxiters = 5,
 )
 no_change_params[:dynamic_solver] = (solver = "IDA", tols = (1e-9, 1e-6), maxiters = 1e3)   #TODO check order of tolerances in implementation. 
+#no_change_params[:optimizer]=  
 no_change_params[:maxiters] = 5 #TODO - change, for test only 
 no_change_params[:lb_loss] = 0.0
 no_change_params[:curriculum] = "none"
@@ -129,15 +142,20 @@ no_change_params[:curriculum_timespans] =
     [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
 no_change_params[:validation_loss_every_n] = 100
 no_change_params[:loss_function] = (
-    component_weights = (A = 1.0, B = 1.0, C = 1.0),
+    component_weights = (
+        initialization_weight = 1.0,
+        dynamic_weight = 1.0,
+        residual_penalty = 1.0,
+    ),
     type_weights = (rmse = 1.0, mae = 0.0),
 )
 no_change_params[:rng_seed] = 123
 no_change_params[:output_mode_skip] = 1
 no_change_params[:train_time_limit_seconds] = 1e9
-no_change_params[:base_path] = joinpath(pwd(), train_folder)
+no_change_params[:base_path] = joinpath(scratch_path, project_folder, train_folder)
 no_change_params[:system_path] = joinpath(
-    pwd(),
+    scratch_path,
+    project_folder,
     train_folder,
     PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
     string(system_name, ".json"),
@@ -175,9 +193,9 @@ build_params_list!(params_data, no_change_params, change_params)
 hpc_params = SummitHPCTrain(;
     username = "mabo4366",
     params_data = params_data,
-    project_folder = "PowerSystemNODEs",
+    project_folder = project_folder,
     train_folder = train_folder,
-    scratch_path = "/scratch/summit/mabo4366", #Options: [pwd(), "/scratch/summit/mabo4366"]
+    scratch_path = scratch_path,
     time_limit_train = "00:30:00",             #Options: ["00:30:00", "23:59:59"]
     time_limit_generate_data = "00:30:00",
     QoS = "normal",
