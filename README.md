@@ -54,4 +54,8 @@ train_parameters
     ...
 ```
 
+To run training on hpc:
+1) Modify `scripts/hpc_train/hpc_train.jl` with parameters.
+2) Run `julia --project scripts/hpc_train/hpc_train.jl` from the PowerSystemNODEs directory. 
+
 Note: to run on hpc, set environment variable  `ENV["GKSwstype"] = "100"` in startup file: `~/.julia/config/startup.jl`

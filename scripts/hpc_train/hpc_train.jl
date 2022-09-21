@@ -133,7 +133,7 @@ no_change_params[:steady_state_solver] = (
     abstol = 1e-4,       #xtol, ftol  #High tolerance -> standard NODE with initializer and observation 
     maxiters = 5,
 )
-no_change_params[:dynamic_solver] = (solver = "IDA", tols = (1e-9, 1e-6), maxiters = 1e3)   #TODO check order of tolerances in implementation. 
+no_change_params[:dynamic_solver] = (solver = "Rodas4", tols = (1e-6, 1e-6), maxiters = 1e3)   #TODO check order of tolerances in implementation. 
 #no_change_params[:optimizer]=  
 no_change_params[:maxiters] = 5 #TODO - change, for test only 
 no_change_params[:lb_loss] = 0.0
