@@ -2,7 +2,7 @@ using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
 
-train_folder = "train_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+train_folder = "exp_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
 system_name = "CTESN_18bus_modified" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 scratch_path = joinpath(pwd(), "..")  #Options: [ joinpath(pwd(), ".."), "/scratch/summit/mabo4366"]
@@ -62,7 +62,7 @@ no_change_params[:surrogate_buses] = [20]
     ),
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
-        solver_tols = (1e-9, 1e-6),
+        solver_tols = (1e-6, 1e-9),
         tspan = (0.0, 10.0),
         steps = 1000,
         tsteps_spacing = "linear",
@@ -84,7 +84,7 @@ no_change_params[:validation_data] = (
     ),
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
-        solver_tols = (1e-9, 1e-6),
+        solver_tols = (1e-6, 1e-9),
         tspan = (0.0, 10.0),
         steps = 1000,
         tsteps_spacing = "linear",
@@ -105,7 +105,7 @@ no_change_params[:test_data] = (
     ),
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
-        solver_tols = (1e-9, 1e-6),
+        solver_tols = (1e-6, 1e-9),
         tspan = (0.0, 10.0),
         steps = 1000,
         tsteps_spacing = "linear",
@@ -170,10 +170,10 @@ no_change_params[:system_path] = joinpath(
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
 change_params[:hidden_states] = [5, 20]
 change_params[:dynamic_solver] = [
-    (solver = "Rodas5", tols = (1e-8, 1e-6), maxiters = 1e3),
-    (solver = "Rodas5", tols = (1e-8, 1e-4), maxiters = 1e3),
+    (solver = "Rodas5", tols = (1e-6, 1e-8), maxiters = 1e3),
+    (solver = "Rodas5", tols = (1e-4, 1e-8), maxiters = 1e3),
     (solver = "Rodas5", tols = (1e-6, 1e-6), maxiters = 1e3),
-    (solver = "Rodas5", tols = (1e-6, 1e-4), maxiters = 1e3),
+    (solver = "Rodas5", tols = (1e-4, 1e-6), maxiters = 1e3),
 ]
 
 change_params[:train_data] = [
@@ -189,7 +189,7 @@ change_params[:train_data] = [
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
-            solver_tols = (1e-9, 1e-6),
+            solver_tols = (1e-6, 1e-9),
             tspan = (0.0, 10.0),
             steps = 100,
             tsteps_spacing = "linear",
@@ -211,7 +211,7 @@ change_params[:train_data] = [
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
-            solver_tols = (1e-9, 1e-6),
+            solver_tols = (1e-6, 1e-9),
             tspan = (0.0, 10.0),
             steps = 1000,
             tsteps_spacing = "linear",
