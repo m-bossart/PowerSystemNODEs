@@ -50,7 +50,7 @@ change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change; train_id set automatically)
 no_change_params[:surrogate_buses] = [20]
-no_change_params[:train_data] = (
+#= no_change_params[:train_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
         generation_scale = 1.0,
@@ -61,17 +61,17 @@ no_change_params[:train_data] = (
         50,
     ),
     params = PSIDS.GenerateDataParams(
-        solver = "IDA",
+        solver = "Rodas5",
         solver_tols = (1e-9, 1e-6),
         tspan = (0.0, 10.0),
         steps = 1000,
         tsteps_spacing = "linear",
-        formulation = "Residual",
+        formulation = "MassMatrix",
         all_lines_dynamic = false,
         seed = 1,
     ),
     system = "full",
-)
+) =#
 no_change_params[:validation_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
@@ -83,12 +83,12 @@ no_change_params[:validation_data] = (
         50,
     ),
     params = PSIDS.GenerateDataParams(
-        solver = "IDA",
+        solver = "Rodas5",
         solver_tols = (1e-9, 1e-6),
         tspan = (0.0, 10.0),
         steps = 1000,
         tsteps_spacing = "linear",
-        formulation = "Residual",
+        formulation = "MassMatrix",
         all_lines_dynamic = false,
         seed = 2,
     ),
@@ -104,17 +104,17 @@ no_change_params[:test_data] = (
         50,
     ),
     params = PSIDS.GenerateDataParams(
-        solver = "IDA",
+        solver = "Rodas5",
         solver_tols = (1e-9, 1e-6),
         tspan = (0.0, 10.0),
         steps = 1000,
         tsteps_spacing = "linear",
-        formulation = "Residual",
+        formulation = "MassMatrix",
         all_lines_dynamic = false,
         seed = 3,
     ),
 )
-no_change_params[:hidden_states] = 10
+#no_change_params[:hidden_states] = 10
 no_change_params[:model_initializer] =
     (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh")
 no_change_params[:model_node] = (
@@ -122,7 +122,7 @@ no_change_params[:model_node] = (
     n_layer = 1,
     width_layers = 10,
     activation = "hardtanh",
-    σ2_initialization = 0.0,
+    σ2_initialization = 0.01,
 )
 no_change_params[:model_observation] =
     (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh")
@@ -133,9 +133,15 @@ no_change_params[:steady_state_solver] = (
     abstol = 1e-4,       #xtol, ftol  #High tolerance -> standard NODE with initializer and observation 
     maxiters = 5,
 )
-no_change_params[:dynamic_solver] = (solver = "Rodas4", tols = (1e-6, 1e-6), maxiters = 1e3)   #TODO check order of tolerances in implementation. 
-#no_change_params[:optimizer]=  
-no_change_params[:maxiters] = 5 #TODO - change, for test only 
+#no_change_params[:dynamic_solver] = (solver = "Rodas5", tols = (1e-6, 1e-6), maxiters = 1e3)   #TODO check order of tolerances in implementation. 
+no_change_params[:optimizer] = (
+    sensealg = "Zygote",
+    primary = "Adam",
+    primary_η = 0.0001,
+    adjust = "nothing",
+    adjust_η = 0.0,
+)
+no_change_params[:maxiters] = 200
 no_change_params[:lb_loss] = 0.0
 no_change_params[:curriculum] = "none"
 no_change_params[:curriculum_timespans] =
@@ -162,25 +168,64 @@ no_change_params[:system_path] = joinpath(
 )
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:optimizer] = [
+change_params[:hidden_states] = [5, 20]
+change_params[:dynamic_solver] = [
+    (solver = "Rodas5", tols = (1e-8, 1e-6), maxiters = 1e3),
+    (solver = "Rodas5", tols = (1e-8, 1e-4), maxiters = 1e3),
+    (solver = "Rodas5", tols = (1e-6, 1e-6), maxiters = 1e3),
+    (solver = "Rodas5", tols = (1e-6, 1e-4), maxiters = 1e3),
+]
+
+change_params[:train_data] = [
     (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.0001,
-        adjust = "nothing",
-        adjust_η = 0.0,
+        id = "1",
+        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+            generation_scale = 1.0,
+            load_scale = 1.0,
+        ),],
+        perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            50,
+        ),
+        params = PSIDS.GenerateDataParams(
+            solver = "Rodas5",
+            solver_tols = (1e-9, 1e-6),
+            tspan = (0.0, 10.0),
+            steps = 100,
+            tsteps_spacing = "linear",
+            formulation = "MassMatrix",
+            all_lines_dynamic = false,
+            seed = 1,
+        ),
+        system = "full",
     ),
     (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.0001,
-        adjust = "nothing",
-        adjust_η = 0.0,
+        id = "2",
+        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+            generation_scale = 1.0,
+            load_scale = 1.0,
+        ),],
+        perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            50,
+        ),
+        params = PSIDS.GenerateDataParams(
+            solver = "Rodas5",
+            solver_tols = (1e-9, 1e-6),
+            tspan = (0.0, 10.0),
+            steps = 1000,
+            tsteps_spacing = "linear",
+            formulation = "MassMatrix",
+            all_lines_dynamic = false,
+            seed = 1,
+        ),
+        system = "full",
     ),
 ]
+
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
-
+##
 #=
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
@@ -196,10 +241,10 @@ hpc_params = SummitHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = scratch_path,
-    time_limit_train = "00:30:00",             #Options: ["00:30:00", "23:59:59"]
-    time_limit_generate_data = "00:30:00",
+    time_limit_train = "12:00:00",             #Options: ["00:30:00", "23:59:59"]
+    time_limit_generate_data = "01:00:00",
     QoS = "normal",
-    partition = "shas-testing",                #Options: ["shas-testing", "shas"]
+    partition = "shas",                #Options: ["shas-testing", "shas"]
     force_generate_inputs = true,
     mb_per_cpu = 4800,
 )

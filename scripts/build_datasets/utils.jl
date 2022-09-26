@@ -39,7 +39,7 @@ function add_surrogate_A!(sys, connecting_bus_number)
         reactive_power_flow = 0.0,
         arc = a,
         r = 0.01,
-        x = 0.01,
+        x = 0.1,
         b = (from = 0.0, to = 0.0),
         rate = 0.0,
         angle_limits = (min = -1.571, max = 1.571),
@@ -90,7 +90,7 @@ function add_surrogate_B!(sys, connecting_bus_number)
         reactive_power_flow = 0.0,
         arc = a,
         r = 0.01,
-        x = 0.01,
+        x = 0.1,
         b = (from = 0.0, to = 0.0),
         rate = 0.0,
         angle_limits = (min = -1.571, max = 1.571),
@@ -154,7 +154,7 @@ function add_surrogate_C!(sys, connecting_bus_number)
         reactive_power_flow = 0.0,
         arc = a,
         r = 0.01,
-        x = 0.01,
+        x = 0.1,
         b = (from = 0.0, to = 0.0),
         rate = 0.0,
         angle_limits = (min = -1.571, max = 1.571),
@@ -280,10 +280,10 @@ function visualize_dataset(dataset::Vector{SteadyStateNODEData})
     for (ix, d) in enumerate(dataset)
         #@assert size(dataset[1].groundtruth_current)[1] == 2    #Surrogate should have a single connecting line 
         if dataset[ix].stable == true
-            Vr = dataset[ix].groundtruth_voltage[1, :]
-            Vi = dataset[ix].groundtruth_voltage[2, :]
-            Ir = dataset[ix].groundtruth_current[1, :]
-            Ii = dataset[ix].groundtruth_current[2, :]
+            Vr = dataset[ix].surrogate_real_voltage[:]
+            Vi = dataset[ix].surrogate_imag_voltage[:]
+            Ir = dataset[ix].branch_real_current[:]
+            Ii = dataset[ix].branch_imag_current[:]
             Vm = sqrt.(Vr .^ 2 + Vi .^ 2)
             Im = sqrt.(Ir .^ 2 + Ii .^ 2)
             Vθ = atan.(Vi ./ Vr)
@@ -302,7 +302,8 @@ function visualize_dataset(dataset::Vector{SteadyStateNODEData})
     total_faults = length(dataset)
     stable_faults = length(filter(x -> x.stable == true, dataset))
     unstable_faults = length(filter(x -> x.stable == false, dataset))
-    @warn "\n connecting impedance: $(dataset[1].connecting_impedance)\n"
+    @warn "\n connecting resistance: $(dataset[1].connecting_resistance)\n"
+    @warn "\n connecting reactance: $(dataset[1].connecting_reactance)\n"
     @warn "\n total faults: $total_faults \n stable faults: $stable_faults \n unstable faults: $unstable_faults \n"
     return plot(p1, p2, p3, p4, p5, p6, p7, p8, layout = (4, 2), size = (700, 800))
 end
