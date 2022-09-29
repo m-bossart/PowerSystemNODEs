@@ -244,7 +244,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_train = "12:00:00",             #Options: ["00:30:00", "23:59:59"]
     time_limit_generate_data = "01:00:00",
     QoS = "normal",
-    partition = "amilan",                #Options: ["shas-testing", "shas"]
+    partition = "amilan",               
     force_generate_inputs = true,
     mb_per_cpu = 4800,
 )
