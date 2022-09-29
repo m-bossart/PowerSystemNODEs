@@ -28,6 +28,8 @@ hpc_transfers/
 *.png
 .vscode
 
+exp_*
+
 #figures
 figs/
 output_data/

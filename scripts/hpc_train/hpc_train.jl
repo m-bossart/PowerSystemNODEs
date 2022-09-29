@@ -5,7 +5,7 @@ const PSIDS = PowerSimulationsDynamicsSurrogates
 train_folder = "exp_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
 system_name = "CTESN_18bus_modified" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
-scratch_path = joinpath(pwd(), "..")  #Options: [ joinpath(pwd(), ".."), "/scratch/summit/mabo4366"]
+scratch_path = joinpath(pwd(), "..")  #Options: [ joinpath(pwd(), ".."), "/scratch/alpine/mabo4366"]
 
 #Copy the full system over to the training directory.
 mkpath(
@@ -235,7 +235,7 @@ build_params_list!(params_data, no_change_params, change_params)
 )
   =#
 
-hpc_params = SummitHPCTrain(;
+hpc_params = AlpineHPCTrain(;
     username = "mabo4366",
     params_data = params_data,
     project_folder = project_folder,
@@ -244,7 +244,7 @@ hpc_params = SummitHPCTrain(;
     time_limit_train = "12:00:00",             #Options: ["00:30:00", "23:59:59"]
     time_limit_generate_data = "01:00:00",
     QoS = "normal",
-    partition = "shas",                #Options: ["shas-testing", "shas"]
+    partition = "amilan",                #Options: ["shas-testing", "shas"]
     force_generate_inputs = true,
     mb_per_cpu = 4800,
 )
