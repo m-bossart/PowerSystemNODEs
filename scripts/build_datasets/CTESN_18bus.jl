@@ -95,7 +95,7 @@ p = TrainParams(
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
-            solver_tols = (1e-9, 1e-6),
+            solver_tols = (reltol = 1e-6, abstol = 1e-9),
             tspan = (0.0, 10.0),
             steps = 1000,
             tsteps_spacing = "linear",
@@ -116,7 +116,7 @@ p = TrainParams(
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",  #IDA
-            solver_tols = (1e-9, 1e-6),
+            solver_tols = (reltol = 1e-6, abstol = 1e-9),
             tspan = (0.0, 10.0),
             steps = 1000,
             tsteps_spacing = "linear",

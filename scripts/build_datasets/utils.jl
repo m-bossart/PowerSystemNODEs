@@ -267,7 +267,7 @@ end =#
 
 #TODO - add a zoom option for visualize dataset (to see the fast transients)
 #TODO - add P and Q to the plots
-function visualize_dataset(dataset::Vector{SteadyStateNODEData})
+function visualize_dataset(dataset::Vector{PSIDS.SteadyStateNODEData})
     p1 = plot()
     p2 = plot()
     p3 = plot()
@@ -305,6 +305,12 @@ function visualize_dataset(dataset::Vector{SteadyStateNODEData})
     @warn "\n connecting resistance: $(dataset[1].connecting_resistance)\n"
     @warn "\n connecting reactance: $(dataset[1].connecting_reactance)\n"
     @warn "\n total faults: $total_faults \n stable faults: $stable_faults \n unstable faults: $unstable_faults \n"
+    l_tstops = [length(d.tstops) for d in dataset]
+    l_tsteps = [length(d.tsteps) for d in dataset]
+
+    @warn "length tstops", l_tstops
+    @warn "length tsteps", l_tsteps
+
     return plot(p1, p2, p3, p4, p5, p6, p7, p8, layout = (4, 2), size = (700, 800))
 end
 

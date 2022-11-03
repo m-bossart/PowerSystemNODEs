@@ -3,14 +3,59 @@ using PowerSimulationNODE
 import PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
 using Logging
+using Serialization
+using Plots 
 
-#STUDY TIMING: 
+train_folder = "train_local3"
+system_name = "CTESN_18bus_modified"
+project_folder = "PowerSystemNODEs"
+scratch_path = joinpath(pwd(), "..")
+#Copy the full system over to the training directory.
+mkpath(
+    joinpath(
+        scratch_path,
+        project_folder,
+        train_folder,
+        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+    ),
+)
+cp(
+    joinpath(scratch_path, project_folder, "systems", string(system_name, ".json")),
+    joinpath(
+        scratch_path,
+        project_folder,
+        train_folder,
+        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+        string(system_name, ".json"),
+    ),
+    force = true,
+)
+cp(
+    joinpath(
+        scratch_path,
+        project_folder,
+        "systems",
+        string(system_name, "_validation_descriptors.json"),
+    ),
+    joinpath(
+        scratch_path,
+        project_folder,
+        train_folder,
+        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+        string(system_name, "_validation_descriptors.json"),
+    ),
+    force = true,
+)
+
+#p = params_data[2]
+#PowerSimulationNODE._rebase_path!(p, joinpath(scratch_path, project_folder, train_folder))
+
 ######################################################################################
 ################################### SET PARAMETERS ###################################
 ######################################################################################
-training_directory = "train_local"
+
 p = TrainParams(
-    base_path = training_directory,
+    base_path = joinpath(scratch_path, project_folder, train_folder),
     system_path = joinpath("systems", "CTESN_18bus_modified.json"),
     surrogate_buses = [20],
     train_data = (
@@ -24,13 +69,14 @@ p = TrainParams(
             5,
         ),
         params = PSIDS.GenerateDataParams(
-            solver = "IDA",
-            solver_tols = (1e-9, 1e-6),
+            solver = "Rodas5",
+            solver_tols = (reltol = 1e-3, abstol = 1e-6),
             tspan = (0.0, 10.0),
-            steps = 100,
-            tsteps_spacing = "linear",
-            formulation = "Residual",
-            all_lines_dynamic = false,
+            tstops = 0.0:0.1:10.0,
+            tsave = 0.0:0.1:10.0,
+            formulation = "MassMatrix",
+            all_branches_dynamic = false,
+            all_lines_dynamic = true,
             seed = 1,
         ),
         system = "full",
@@ -46,14 +92,15 @@ p = TrainParams(
             5,
         ),
         params = PSIDS.GenerateDataParams(
-            solver = "IDA",
-            solver_tols = (1e-9, 1e-6),
+            solver = "Rodas5",
+            solver_tols = (reltol = 1e-3, abstol = 1e-6),
             tspan = (0.0, 10.0),
-            steps = 100,
-            tsteps_spacing = "linear",
-            formulation = "Residual",
-            all_lines_dynamic = false,
-            seed = 2,
+            tstops = 0.0:0.1:10.0,
+            tsave = 0.0:0.1:10.0,
+            formulation = "MassMatrix",
+            all_branches_dynamic = false,
+            all_lines_dynamic = true,
+            seed = 1,
         ),
     ),
     test_data = (
@@ -67,14 +114,15 @@ p = TrainParams(
             5,
         ),
         params = PSIDS.GenerateDataParams(
-            solver = "IDA",
-            solver_tols = (1e-9, 1e-6),
+            solver = "Rodas5",
+            solver_tols = (reltol = 1e-3, abstol = 1e-6),
             tspan = (0.0, 10.0),
-            steps = 100,
-            tsteps_spacing = "linear",
-            formulation = "Residual",
-            all_lines_dynamic = false,
-            seed = 3,
+            tstops = 0.0:0.1:10.0,
+            tsave = 0.0:0.1:10.0,
+            formulation = "MassMatrix",
+            all_branches_dynamic = false,       #possible with current version of PSID? 
+            all_lines_dynamic = true,
+            seed = 1,
         ),
     ),
     hidden_states = 10,
@@ -99,9 +147,9 @@ p = TrainParams(
     ),
     scaling_limits = (input_limits = (-1.0, 1.0), target_limits = (-1.0, 1.0)),
     steady_state_solver = (
-        solver = "SSRootfind",  ##SSRootfind, Rodas4
-        abstol = 1e-6, #1e-4        #xtol, ftol  #High tolerance -> standard NODE with initializer and observation 
-        maxiters = 50,  #does not currently work for NLsolve (not set appropriately, always defaults to 1000 )
+        solver = "SSRootfind",
+        abstol = 1e-4,
+        maxiters = 1,  #TODO does not currently work for NLsolve (not set appropriately, always defaults to 1000 )
     ),
     optimizer = (
         sensealg = "Zygote",
@@ -110,7 +158,7 @@ p = TrainParams(
         adjust = "nothing",
         adjust_η = 0.0,
     ),
-    dynamic_solver = (solver = "Rodas5", tols = (1e-6, 1e-3), maxiters = 1e3), #1e-9, 1e-6 
+    dynamic_solver = (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5),
     maxiters = 5, #TODO modify 
     lb_loss = 0.0,
     curriculum = "none",
@@ -138,6 +186,15 @@ generate_train_data(p)
 generate_validation_data(p)
 generate_test_data(p)
 
+##########################
+#todo - write a diagnostic function which prints a bunch of data about the datasets (use before attempting to train)
+train_dataset = Serialization.deserialize(p.train_data_path)
+visualize_dataset(train_dataset)
+validation_dataset = Serialization.deserialize(p.validation_data_path)
+visualize_dataset(validation_dataset)
+test_dataset = Serialization.deserialize(p.test_data_path)
+visualize_dataset(test_dataset)
+
 ######################################################################################
 ####################################### TRAIN ########################################
 ######################################################################################
@@ -145,7 +202,7 @@ train(p)
 ######################################################################################
 ############################### ANALYZE AND VISUALIZE ################################
 ######################################################################################
-
+##
 input_param_file = joinpath(p.base_path, "input_data", "input_test1.json")
 PowerSimulationNODE.serialize(p, input_param_file)
 visualize_training(input_param_file, skip = 1)
