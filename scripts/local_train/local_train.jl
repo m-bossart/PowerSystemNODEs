@@ -5,7 +5,7 @@ const PSIDS = PowerSimulationsDynamicsSurrogates
 using Logging
 using Serialization
 using Plots 
-
+include("../build_datasets/utils.jl")
 train_folder = "train_local3"
 system_name = "CTESN_18bus_modified"
 project_folder = "PowerSystemNODEs"
