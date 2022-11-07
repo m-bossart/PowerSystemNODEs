@@ -252,7 +252,7 @@ hpc_params = AlpineHPCTrain(;
     QoS = "normal",
     partition = "amilan",
     force_generate_inputs = true,
-    mb_per_cpu = 4800,  #TODO - different on alpine? 
+    mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 
 generate_train_files(hpc_params)
