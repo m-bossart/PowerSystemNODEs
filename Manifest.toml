@@ -783,10 +783,10 @@ uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.3"
 
 [[deps.InfrastructureSystems]]
-deps = ["CSV", "DataFrames", "DataStructures", "Dates", "DocStringExtensions", "H5Zblosc", "HDF5", "InteractiveUtils", "JSON3", "Logging", "Mustache", "Pkg", "PrettyTables", "Random", "TOML", "TerminalLoggers", "Test", "TimeSeries", "UUIDs", "YAML"]
-git-tree-sha1 = "b2265d4999315e7f8646efaecbe370c2ffc973c9"
+deps = ["CSV", "DataFrames", "DataStructures", "Dates", "DocStringExtensions", "H5Zblosc", "HDF5", "InteractiveUtils", "JSON3", "Logging", "Mustache", "Pkg", "PrettyTables", "Random", "StructTypes", "TOML", "TerminalLoggers", "Test", "TimeSeries", "UUIDs", "YAML"]
+git-tree-sha1 = "b9eb2612a13ef0143d2dd1e9c8df84417f835384"
 uuid = "2cd47ed4-ca9b-11e9-27f2-ab636a7671f1"
-version = "1.17.7"
+version = "1.18.1"
 
 [[deps.IniFile]]
 git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
@@ -1230,9 +1230,9 @@ uuid = "d8793406-e978-5875-9003-1fc021f44a92"
 version = "0.3.7"
 
 [[deps.Observables]]
-git-tree-sha1 = "c2dffec4623a66b9c850e67026839137a5f63a3d"
+git-tree-sha1 = "6862738f9796b3edc1c09d0890afce4eca9e7e93"
 uuid = "510215fc-4207-5dde-b226-833fc4488ee2"
-version = "0.5.3"
+version = "0.5.4"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
@@ -1419,7 +1419,7 @@ version = "0.1.2"
 
 [[deps.PowerSimulationNODE]]
 deps = ["Arrow", "CUDA", "DataFrames", "Dates", "Flux", "ForwardDiff", "IterTools", "JSON3", "LaTeXStrings", "Logging", "Mustache", "NLsolve", "Optim", "Optimization", "OptimizationOptimisers", "OrdinaryDiffEq", "Plots", "PowerFlows", "PowerSimulationsDynamics", "PowerSimulationsDynamicsSurrogates", "PowerSystems", "PrettyTables", "Random", "Requires", "SciMLBase", "SciMLSensitivity", "Serialization", "Statistics", "StatsBase", "SteadyStateDiffEq", "StructTypes", "YAML", "Zygote"]
-git-tree-sha1 = "b60fe6cc008a029b2f3ab0804098f0d5dcf35702"
+git-tree-sha1 = "9dba3ea436ce0183c318bfa07995dc7a5b38a052"
 repo-rev = "main"
 repo-url = "https://github.com/HodgeLab/PowerSimulationNODE"
 uuid = "4b7d6be9-769c-4710-86e6-88f799a27627"
@@ -1449,9 +1449,9 @@ version = "0.5.2"
 
 [[deps.PowerSystems]]
 deps = ["CSV", "DataFrames", "Dates", "DocStringExtensions", "InfrastructureSystems", "InteractiveUtils", "JSON3", "LinearAlgebra", "Logging", "NLsolve", "PrettyTables", "SparseArrays", "TimeSeries", "UUIDs", "Unicode", "YAML"]
-git-tree-sha1 = "0d543d73e683be3b481c3396fa8dddc86f476fea"
+git-tree-sha1 = "b643d72a4ea20602dc6714b6d7f129fbc855e647"
 uuid = "bcd98974-b02a-5e2f-9ee0-a103f5c450dd"
-version = "1.24.1"
+version = "1.24.2"
 
 [[deps.PreallocationTools]]
 deps = ["Adapt", "ArrayInterfaceCore", "ForwardDiff"]
