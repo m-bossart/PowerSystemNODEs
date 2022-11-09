@@ -155,11 +155,12 @@ p = TrainParams(
         sensealg = "Zygote",
         primary = "Adam",
         primary_η = 0.00000000000001,
-        adjust = "nothing",
+        primary_maxiters = 5, 
+        adjust = "Bfgs",
         adjust_η = 0.0,
+        adjust_maxiters = 5
     ),
     dynamic_solver = (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5),
-    maxiters = 5, #TODO modify 
     lb_loss = 0.0,
     curriculum = "none",
     curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],

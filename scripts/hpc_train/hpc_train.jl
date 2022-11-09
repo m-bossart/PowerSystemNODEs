@@ -150,7 +150,6 @@ no_change_params[:dynamic_solver] =
     adjust = "nothing",
     adjust_η = 0.0,
 ) =#
-no_change_params[:maxiters] = 2000
 no_change_params[:lb_loss] = 0.0
 no_change_params[:curriculum] = "none"
 no_change_params[:curriculum_timespans] =
@@ -210,22 +209,28 @@ change_params[:optimizer] = [
         sensealg = "Zygote",
         primary = "Adam",
         primary_η = 0.001,
-        adjust = "nothing",
+        primary_maxiters = 2000,
+        adjust = "Bfgs",
         adjust_η = 0.0,
+        adjust_maxiters = 50, 
     ),
     (
         sensealg = "Zygote",
         primary = "Adam",
         primary_η = 0.0001,
-        adjust = "nothing",
+        primary_maxiters = 2000,
+        adjust = "Bfgs",
         adjust_η = 0.0,
+        adjust_maxiters = 50, 
     ),
     (
         sensealg = "Zygote",
         primary = "Adam",
         primary_η = 0.00001,
-        adjust = "nothing",
+        primary_maxiters = 2000,
+        adjust = "Bfgs",
         adjust_η = 0.0,
+        adjust_maxiters = 50, 
     ),
 ]
 
