@@ -3,7 +3,7 @@ using PowerSimulationNODE
 using Plots
 using Logging
 #include("../system_data/dynamic_components_data.jl")
-train_folder = joinpath("transfers", "exp_11_03_22")
+train_folder = joinpath("transfers", "exp_11_09_22")
 configure_logging(console_level = Logging.Info)
 
 visualize_level = isempty(ARGS) ? 3 : parse(Int64, ARGS[1])
@@ -16,14 +16,16 @@ train_files = filter(
     ),
 )
 
-output_folders =   readdir(
+output_folders = readdir(
     joinpath(pwd(), train_folder, PowerSimulationNODE.OUTPUT_FOLDER_NAME),
     join = false,
 )
 
-
 train_files_with_output = filter(
-    x -> occursin("train_", x) && occursin(".json", x) && TrainParams(x).train_id in output_folders,
+    x ->
+        occursin("train_", x) &&
+            occursin(".json", x) &&
+            TrainParams(x).train_id in output_folders,
     readdir(
         joinpath(pwd(), train_folder, PowerSimulationNODE.INPUT_FOLDER_NAME),
         join = true,

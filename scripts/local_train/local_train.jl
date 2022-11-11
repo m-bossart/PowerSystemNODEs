@@ -4,7 +4,7 @@ import PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
 using Logging
 using Serialization
-using Plots 
+using Plots
 include("../build_datasets/utils.jl")
 train_folder = "train_local3"
 system_name = "CTESN_18bus_modified"
@@ -154,11 +154,11 @@ p = TrainParams(
     optimizer = (
         sensealg = "Zygote",
         primary = "Adam",
-        primary_η = 0.00000000000001,
-        primary_maxiters = 5, 
+        primary_η = 0.000000000001,
+        primary_maxiters = 5,
         adjust = "Bfgs",
-        adjust_η = 0.0,
-        adjust_maxiters = 5
+        adjust_initial_stepnorm = 0.001,
+        adjust_maxiters = 5,
     ),
     dynamic_solver = (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5),
     lb_loss = 0.0,

@@ -6,7 +6,10 @@ a = generate_summary(joinpath(pwd(), "transfers", "exp_11_03_22", "output_data")
 #plotlyjs()
 print_train_parameter_overview(joinpath(pwd(), "transfers", "exp_11_03_22", "input_data"))
 p = visualize_summary(a)
-print_high_level_output_overview(a, joinpath(pwd(), "transfers", "exp_11_03_22", "input_data"))
+print_high_level_output_overview(
+    a,
+    joinpath(pwd(), "transfers", "exp_11_03_22", "input_data"),
+)
 png(p, joinpath(TrainParams().base_path, "train_summary"))
 
 ids = []

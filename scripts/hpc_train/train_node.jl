@@ -9,9 +9,11 @@ train_params = TrainParams(train_params_file)
 logger = configure_logging(
     console_level = PowerSimulationNODE.NODE_CONSOLE_LEVEL,
     file_level = PowerSimulationNODE.NODE_FILE_LEVEL,
-    filename = string("log_", train_params.train_id, ".log"),
+    filename = joinpath(
+        train_params.base_path,
+        string("log_", train_params.train_id, ".log"),
+    ),
 )
-#TODO - We don't get log file written if the process is killed externally... 
 try
     with_logger(logger) do
         @info train_params.train_id

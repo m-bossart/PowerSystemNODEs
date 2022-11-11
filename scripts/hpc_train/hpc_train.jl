@@ -50,84 +50,76 @@ change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change; train_id set automatically)
 no_change_params[:surrogate_buses] = [20]
-no_change_params[:train_data] =
-    (
-        id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
-        ),
-        params = PSIDS.GenerateDataParams(
-            solver = "Rodas5",
-            solver_tols = (reltol = 1e-3, abstol = 1e-6),
-            tspan = (0.0, 10.0),
-            tstops = 0.0:0.1:10.0,
-            tsave = 0.0:0.1:10.0,
-            formulation = "MassMatrix",
-            all_branches_dynamic = false,
-            all_lines_dynamic = true,
-            seed = 1,
-        ),
-        system = "full",
-    )
-    no_change_params[:validation_data] =
-        (
-            id = "1",
-            operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-                generation_scale = 1.0,
-                load_scale = 1.0,
-            ),],
-            perturbations = repeat(
-                [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-                5,
-            ),
-            params = PSIDS.GenerateDataParams(
-                solver = "Rodas5",
-                solver_tols = (reltol = 1e-3, abstol = 1e-6),
-                tspan = (0.0, 10.0),
-                tstops = 0.0:0.1:10.0,
-                tsave = 0.0:0.1:10.0,
-                formulation = "MassMatrix",
-                all_branches_dynamic = false,
-                all_lines_dynamic = true,
-                seed = 2,
-            ),
-        )
-        no_change_params[:test_data] =
-            (
-                id = "1",
-                operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-                    generation_scale = 1.0,
-                    load_scale = 1.0,
-                ),],
-                perturbations = repeat(
-                    [[
-                        PSIDS.RandomLoadChange(
-                            time = 1.0,
-                            load_multiplier_range = (0.0, 2.0),
-                        ),
-                    ]],
-                    5,
-                ),
-                params = PSIDS.GenerateDataParams(
-                    solver = "Rodas5",
-                    solver_tols = (reltol = 1e-3, abstol = 1e-6),
-                    tspan = (0.0, 10.0),
-                    tstops = 0.0:0.1:10.0,
-                    tsave = 0.0:0.1:10.0,
-                    formulation = "MassMatrix",
-                    all_branches_dynamic = false,       #possible with current version of PSID? 
-                    all_lines_dynamic = true,
-                    seed = 3,
-                ),
-            )
-            #no_change_params[:hidden_states] = 10
-            no_change_params[:model_initializer] =
-                (type = "dense", n_layer = 2, width_layers = 10, activation = "hardtanh")
+no_change_params[:train_data] = (
+    id = "1",
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+        generation_scale = 1.0,
+        load_scale = 1.0,
+    ),],
+    perturbations = repeat(
+        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+        5,
+    ),
+    params = PSIDS.GenerateDataParams(
+        solver = "Rodas5",
+        solver_tols = (reltol = 1e-3, abstol = 1e-6),
+        tspan = (0.0, 10.0),
+        tstops = 0.0:0.1:10.0,
+        tsave = 0.0:0.1:10.0,
+        formulation = "MassMatrix",
+        all_branches_dynamic = false,
+        all_lines_dynamic = true,
+        seed = 1,
+    ),
+    system = "full",
+)
+no_change_params[:validation_data] = (
+    id = "1",
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+        generation_scale = 1.0,
+        load_scale = 1.0,
+    ),],
+    perturbations = repeat(
+        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+        5,
+    ),
+    params = PSIDS.GenerateDataParams(
+        solver = "Rodas5",
+        solver_tols = (reltol = 1e-3, abstol = 1e-6),
+        tspan = (0.0, 10.0),
+        tstops = 0.0:0.1:10.0,
+        tsave = 0.0:0.1:10.0,
+        formulation = "MassMatrix",
+        all_branches_dynamic = false,
+        all_lines_dynamic = true,
+        seed = 2,
+    ),
+)
+no_change_params[:test_data] = (
+    id = "1",
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+        generation_scale = 1.0,
+        load_scale = 1.0,
+    ),],
+    perturbations = repeat(
+        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+        5,
+    ),
+    params = PSIDS.GenerateDataParams(
+        solver = "Rodas5",
+        solver_tols = (reltol = 1e-3, abstol = 1e-6),
+        tspan = (0.0, 10.0),
+        tstops = 0.0:0.1:10.0,
+        tsave = 0.0:0.1:10.0,
+        formulation = "MassMatrix",
+        all_branches_dynamic = false,       #possible with current version of PSID? 
+        all_lines_dynamic = true,
+        seed = 3,
+    ),
+)
+#no_change_params[:hidden_states] = 10
+no_change_params[:model_initializer] =
+    (type = "dense", n_layer = 2, width_layers = 10, activation = "hardtanh")
 no_change_params[:model_node] = (
     type = "dense",
     n_layer = 1,
@@ -164,7 +156,7 @@ no_change_params[:validation_loss_every_n] = 100
     type_weights = (rmse = 1.0, mae = 0.0),
 ) =#
 no_change_params[:rng_seed] = 123
-no_change_params[:output_mode_skip] = 10
+no_change_params[:output_mode_skip] = 1
 no_change_params[:train_time_limit_seconds] = 1e9
 no_change_params[:base_path] = joinpath(scratch_path, project_folder, train_folder)
 no_change_params[:system_path] = joinpath(
@@ -176,8 +168,16 @@ no_change_params[:system_path] = joinpath(
 )
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:hidden_states] = [4, 8, 12]
+change_params[:hidden_states] = [5, 10]
 change_params[:loss_function] = [
+    (
+        component_weights = (
+            initialization_weight = 10.0,
+            dynamic_weight = 1.0,
+            residual_penalty = 1.0e9,
+        ),
+        type_weights = (rmse = 1.0, mae = 0.0),
+    ),
     (
         component_weights = (
             initialization_weight = 1.0,
@@ -194,43 +194,62 @@ change_params[:loss_function] = [
         ),
         type_weights = (rmse = 1.0, mae = 0.0),
     ),
-    (
-        component_weights = (
-            initialization_weight = 1.0,
-            dynamic_weight = 100.0,
-            residual_penalty = 1.0e9,
-        ),
-        type_weights = (rmse = 1.0, mae = 0.0),
-    ),
 ]
 
 change_params[:optimizer] = [
     (
         sensealg = "Zygote",
         primary = "Adam",
+        primary_η = 0.01,
+        primary_maxiters = 400,
+        adjust = "Bfgs",
+        adjust_initial_stepnorm = 0.001,
+        adjust_maxiters = 50,
+    ),
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
         primary_η = 0.001,
-        primary_maxiters = 2000,
+        primary_maxiters = 400,
         adjust = "Bfgs",
-        adjust_η = 0.0,
-        adjust_maxiters = 50, 
+        adjust_initial_stepnorm = 0.001,
+        adjust_maxiters = 50,
     ),
     (
         sensealg = "Zygote",
         primary = "Adam",
-        primary_η = 0.0001,
-        primary_maxiters = 2000,
+        primary_η = 0.01,
+        primary_maxiters = 400,
         adjust = "Bfgs",
-        adjust_η = 0.0,
-        adjust_maxiters = 50, 
+        adjust_initial_stepnorm = 0.01,
+        adjust_maxiters = 50,
     ),
     (
         sensealg = "Zygote",
         primary = "Adam",
-        primary_η = 0.00001,
-        primary_maxiters = 2000,
+        primary_η = 0.001,
+        primary_maxiters = 400,
         adjust = "Bfgs",
-        adjust_η = 0.0,
-        adjust_maxiters = 50, 
+        adjust_initial_stepnorm = 0.01,
+        adjust_maxiters = 50,
+    ),
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.01,
+        primary_maxiters = 400,
+        adjust = "LBfgs",
+        adjust_initial_stepnorm = 0.01,
+        adjust_maxiters = 50,
+    ),
+    (
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.001,
+        primary_maxiters = 400,
+        adjust = "LBfgs",
+        adjust_initial_stepnorm = 0.01,
+        adjust_maxiters = 50,
     ),
 ]
 
@@ -252,7 +271,7 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = scratch_path,
-    time_limit_train = "23:59:59",             #Options: ["00:30:00", "23:59:59"]
+    time_limit_train = "11:59:59",             #Options: ["00:30:00", "23:59:59"]
     time_limit_generate_data = "01:00:00",
     QoS = "normal",
     partition = "amilan",
