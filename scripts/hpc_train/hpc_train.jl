@@ -117,7 +117,7 @@ no_change_params[:test_data] = (
         seed = 3,
     ),
 )
-#no_change_params[:hidden_states] = 10
+no_change_params[:hidden_states] = 5
 no_change_params[:model_initializer] =
     (type = "dense", n_layer = 2, width_layers = 10, activation = "hardtanh")
 no_change_params[:model_node] = (
@@ -147,14 +147,14 @@ no_change_params[:curriculum] = "none"
 no_change_params[:curriculum_timespans] =
     [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
 no_change_params[:validation_loss_every_n] = 100
-#= no_change_params[:loss_function] = (
+no_change_params[:loss_function] = (
     component_weights = (
         initialization_weight = 1.0,
         dynamic_weight = 1.0,
         residual_penalty = 1.0,
     ),
     type_weights = (rmse = 1.0, mae = 0.0),
-) =#
+) 
 no_change_params[:rng_seed] = 123
 no_change_params[:output_mode_skip] = 1
 no_change_params[:train_time_limit_seconds] = 1e9
@@ -168,87 +168,53 @@ no_change_params[:system_path] = joinpath(
 )
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:hidden_states] = [5, 10]
-change_params[:loss_function] = [
-    (
-        component_weights = (
-            initialization_weight = 10.0,
-            dynamic_weight = 1.0,
-            residual_penalty = 1.0e9,
-        ),
-        type_weights = (rmse = 1.0, mae = 0.0),
-    ),
+#change_params[:hidden_states] = [5, 10]
+#= change_params[:loss_function] = [
     (
         component_weights = (
             initialization_weight = 1.0,
             dynamic_weight = 1.0,
-            residual_penalty = 1.0e9,
-        ),
-        type_weights = (rmse = 1.0, mae = 0.0),
-    ),
-    (
-        component_weights = (
-            initialization_weight = 1.0,
-            dynamic_weight = 10.0,
             residual_penalty = 1.0e9,
         ),
         type_weights = (rmse = 1.0, mae = 0.0),
     ),
 ]
-
+ =#
 change_params[:optimizer] = [
     (
         sensealg = "Zygote",
         primary = "Adam",
-        primary_η = 0.01,
-        primary_maxiters = 400,
+        primary_η = 1.0,
+        primary_maxiters = 5000,
         adjust = "Bfgs",
-        adjust_initial_stepnorm = 0.001,
+        adjust_initial_stepnorm = 0.00001,
         adjust_maxiters = 50,
     ),
     (
         sensealg = "Zygote",
         primary = "Adam",
-        primary_η = 0.001,
-        primary_maxiters = 400,
+        primary_η = 0.1,
+        primary_maxiters = 5000,
         adjust = "Bfgs",
-        adjust_initial_stepnorm = 0.001,
-        adjust_maxiters = 50,
-    ),
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.01,
-        primary_maxiters = 400,
-        adjust = "Bfgs",
-        adjust_initial_stepnorm = 0.01,
-        adjust_maxiters = 50,
-    ),
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.001,
-        primary_maxiters = 400,
-        adjust = "Bfgs",
-        adjust_initial_stepnorm = 0.01,
+        adjust_initial_stepnorm = 0.00001,
         adjust_maxiters = 50,
     ),
     (
         sensealg = "Zygote",
         primary = "Adam",
         primary_η = 0.01,
-        primary_maxiters = 400,
-        adjust = "LBfgs",
-        adjust_initial_stepnorm = 0.01,
+        primary_maxiters = 5000,
+        adjust = "Bfgs",
+        adjust_initial_stepnorm = 0.00001,
         adjust_maxiters = 50,
     ),
     (
         sensealg = "Zygote",
         primary = "Adam",
         primary_η = 0.001,
-        primary_maxiters = 400,
-        adjust = "LBfgs",
-        adjust_initial_stepnorm = 0.01,
+        primary_maxiters = 5000,
+        adjust = "Bfgs",
+        adjust_initial_stepnorm = 0.00001,
         adjust_maxiters = 50,
     ),
 ]
