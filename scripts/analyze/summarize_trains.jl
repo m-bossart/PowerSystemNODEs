@@ -1,14 +1,17 @@
 using PowerSimulationNODE
 using Plots
 
-#a = generate_summary(TrainParams().output_data_path)
-a = generate_summary(joinpath(pwd(), "transfers", "exp_11_03_22", "output_data"))
+train_folder = joinpath("transfers", "exp_11_16_22")
 #plotlyjs()
-print_train_parameter_overview(joinpath(pwd(), "transfers", "exp_11_03_22", "input_data"))
+
+a = generate_summary(joinpath(pwd(), train_folder, "output_data"))
+print_train_parameter_overview(
+    joinpath(pwd(), train_folder, PowerSimulationNODE.INPUT_FOLDER_NAME),
+)
 p = visualize_summary(a)
 print_high_level_output_overview(
     a,
-    joinpath(pwd(), "transfers", "exp_11_03_22", "input_data"),
+    joinpath(pwd(), train_folder, PowerSimulationNODE.INPUT_FOLDER_NAME),
 )
 png(p, joinpath(TrainParams().base_path, "train_summary"))
 
