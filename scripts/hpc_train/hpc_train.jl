@@ -54,7 +54,7 @@ change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change; train_id set automatically)
 no_change_params[:surrogate_buses] = [20]
-#= no_change_params[:train_data] = (
+no_change_params[:train_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
         generation_scale = 1.0,
@@ -76,7 +76,7 @@ no_change_params[:surrogate_buses] = [20]
         seed = 1,
     ),
     system = "full",
-) =#
+)
 no_change_params[:validation_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
@@ -124,13 +124,13 @@ no_change_params[:test_data] = (
 no_change_params[:hidden_states] = 5
 no_change_params[:model_initializer] =
     (type = "dense", n_layer = 2, width_layers = 10, activation = "hardtanh")
-#= no_change_params[:model_node] = (
+no_change_params[:model_node] = (
     type = "dense",
     n_layer = 1,
     width_layers = 10,
     activation = "hardtanh",
     σ2_initialization = 0.0,
-) =#
+)
 no_change_params[:model_observation] =
     (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh")
 no_change_params[:scaling_limits] =
@@ -139,7 +139,7 @@ no_change_params[:steady_state_solver] =
     (solver = "SSRootfind", abstol = 1e-4, maxiters = 5)
 no_change_params[:dynamic_solver] =
     (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5)
-no_change_params[:optimizer] = (
+#= no_change_params[:optimizer] = (
     sensealg = "Zygote",
     primary = "Adam",
     primary_η = 0.01,
@@ -147,9 +147,9 @@ no_change_params[:optimizer] = (
     adjust = "Bfgs",
     adjust_initial_stepnorm = 0.00001,
     adjust_maxiters = 300,
-)
+) =#
 no_change_params[:lb_loss] = 0.0
-#no_change_params[:primary_curriculum] = "individual faults"
+no_change_params[:primary_curriculum] = "individual faults"
 no_change_params[:primary_curriculum_timespans] =
     [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
 #no_change_params[:adjust_curriculum] = "simultaneous"
@@ -189,94 +189,34 @@ no_change_params[:system_path] = joinpath(
     ),
 ]
  =#
-change_params[:model_node] = [
-    (
-        type = "dense",
-        n_layer = 1,
-        width_layers = 10,
-        activation = "hardtanh",
-        σ2_initialization = 0.0,
-    ),
-    (
-        type = "dense",
-        n_layer = 2,
-        width_layers = 10,
-        activation = "hardtanh",
-        σ2_initialization = 0.0,
-    ),
-]
-change_params[:primary_curriculum] =
-    ["individual faults", "individual faults x2", "individual faults x3"]
 change_params[:adjust_curriculum] = ["individual faults", "simultaneous"]
-change_params[:train_data] = [
+change_params[:optimizer] = [
     (
-        id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
-        ),
-        params = PSIDS.GenerateDataParams(
-            solver = "Rodas5",
-            solver_tols = (reltol = 1e-3, abstol = 1e-6),
-            tspan = (0.0, 10.0),
-            tstops = 0.0:0.1:10.0,
-            tsave = 0.0:0.1:10.0,
-            formulation = "MassMatrix",
-            all_branches_dynamic = false,
-            all_lines_dynamic = true,
-            seed = 1,
-        ),
-        system = "full",
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.01,
+        primary_maxiters = 2000,
+        adjust = "Bfgs",
+        adjust_initial_stepnorm = 0.0001,
+        adjust_maxiters = 400,
     ),
     (
-        id = "2",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
-        ),
-        params = PSIDS.GenerateDataParams(
-            solver = "Rodas5",
-            solver_tols = (reltol = 1e-3, abstol = 1e-6),
-            tspan = (0.0, 10.0),
-            tstops = 0.0:0.1:10.0,
-            tsave = 0.0:0.1:10.0,
-            formulation = "MassMatrix",
-            all_branches_dynamic = false,
-            all_lines_dynamic = true,
-            seed = 2,
-        ),
-        system = "full",
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.01,
+        primary_maxiters = 2000,
+        adjust = "Bfgs",
+        adjust_initial_stepnorm = 0.01,
+        adjust_maxiters = 400,
     ),
     (
-        id = "3",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
-        ),
-        params = PSIDS.GenerateDataParams(
-            solver = "Rodas5",
-            solver_tols = (reltol = 1e-3, abstol = 1e-6),
-            tspan = (0.0, 10.0),
-            tstops = 0.0:0.1:10.0,
-            tsave = 0.0:0.1:10.0,
-            formulation = "MassMatrix",
-            all_branches_dynamic = false,
-            all_lines_dynamic = true,
-            seed = 3,
-        ),
-        system = "full",
+        sensealg = "Zygote",
+        primary = "Adam",
+        primary_η = 0.01,
+        primary_maxiters = 2000,
+        adjust = "Bfgs",
+        adjust_initial_stepnorm = 1.0,
+        adjust_maxiters = 400,
     ),
 ]
 build_params_list!(params_data, no_change_params, change_params)
@@ -297,8 +237,8 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "11:59:59",             #Options: ["00:30:00", "23:59:59"]
-    time_limit_generate_data = "01:00:00",
+    time_limit_train = "23:59:59",             #Options: ["00:30:00", "23:59:59"]
+    time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
     force_generate_inputs = true,
