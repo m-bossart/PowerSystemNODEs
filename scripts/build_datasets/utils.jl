@@ -282,8 +282,8 @@ function visualize_dataset(dataset::Vector{PSIDS.SteadyStateNODEData})
         if dataset[ix].stable == true
             Vr = dataset[ix].surrogate_real_voltage[:]
             Vi = dataset[ix].surrogate_imag_voltage[:]
-            Ir = dataset[ix].branch_real_current[:]
-            Ii = dataset[ix].branch_imag_current[:]
+            Ir = dataset[ix].real_current[:]
+            Ii = dataset[ix].imag_current[:]
             Vm = sqrt.(Vr .^ 2 + Vi .^ 2)
             Im = sqrt.(Ir .^ 2 + Ii .^ 2)
             Vθ = atan.(Vi ./ Vr)

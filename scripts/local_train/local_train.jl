@@ -60,26 +60,36 @@ p = TrainParams(
     surrogate_buses = [20],
     train_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
+        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
+            source_name = "source_1",
+            V_scale = 1.0,
+            θ_scale = 1.0,
+            P_scale = 1.0,
+            Q_scale = 1.0,
         ),],
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
-        ),
+        perturbations = [[
+            PSIDS.Chirp(
+                source_name = "source_1",
+                ω1 = 0.1 * (2 * pi),
+                ω2 = 3.0 * (2 * pi),
+                tstart = 1.0,
+                N = 11.0,
+                V_amp = 0.15,
+                ω_amp = 0.01,
+            ),
+        ]],
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
-            solver_tols = (reltol = 1e-3, abstol = 1e-6),
+            solver_tols = (reltol = 1e-4, abstol = 1e-7),
             tspan = (0.0, 10.0),
-            tstops = 0.0:0.1:10.0,
-            tsave = 0.0:0.1:10.0,
+            tstops = [], #0.0:0.01:10.0,
+            tsave = [], #0.0:0.01:10.0,
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = true,
             seed = 1,
         ),
-        system = "full",
+        system = "reduced",
     ),
     validation_data = (
         id = "1",
@@ -162,8 +172,10 @@ p = TrainParams(
     ),
     dynamic_solver = (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5),
     lb_loss = 0.0,
-    curriculum = "none",
-    curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
+    primary_curriculum = "individual faults",
+    primary_curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
+    adjust_curriculum = "individual faults",
+    adjust_curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
     validation_loss_every_n = 100, #TODO modify 
     loss_function = (
         component_weights = (
@@ -188,7 +200,7 @@ generate_validation_data(p)
 generate_test_data(p)
 
 ##########################
-#todo - write a diagnostic function which prints a bunch of data about the datasets (use before attempting to train)
+# Visualize datasets (use before attempting to train)
 train_dataset = Serialization.deserialize(p.train_data_path)
 visualize_dataset(train_dataset)
 validation_dataset = Serialization.deserialize(p.validation_data_path)

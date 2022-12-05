@@ -56,26 +56,36 @@ change_params = Dict{Symbol, Any}()
 no_change_params[:surrogate_buses] = [20]
 no_change_params[:train_data] = (
     id = "1",
-    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-        generation_scale = 1.0,
-        load_scale = 1.0,
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
+        source_name = "source_1",
+        V_scale = 1.0,
+        θ_scale = 1.0,
+        P_scale = 1.0,
+        Q_scale = 1.0,
     ),],
-    perturbations = repeat(
-        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-        5,
-    ),
+    perturbations = [[
+        PSIDS.Chirp(
+            source_name = "source_1",
+            ω1 = 0.1 * (2 * pi),
+            ω2 = 3.0 * (2 * pi),
+            tstart = 1.0,
+            N = 11.0,
+            V_amp = 0.15,
+            ω_amp = 0.01,
+        ),
+    ]],
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
-        solver_tols = (reltol = 1e-3, abstol = 1e-6),
+        solver_tols = (reltol = 1e-4, abstol = 1e-7),
         tspan = (0.0, 10.0),
-        tstops = 0.0:0.1:10.0,
-        tsave = 0.0:0.1:10.0,
+        tstops = [], #0.0:0.01:10.0,
+        tsave = [], #0.0:0.01:10.0,
         formulation = "MassMatrix",
         all_branches_dynamic = false,
         all_lines_dynamic = true,
         seed = 1,
     ),
-    system = "full",
+    system = "reduced",
 )
 no_change_params[:validation_data] = (
     id = "1",

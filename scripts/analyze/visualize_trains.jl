@@ -31,13 +31,43 @@ train_files_with_output = filter(
         join = true,
     ),
 )
-##
 
-for file in train_files_with_outputs
+for file in train_files_with_output
     visualize_training(file, skip = 100, new_base_path = train_folder)       #TODO - re-base path should be separate
     #animate_training(file, skip = 100)
 end
-
+##
+L4 = PowerSimulationNODE.read_arrow_file_to_dataframe(
+    joinpath(pwd(), "transfers", "exp_11_18_22", "output_data", "004", "loss"),
+)
+L5 = PowerSimulationNODE.read_arrow_file_to_dataframe(
+    joinpath(pwd(), "transfers", "exp_11_18_22", "output_data", "005", "loss"),
+)
+L6 = PowerSimulationNODE.read_arrow_file_to_dataframe(
+    joinpath(pwd(), "transfers", "exp_11_18_22", "output_data", "006", "loss"),
+)
+p4 = plot(
+    L4[1990:end, :Loss_dynamic],
+    yaxis = :log,
+    legend = false,
+    title = "initial_stepnorm = 0.0001",
+)
+plot!(p4, L4[1990:end, :Loss_initialization], yaxis = :log)
+p5 = plot(
+    L5[1990:end, :Loss_dynamic],
+    yaxis = :log,
+    legend = false,
+    title = "initial_stepnorm = 0.01",
+)
+plot!(p5, L5[1990:end, :Loss_initialization], yaxis = :log)
+p6 = plot(
+    L6[1990:end, :Loss_dynamic],
+    yaxis = :log,
+    legend = false,
+    title = "initial_stepnorm = 1.0",
+)
+plot!(p6, L6[1990:end, :Loss_initialization], yaxis = :log)
+##
 L19 = PowerSimulationNODE.read_arrow_file_to_dataframe(
     joinpath(pwd(), "transfers", "exp_11_16_22", "output_data", "019", "loss"),
 )
