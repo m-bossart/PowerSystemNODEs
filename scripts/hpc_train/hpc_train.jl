@@ -149,20 +149,23 @@ no_change_params[:steady_state_solver] =
     (solver = "SSRootfind", abstol = 1e-4, maxiters = 5)
 no_change_params[:dynamic_solver] =
     (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5)
-#= no_change_params[:optimizer] = (
+no_change_params[:optimizer] = (
     sensealg = "Zygote",
     primary = "Adam",
     primary_η = 0.01,
-    primary_maxiters = 3000,
+    primary_maxiters = 2000,
     adjust = "Bfgs",
-    adjust_initial_stepnorm = 0.00001,
-    adjust_maxiters = 300,
-) =#
+    adjust_initial_stepnorm = 1.0,
+    adjust_maxiters = 400,
+) 
+
+
+
 no_change_params[:lb_loss] = 0.0
 no_change_params[:primary_curriculum] = "individual faults"
 no_change_params[:primary_curriculum_timespans] =
     [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
-#no_change_params[:adjust_curriculum] = "simultaneous"
+no_change_params[:adjust_curriculum] = "simultaneous"
 no_change_params[:adjust_curriculum_timespans] =
     [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
 no_change_params[:validation_loss_every_n] = 100
@@ -199,8 +202,8 @@ no_change_params[:system_path] = joinpath(
     ),
 ]
  =#
-change_params[:adjust_curriculum] = ["individual faults", "simultaneous"]
-change_params[:optimizer] = [
+#change_params[:adjust_curriculum] = ["individual faults", "simultaneous"]
+#= change_params[:optimizer] = [
     (
         sensealg = "Zygote",
         primary = "Adam",
@@ -228,7 +231,7 @@ change_params[:optimizer] = [
         adjust_initial_stepnorm = 1.0,
         adjust_maxiters = 400,
     ),
-]
+] =#
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
 ##
