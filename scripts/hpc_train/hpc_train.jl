@@ -54,7 +54,7 @@ change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change; train_id set automatically)
 no_change_params[:surrogate_buses] = [20]
-no_change_params[:train_data] = (
+#= no_change_params[:train_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
         source_name = "source_1",
@@ -86,7 +86,7 @@ no_change_params[:train_data] = (
         seed = 1,
     ),
     system = "reduced",
-)
+)  =#
 no_change_params[:validation_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
@@ -149,7 +149,7 @@ no_change_params[:steady_state_solver] =
     (solver = "SSRootfind", abstol = 1e-4, maxiters = 5)
 no_change_params[:dynamic_solver] =
     (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5)
-no_change_params[:optimizer] = (
+#= no_change_params[:optimizer] = (
     sensealg = "Zygote",
     primary = "Adam",
     primary_η = 0.01,
@@ -157,9 +157,7 @@ no_change_params[:optimizer] = (
     adjust = "Bfgs",
     adjust_initial_stepnorm = 1.0,
     adjust_maxiters = 400,
-) 
-
-
+)  =#
 
 no_change_params[:lb_loss] = 0.0
 no_change_params[:primary_curriculum] = "individual faults"
@@ -190,6 +188,64 @@ no_change_params[:system_path] = joinpath(
 )
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
+change_params[:train_data] = [
+    (
+        id = "1",
+        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+            generation_scale = 1.0,
+            load_scale = 1.0,
+        ),],
+        perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            5,
+        ),
+        params = PSIDS.GenerateDataParams(
+            solver = "Rodas5",
+            solver_tols = (reltol = 1e-3, abstol = 1e-6),
+            tspan = (0.0, 10.0),
+            tstops = 0.0:0.1:10.0,
+            tsave = 0.0:0.1:10.0,
+            formulation = "MassMatrix",
+            all_branches_dynamic = false,
+            all_lines_dynamic = true,
+            seed = 1,
+        ),
+        system = "full",
+    ),
+    (
+        id = "2",
+        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
+            source_name = "source_1",
+            V_scale = 1.0,
+            θ_scale = 1.0,
+            P_scale = 1.0,
+            Q_scale = 1.0,
+        ),],
+        perturbations = [[
+            PSIDS.Chirp(
+                source_name = "source_1",
+                ω1 = 0.1 * (2 * pi),
+                ω2 = 3.0 * (2 * pi),
+                tstart = 1.0,
+                N = 11.0,
+                V_amp = 0.15,
+                ω_amp = 0.01,
+            ),
+        ]],
+        params = PSIDS.GenerateDataParams(
+            solver = "Rodas5",
+            solver_tols = (reltol = 1e-4, abstol = 1e-7),
+            tspan = (0.0, 10.0),
+            tstops = [], #0.0:0.01:10.0,
+            tsave = [], #0.0:0.01:10.0,
+            formulation = "MassMatrix",
+            all_branches_dynamic = false,
+            all_lines_dynamic = true,
+            seed = 1,
+        ),
+        system = "reduced",
+    ),
+]
 #change_params[:hidden_states] = [5, 10]
 #= change_params[:loss_function] = [
     (
@@ -203,16 +259,7 @@ no_change_params[:system_path] = joinpath(
 ]
  =#
 #change_params[:adjust_curriculum] = ["individual faults", "simultaneous"]
-#= change_params[:optimizer] = [
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.01,
-        primary_maxiters = 2000,
-        adjust = "Bfgs",
-        adjust_initial_stepnorm = 0.0001,
-        adjust_maxiters = 400,
-    ),
+change_params[:optimizer] = [
     (
         sensealg = "Zygote",
         primary = "Adam",
@@ -225,13 +272,15 @@ no_change_params[:system_path] = joinpath(
     (
         sensealg = "Zygote",
         primary = "Adam",
-        primary_η = 0.01,
+        primary_η = 0.1,
         primary_maxiters = 2000,
         adjust = "Bfgs",
-        adjust_initial_stepnorm = 1.0,
+        adjust_initial_stepnorm = 0.01,
         adjust_maxiters = 400,
     ),
-] =#
+]
+change_params[:primary_fix_params] = ["none", "initializer", "initializer+observation"]
+change_params[:adjust_fix_params] = ["none", "initializer", "initializer+observation"]
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
 ##
