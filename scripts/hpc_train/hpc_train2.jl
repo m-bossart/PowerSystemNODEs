@@ -6,7 +6,7 @@ if Sys.iswindows() || Sys.isapple()
 else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
-train_folder = "exp_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+train_folder = "exp_2"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
 system_name = "CTESN_18bus_modified" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 #scratch_path = "/scratch/alpine/mabo4366"  #Options: [ joinpath(pwd(), ".."), "/scratch/alpine/mabo4366"]
@@ -54,39 +54,29 @@ change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change; train_id set automatically)
 no_change_params[:surrogate_buses] = [20]
-#= no_change_params[:train_data] = (
+no_change_params[:train_data] = (
     id = "1",
-    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
-        source_name = "source_1",
-        V_scale = 1.0,
-        θ_scale = 1.0,
-        P_scale = 1.0,
-        Q_scale = 1.0,
+    operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+        generation_scale = 1.0,
+        load_scale = 1.0,
     ),],
-    perturbations = [[
-        PSIDS.Chirp(
-            source_name = "source_1",
-            ω1 = 0.1 * (2 * pi),
-            ω2 = 3.0 * (2 * pi),
-            tstart = 1.0,
-            N = 11.0,
-            V_amp = 0.15,
-            ω_amp = 0.01,
-        ),
-    ]],
+    perturbations = repeat(
+        [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+        5,
+    ),
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
-        solver_tols = (reltol = 1e-4, abstol = 1e-7),
+        solver_tols = (reltol = 1e-3, abstol = 1e-6),
         tspan = (0.0, 10.0),
-        tstops = [], #0.0:0.01:10.0,
-        tsave = [], #0.0:0.01:10.0,
+        tstops = 0.0:0.1:10.0,
+        tsave = 0.0:0.1:10.0,
         formulation = "MassMatrix",
         all_branches_dynamic = false,
         all_lines_dynamic = true,
         seed = 1,
     ),
-    system = "reduced",
-)  =#
+    system = "full",
+)
 no_change_params[:validation_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
@@ -131,7 +121,7 @@ no_change_params[:test_data] = (
         seed = 3,
     ),
 )
-#no_change_params[:hidden_states] = 5
+no_change_params[:hidden_states] = 5
 no_change_params[:model_initializer] =
     (type = "dense", n_layer = 2, width_layers = 10, activation = "hardtanh")
 no_change_params[:model_node] = (
@@ -141,8 +131,8 @@ no_change_params[:model_node] = (
     activation = "hardtanh",
     σ2_initialization = 0.0,
 )
-no_change_params[:model_observation] =
-    (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh")
+#= no_change_params[:model_observation] =
+    (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh") =#
 no_change_params[:scaling_limits] =
     (input_limits = (-1.0, 1.0), target_limits = (-1.0, 1.0))
 no_change_params[:steady_state_solver] =
@@ -152,11 +142,11 @@ no_change_params[:dynamic_solver] =
 no_change_params[:optimizer] = (
     sensealg = "Zygote",
     primary = "Adam",
-    primary_η = 0.0001,
-    primary_maxiters = 200,
-    adjust = "nothing",
-    adjust_initial_stepnorm = 1.0,
-    adjust_maxiters = 400,
+    primary_η = 0.01,
+    primary_maxiters = 2000,
+    adjust = "Bfgs",
+    adjust_initial_stepnorm = 0.01,
+    adjust_maxiters = 1000,
 )
 
 no_change_params[:lb_loss] = 0.0
@@ -175,8 +165,6 @@ no_change_params[:loss_function] = (
     ),
     type_weights = (rmse = 1.0, mae = 0.0),
 )
-no_change_params[:primary_fix_params] = "none"
-no_change_params[:adjust_fix_params] = "none"
 no_change_params[:rng_seed] = 123
 no_change_params[:output_mode_skip] = 1
 no_change_params[:train_time_limit_seconds] = 1e9
@@ -189,145 +177,15 @@ no_change_params[:system_path] = joinpath(
     string(system_name, ".json"),
 )
 
+no_change_params[:adjust_fix_params] = "initializer+observation"
+
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:train_data] = [
-    (
-        id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
-            source_name = "source_1",
-            V_scale = 1.0,
-            θ_scale = 1.0,
-            P_scale = 1.0,
-            Q_scale = 1.0,
-        ),],
-        perturbations = [[
-            PSIDS.Chirp(
-                source_name = "source_1",
-                ω1 = 0.1 * (2 * pi),
-                ω2 = 3.0 * (2 * pi),
-                tstart = 1.0,
-                N = 11.0,
-                V_amp = 0.15,
-                ω_amp = 0.01,
-            ),
-        ]],
-        params = PSIDS.GenerateDataParams(
-            solver = "Rodas5",
-            solver_tols = (reltol = 1e-3, abstol = 1e-6),
-            tspan = (0.0, 10.0),
-            tstops = [], #0.0:0.01:10.0,
-            tsave = [], #0.0:0.01:10.0,
-            formulation = "MassMatrix",
-            all_branches_dynamic = false,
-            all_lines_dynamic = true,
-            seed = 1,
-        ),
-        system = "reduced",
-    ),
-    (
-        id = "2",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
-            source_name = "source_1",
-            V_scale = 1.0,
-            θ_scale = 1.0,
-            P_scale = 1.0,
-            Q_scale = 1.0,
-        ),],
-        perturbations = [[
-            PSIDS.Chirp(
-                source_name = "source_1",
-                ω1 = 0.1 * (2 * pi),
-                ω2 = 3.0 * (2 * pi),
-                tstart = 1.0,
-                N = 11.0,
-                V_amp = 0.15,
-                ω_amp = 0.01,
-            ),
-        ]],
-        params = PSIDS.GenerateDataParams(
-            solver = "Rodas5",
-            solver_tols = (reltol = 1e-4, abstol = 1e-7),
-            tspan = (0.0, 10.0),
-            tstops = [], #0.0:0.01:10.0,
-            tsave = [], #0.0:0.01:10.0,
-            formulation = "MassMatrix",
-            all_branches_dynamic = false,
-            all_lines_dynamic = true,
-            seed = 1,
-        ),
-        system = "reduced",
-    ),
-    (
-        id = "3",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.ScaleSource(
-            source_name = "source_1",
-            V_scale = 1.0,
-            θ_scale = 1.0,
-            P_scale = 1.0,
-            Q_scale = 1.0,
-        ),],
-        perturbations = [[
-            PSIDS.Chirp(
-                source_name = "source_1",
-                ω1 = 0.1 * (2 * pi),
-                ω2 = 3.0 * (2 * pi),
-                tstart = 1.0,
-                N = 11.0,
-                V_amp = 0.15,
-                ω_amp = 0.01,
-            ),
-        ]],
-        params = PSIDS.GenerateDataParams(
-            solver = "Rodas5",
-            solver_tols = (reltol = 1e-5, abstol = 1e-8),
-            tspan = (0.0, 10.0),
-            tstops = [], #0.0:0.01:10.0,
-            tsave = [], #0.0:0.01:10.0,
-            formulation = "MassMatrix",
-            all_branches_dynamic = false,
-            all_lines_dynamic = true,
-            seed = 1,
-        ),
-        system = "reduced",
-    ),
+change_params[:primary_fix_params] = ["none", "initializer"]
+change_params[:model_observation] = [
+    (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh"),
+    (type = "DirectObservation", n_layer = 1, width_layers = 10, activation = "hardtanh"),
 ]
-#change_params[:hidden_states] = [5, 10]
-#= change_params[:loss_function] = [
-    (
-        component_weights = (
-            initialization_weight = 1.0,
-            dynamic_weight = 1.0,
-            residual_penalty = 1.0e9,
-        ),
-        type_weights = (rmse = 1.0, mae = 0.0),
-    ),
-]
- =#
-#change_params[:adjust_curriculum] = ["individual faults", "simultaneous"]
-#= change_params[:optimizer] = [
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.01,
-        primary_maxiters = 2000,
-        adjust = "Bfgs",
-        adjust_initial_stepnorm = 0.01,
-        adjust_maxiters = 400,
-    ),
-    (
-        sensealg = "Zygote",
-        primary = "Adam",
-        primary_η = 0.1,
-        primary_maxiters = 2000,
-        adjust = "Bfgs",
-        adjust_initial_stepnorm = 0.01,
-        adjust_maxiters = 400,
-    ),
-] =#
-#change_params[:primary_fix_params] = ["none", "initializer", "initializer+observation"]
-#change_params[:adjust_fix_params] = ["none", "initializer", "initializer+observation"]
 change_params[:force_tstops] = [true, false]
-change_params[:hidden_states] = [5, 10, 20]
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
 ##
