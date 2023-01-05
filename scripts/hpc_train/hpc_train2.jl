@@ -121,50 +121,67 @@ no_change_params[:test_data] = (
         seed = 3,
     ),
 )
-no_change_params[:hidden_states] = 5
-no_change_params[:model_initializer] =
-    (type = "dense", n_layer = 2, width_layers = 10, activation = "hardtanh")
-no_change_params[:model_node] = (
-    type = "dense",
-    n_layer = 1,
-    width_layers = 10,
-    activation = "hardtanh",
-    σ2_initialization = 0.0,
+no_change_params[:model_params] =  SteadyStateNODEParams(
+    name = "source_1",    
+    n_ports = 1,
+    initializer_layer_type = "dense", #Correct 
+    initializer_n_layer = 2, #Correct 
+    initializer_width_layers = 10, #Correct 
+    initializer_activation = "hardtanh", #Correct 
+    dynamic_layer_type = "dense", #Correct 
+    dynamic_hidden_states = 5,  #Correct 
+    dynamic_n_layer = 1, #Correct 
+    dynamic_width_layers = 10, #Correct 
+    dynamic_activation = "hardtanh", #Correct 
+    dynamic_σ2_initialization = 0.0, #Correct 
 )
-#= no_change_params[:model_observation] =
-    (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh") =#
-no_change_params[:scaling_limits] =
-    (input_limits = (-1.0, 1.0), target_limits = (-1.0, 1.0))
+
 no_change_params[:steady_state_solver] =
     (solver = "SSRootfind", abstol = 1e-4, maxiters = 5)
 no_change_params[:dynamic_solver] =
-    (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5)
-no_change_params[:optimizer] = (
-    sensealg = "Zygote",
-    primary = "Adam",
-    primary_η = 0.01,
-    primary_maxiters = 2000,
-    adjust = "Bfgs",
-    adjust_initial_stepnorm = 0.01,
-    adjust_maxiters = 1000,
-)
+    (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5, force_tstops = true)
 
-no_change_params[:lb_loss] = 0.0
-no_change_params[:primary_curriculum] = "individual faults"
-no_change_params[:primary_curriculum_timespans] =
-    [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
-no_change_params[:adjust_curriculum] = "simultaneous"
-no_change_params[:adjust_curriculum_timespans] =
-    [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)]
-no_change_params[:validation_loss_every_n] = 100
-no_change_params[:loss_function] = (
-    component_weights = (
-        initialization_weight = 1.0,
-        dynamic_weight = 1.0,
-        residual_penalty = 1.0,
+no_change_params[:optimizer] =  [
+    (  #PRIMARY! 
+        sensealg = "Zygote", #Correct 
+        algorithm = "Adam", #Correct 
+        η = 0.01,  #Correct 
+        initial_stepnorm = 0.0,  #Correct 
+        maxiters = 2000,  #Correct 
+        lb_loss = 0.0,  #Correct 
+        curriculum = "individual faults",  #Correct 
+        curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)], #Correct 
+        fix_params = [], #Correct 
+        loss_function = ( #Correct 
+            component_weights = (
+                initialization_weight = 1.0,
+                dynamic_weight = 1.0,
+                residual_penalty = 1.0,
+            ),
+            type_weights = (rmse = 1.0, mae = 0.0),
+        ),
     ),
-    type_weights = (rmse = 1.0, mae = 0.0),
-)
+    (  #Secondary 
+        sensealg = "Zygote", #Correct 
+        algorithm = "Bfgs", #Correct 
+        η = 0.0, #Correct 
+        initial_stepnorm = 0.01, #Correct 
+        maxiters = 1000, #Correct 
+        lb_loss = 0.0,  #Correct 
+        curriculum = "simultaneous", #Correct 
+        curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)], #Correct 
+        fix_params = [],
+        loss_function = ( #Correct 
+            component_weights = (
+                initialization_weight = 1.0,
+                dynamic_weight = 1.0,
+                residual_penalty = 1.0,
+            ),
+            type_weights = (rmse = 1.0, mae = 0.0),
+        ),
+    ),
+]
+no_change_params[:validation_loss_every_n] = 100
 no_change_params[:rng_seed] = 123
 no_change_params[:output_mode_skip] = 1
 no_change_params[:train_time_limit_seconds] = 1e9
@@ -177,15 +194,9 @@ no_change_params[:system_path] = joinpath(
     string(system_name, ".json"),
 )
 
-no_change_params[:adjust_fix_params] = "initializer+observation"
+
 
 #INDICATE PARAMETES TO ITERATE OVER COMBINATORIALLY 
-change_params[:primary_fix_params] = ["none", "initializer"]
-change_params[:model_observation] = [
-    (type = "dense", n_layer = 1, width_layers = 10, activation = "hardtanh"),
-    (type = "DirectObservation", n_layer = 1, width_layers = 10, activation = "hardtanh"),
-]
-change_params[:force_tstops] = [true, false]
 build_params_list!(params_data, no_change_params, change_params)
 @warn "Number of trainings:", length(params_data)
 ##
