@@ -126,7 +126,7 @@ p = TrainParams(
         ),
     ),
     model_params = SteadyStateNODEObsParams(
-        name = "source_1",    
+        name = "source_1",
         n_ports = 1,
         initializer_layer_type = "dense",
         initializer_n_layer = 2,
