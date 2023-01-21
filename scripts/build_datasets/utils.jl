@@ -264,7 +264,6 @@ function getSystemProperties(sys)
 end =#
 
 #TODO - add a GFL 
-
 #TODO - add a zoom option for visualize dataset (to see the fast transients)
 #TODO - add P and Q to the plots
 function visualize_dataset(dataset::Vector{PSIDS.SteadyStateNODEData})

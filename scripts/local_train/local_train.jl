@@ -60,10 +60,11 @@ p = TrainParams(
     surrogate_buses = [20],
     train_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = PSIDS.SurrogateOperatingPoint[
+            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
+            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
+            PSIDS.GenerationLoadScale(generation_scale = 1.1, load_scale = 1.1),
+        ],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             5,
@@ -83,10 +84,11 @@ p = TrainParams(
     ),
     validation_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = PSIDS.SurrogateOperatingPoint[
+            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
+            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
+            PSIDS.GenerationLoadScale(generation_scale = 1.1, load_scale = 1.1),
+        ],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             5,
@@ -100,7 +102,7 @@ p = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = true,
-            seed = 1,
+            seed = 2,
         ),
     ),
     test_data = (
@@ -143,11 +145,7 @@ p = TrainParams(
         observation_width_layers = 10,
         observation_activation = "hardtanh",
     ),
-    steady_state_solver = (
-        solver = "SSRootfind",
-        abstol = 1e-4,
-        maxiters = 1,  #TODO does not currently work for NLsolve (not set appropriately, always defaults to 1000 )
-    ),
+    steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
     dynamic_solver = (
         solver = "Rodas5",
         reltol = 1e-3,
@@ -175,25 +173,25 @@ p = TrainParams(
                 type_weights = (rmse = 1.0, mae = 0.0),
             ),
         ),
-        (  #Secondary 
-            sensealg = "Zygote",
-            algorithm = "Bfgs",
-            η = 0.0,
-            initial_stepnorm = 0.001,
-            maxiters = 5,
-            lb_loss = 0.0,
-            curriculum = "individual faults",
-            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-            fix_params = [],
-            loss_function = (
-                component_weights = (
-                    initialization_weight = 1.0,
-                    dynamic_weight = 1.0,
-                    residual_penalty = 1.0e9,
-                ),
-                type_weights = (rmse = 1.0, mae = 0.0),
-            ),
-        ),
+        #=         (  #Secondary 
+                    sensealg = "Zygote",
+                    algorithm = "Bfgs",
+                    η = 0.0,
+                    initial_stepnorm = 0.001,
+                    maxiters = 5,
+                    lb_loss = 0.0,
+                    curriculum = "individual faults",
+                    curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
+                    fix_params = [],
+                    loss_function = (
+                        component_weights = (
+                            initialization_weight = 1.0,
+                            dynamic_weight = 1.0,
+                            residual_penalty = 1.0e9,
+                        ),
+                        type_weights = (rmse = 1.0, mae = 0.0),
+                    ),
+                ), =#
     ],
     p_start = [],
     validation_loss_every_n = 100, #TODO modify 
@@ -214,12 +212,12 @@ generate_test_data(p)
 ##########################
 # Visualize datasets (use before attempting to train)
 train_dataset = Serialization.deserialize(p.train_data_path)
-visualize_dataset(train_dataset)
+display(visualize_dataset(train_dataset))
 validation_dataset = Serialization.deserialize(p.validation_data_path)
-visualize_dataset(validation_dataset)
+display(visualize_dataset(validation_dataset))
 test_dataset = Serialization.deserialize(p.test_data_path)
-visualize_dataset(test_dataset)
-
+display(visualize_dataset(test_dataset))
+##
 ######################################################################################
 ####################################### TRAIN ########################################
 ######################################################################################
