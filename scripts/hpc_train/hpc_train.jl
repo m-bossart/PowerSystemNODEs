@@ -7,9 +7,8 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "CTESN_18bus_modified" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36Bus" #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
-#scratch_path = "/scratch/alpine/mabo4366"  #Options: [ joinpath(pwd(), ".."), "/scratch/alpine/mabo4366"]
 
 #Copy the full system over to the training directory.
 mkpath(
@@ -53,7 +52,8 @@ no_change_params = Dict{Symbol, Any}()
 change_params = Dict{Symbol, Any}()
 
 #INDICATE CONSTANT, NON-DEFAULT PARAMETERS (surrogate_buses and system_path CANNOT change; train_id set automatically)
-no_change_params[:surrogate_buses] = [20]
+no_change_params[:surrogate_buses] =
+    [21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 36, 37, 38, 39]
 no_change_params[:train_data] = (
     id = "1",
     operating_points = PSIDS.SurrogateOperatingPoint[
@@ -63,7 +63,7 @@ no_change_params[:train_data] = (
     ],
     perturbations = repeat(
         [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-        5,
+        15,
     ),
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
@@ -73,7 +73,7 @@ no_change_params[:train_data] = (
         tsave = 0.0:0.1:10.0,
         formulation = "MassMatrix",
         all_branches_dynamic = false,
-        all_lines_dynamic = true,
+        all_lines_dynamic = false,
         seed = 1,
     ),
     system = "full",
@@ -86,7 +86,7 @@ no_change_params[:validation_data] = (
     ),],
     perturbations = repeat(
         [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-        5,
+        15,
     ),
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
@@ -96,7 +96,7 @@ no_change_params[:validation_data] = (
         tsave = 0.0:0.1:10.0,
         formulation = "MassMatrix",
         all_branches_dynamic = false,
-        all_lines_dynamic = true,
+        all_lines_dynamic = false,
         seed = 2,
     ),
 )
@@ -108,7 +108,7 @@ no_change_params[:test_data] = (
     ),],
     perturbations = repeat(
         [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-        5,
+        15,
     ),
     params = PSIDS.GenerateDataParams(
         solver = "Rodas5",
@@ -118,11 +118,11 @@ no_change_params[:test_data] = (
         tsave = 0.0:0.1:10.0,
         formulation = "MassMatrix",
         all_branches_dynamic = false,       #possible with current version of PSID? 
-        all_lines_dynamic = true,
+        all_lines_dynamic = false,
         seed = 3,
     ),
 )
-no_change_params[:model_params] = SteadyStateNODEParams(
+#= no_change_params[:model_params] = SteadyStateNODEParams(
     name = "source_1",
     n_ports = 1,
     initializer_layer_type = "dense", #Correct 
@@ -135,9 +135,9 @@ no_change_params[:model_params] = SteadyStateNODEParams(
     dynamic_width_layers = 10, #Correct 
     dynamic_activation = "hardtanh", #Correct 
     dynamic_σ2_initialization = 0.0, #Correct 
-)
+) =#
 
-no_change_params[:steady_state_solver] = (solver = "SSRootfind", abstol = 1e-4)
+#no_change_params[:steady_state_solver] = (solver = "SSRootfind", abstol = 1e-4)
 no_change_params[:dynamic_solver] =
     (solver = "Rodas5", reltol = 1e-3, abstol = 1e-6, maxiters = 1e5, force_tstops = true)
 
@@ -155,6 +155,25 @@ no_change_params[:system_path] = joinpath(
 )
 
 change_params[:rng_seed] = [1, 2]
+change_params[:model_params] = [
+    SteadyStateNODEParams(
+        name = "source_1",
+        n_ports = 1,
+        initializer_layer_type = "dense",
+        initializer_n_layer = 2,
+        initializer_width_layers = 10,
+        initializer_activation = "hardtanh",
+        dynamic_layer_type = "dense",
+        dynamic_hidden_states = 5,
+        dynamic_n_layer = 1,
+        dynamic_width_layers = 10,
+        dynamic_activation = "hardtanh",
+        dynamic_σ2_initialization = 0.0,
+    ),
+    MultiDeviceParams(name = "source_1"),
+]
+change_params[:steady_state_solver] =
+    [(solver = "SSRootfind", abstol = 1e-4), (solver = "SSRootfind", abstol = 1e10)]
 change_params[:optimizer] = [
     [
         (
@@ -162,7 +181,7 @@ change_params[:optimizer] = [
             algorithm = "Adam",
             η = 0.01,
             initial_stepnorm = 0.0,
-            maxiters = 6000,
+            maxiters = 2000,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -187,87 +206,17 @@ change_params[:optimizer] = [
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-            fix_params = [],
-            loss_function = (
-                component_weights = (
-                    initialization_weight = 1.0,
-                    dynamic_weight = 1.0,
-                    residual_penalty = 1.0,
-                ),
-                type_weights = (rmse = 1.0, mae = 0.0),
-            ),
-        ),
-        (  #Secondary 
-            sensealg = "Zygote",
-            algorithm = "Bfgs",
-            η = 0.0,
-            initial_stepnorm = 0.01,
-            maxiters = 1000,
-            lb_loss = 0.0,
-            curriculum = "simultaneous",
-            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-            fix_params = [:initializer],
-            loss_function = (
-                component_weights = (
-                    initialization_weight = 1.0,
-                    dynamic_weight = 1.0,
-                    residual_penalty = 1.0,
-                ),
-                type_weights = (rmse = 1.0, mae = 0.0),
-            ),
-        ),
-    ],
-    [
-        (
-            sensealg = "Zygote",
-            algorithm = "Adam",
-            η = 0.05,
-            initial_stepnorm = 0.0,
-            maxiters = 6000,
-            lb_loss = 0.0,
-            curriculum = "individual faults",
-            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-            fix_params = [],
-            loss_function = (
-                component_weights = (
-                    initialization_weight = 1.0,
-                    dynamic_weight = 1.0,
-                    residual_penalty = 1.0,
-                ),
-                type_weights = (rmse = 1.0, mae = 0.0),
-            ),
-        ),
-    ],
-    [
-        (
-            sensealg = "Zygote",
-            algorithm = "Adam",
-            η = 0.05,
-            initial_stepnorm = 0.0,
-            maxiters = 2000,
-            lb_loss = 0.0,
-            curriculum = "individual faults",
-            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-            fix_params = [],
-            loss_function = (
-                component_weights = (
-                    initialization_weight = 1.0,
-                    dynamic_weight = 1.0,
-                    residual_penalty = 1.0,
-                ),
-                type_weights = (rmse = 1.0, mae = 0.0),
-            ),
-        ),
-        (  #Secondary 
-            sensealg = "Zygote",
-            algorithm = "Bfgs",
-            η = 0.0,
-            initial_stepnorm = 0.01,
-            maxiters = 1000,
-            lb_loss = 0.0,
-            curriculum = "simultaneous",
-            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-            fix_params = [:initializer],
+            fix_params = [
+                :P_fraction_1,  #how P/Q is distributed among devices in MultiDevice
+                :Q_fraction_1,
+                :P_fraction_2,
+                :Q_fraction_2,
+                :P_fraction_3,
+                :Q_fraction_3,
+                :kffv_gfl,      #binary parameters in the inverters 
+                :kffv_gfm,
+                :kffi,
+            ],
             loss_function = (
                 component_weights = (
                     initialization_weight = 1.0,
