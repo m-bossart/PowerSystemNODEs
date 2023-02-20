@@ -156,7 +156,7 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 100
+total_runs = 10
 r_1 = (:η, (min = 0.0, max = 0.01))
 r_2 = (:β, (min = 0.0, max = 1.0))
 params_data = build_random_search!(base_option, total_runs, r_1, r_2)

@@ -158,7 +158,7 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 20
+total_runs = 10
 r1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
 r2 = (:initializer_n_layer, (min = 1, max = 5))
