@@ -158,7 +158,7 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 100
+total_runs = 10
 r1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
 r2 = (:initializer_n_layer, (min = 1, max = 5))
@@ -171,7 +171,7 @@ r6 = (:dynamic_width_layers, (min = 5, max = 20))
 #r = (:dynamic_σ2_initialization, (min = "na", max = "na", set = [0.0]))
 
 #OPTIMIZER PARAMETERS
-r7 = (:log_η, (min = -6.0, max = -1.0))
+r7 = (:log_η, (min = -6.0, max = -2.0))
 r8 = (:α, (min = 0.0, max = 1.0))   #tradeoff dynamic vs. initialization loss 
 r9 = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
 
