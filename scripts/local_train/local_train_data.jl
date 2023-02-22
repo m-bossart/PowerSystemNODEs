@@ -1,24 +1,28 @@
+using Revise
 using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
-include(joinpath(@__DIR__, "utils.jl"))
-if Sys.iswindows() || Sys.isapple()
-    const SCRATCH_PATH = joinpath(pwd(), "..")
-else
-    const SCRATCH_PATH = "/scratch/alpine/mabo4366"
-end
-train_folder = "exp_data_random"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+using Logging
+using Serialization
+using Plots
+include("../build_datasets/utils.jl")
+include("../hpc_train/utils.jl")
+train_folder = "train_local_data"
+system_name = "36Bus"
 project_folder = "PowerSystemNODEs"
+scratch_path = joinpath(pwd(), "..")
 
 _copy_full_system_to_train_directory(
-    SCRATCH_PATH,
+    scratch_path,
     project_folder,
     train_folder,
     system_name,
 )
 
-base_option = TrainParams(
+######################################################################################
+################################### SET PARAMETERS ###################################
+######################################################################################
+p = TrainParams(
     train_id = "BASE",
     surrogate_buses = [
         21,
@@ -49,7 +53,7 @@ base_option = TrainParams(
         ],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -72,7 +76,7 @@ base_option = TrainParams(
         ),],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -94,7 +98,7 @@ base_option = TrainParams(
         ),],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -134,9 +138,9 @@ base_option = TrainParams(
         (
             sensealg = "Zygote",
             algorithm = "Adam",
-            log_η = -2.0,
+            log_η = -9.0,
             initial_stepnorm = 0.0,
-            maxiters = 6000,
+            maxiters = 10,        #CHanged to proof of concept 
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -148,9 +152,9 @@ base_option = TrainParams(
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
-    base_path = joinpath(SCRATCH_PATH, project_folder, train_folder),
+    base_path = joinpath(scratch_path, project_folder, train_folder),
     system_path = joinpath(
-        SCRATCH_PATH,
+        scratch_path,
         project_folder,
         train_folder,
         PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
@@ -158,47 +162,41 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 100
-r1 = (:rng_seed, (min = 1, max = 1000))
-#MODEL PARAMTERS
-r2 = (:initializer_n_layer, (min = 1, max = 5))
-r3 = (:initializer_width_layers, (min = 5, max = 20))
-r4 = (:dynamic_hidden_states, (min = 5, max = 30))
-r5 = (:dynamic_n_layer, (min = 1, max = 5))
-r6 = (:dynamic_width_layers, (min = 5, max = 20))
-#r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
-#r = (:dynamic_activation, (min = "na", max = "na", set = ["relu"]))
-#r = (:dynamic_σ2_initialization, (min = "na", max = "na", set = [0.0]))
+######################################################################################
+################################# BUILD AND GENERATE #################################
+######################################################################################
+build_subsystems(p)
+mkpath(joinpath(p.base_path, PowerSimulationNODE.INPUT_FOLDER_NAME))
+generate_train_data(p)
+generate_validation_data(p)
+generate_test_data(p)
 
-#OPTIMIZER PARAMETERS
-r7 = (:log_η, (min = -6.0, max = -1.0))
-r8 = (:α, (min = 0.0, max = 1.0))   #tradeoff dynamic vs. initialization loss 
-r9 = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
+##########################
+# Visualize datasets (use before attempting to train)
+train_dataset = Serialization.deserialize(p.train_data_path)
+display(visualize_dataset(train_dataset))
+validation_dataset = Serialization.deserialize(p.validation_data_path)
+display(visualize_dataset(validation_dataset))
+test_dataset = Serialization.deserialize(p.test_data_path)
+display(visualize_dataset(test_dataset))
 
-params_data =
-    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7, r8, r9)
+######################################################################################
+####################################### TRAIN ########################################
+######################################################################################
+train(p)
+######################################################################################
+############################### ANALYZE AND VISUALIZE ################################
+######################################################################################
 ##
-#=
- hpc_params = SavioHPCTrain(;
-    username = "jdlara",
-    params_data = params_data,
-    project_folder = "PowerSystemNODEs",
-    scratch_path = "/global/home/users/jdlara",
-)
-  =#
-hpc_params = AlpineHPCTrain(;
-    username = "mabo4366",
-    params_data = params_data,
-    project_folder = project_folder,
-    train_folder = train_folder,
-    scratch_path = SCRATCH_PATH,
-    time_limit_train = "23:59:59",             #Options: ["00:30:00", "23:59:59"]
-    time_limit_generate_data = "02:00:00",
-    QoS = "normal",
-    partition = "amilan",
-    force_generate_inputs = true,
-    mb_per_cpu = 9600,  #Avoide OOM error on HPC 
-)
-generate_train_files(hpc_params)
-##                                   
-run_parallel_train(hpc_params)
+input_param_file = joinpath(p.base_path, "input_data", "input_test1.json")
+PowerSimulationNODE.serialize(p, input_param_file)
+visualize_training(input_param_file, skip = 1)
+##
+animate_training(input_param_file, skip = 1)
+a = generate_summary(joinpath(p.base_path, "output_data"))
+pp = visualize_summary(a)
+print_high_level_output_overview(a, p.base_path)
+
+#= sys = System(joinpath(pwd(), "systems", "IEEE_14bus_modified.json"))
+sys_train = System(joinpath(pwd(), "train_11", "system_data", "train_system.json"))
+sys_validation = System(joinpath(pwd(), "train_11", "system_data", "validation_system.json")) =#

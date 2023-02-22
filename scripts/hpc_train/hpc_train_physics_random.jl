@@ -122,7 +122,7 @@ base_option = TrainParams(
         (
             sensealg = "ForwardDiff",
             algorithm = "Adam",
-            η = 0.01,
+            log_η = -2.0,
             initial_stepnorm = 0.0,
             maxiters = 6000,
             lb_loss = 0.0,
@@ -157,7 +157,7 @@ base_option = TrainParams(
 )
 
 total_runs = 10
-r_1 = (:η, (min = 0.0, max = 0.01))
+r_1 = (:log_η, (min = -6.0, max = -2.0))
 r_2 = (:β, (min = 0.0, max = 1.0))
 params_data = build_random_search!(base_option, total_runs, r_1, r_2)
 

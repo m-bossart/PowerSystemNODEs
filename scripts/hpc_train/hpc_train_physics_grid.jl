@@ -122,7 +122,7 @@ base_option = TrainParams(
         (
             sensealg = "ForwardDiff",
             algorithm = "Adam",
-            η = 0.01,
+            log_η = -2.0,
             initial_stepnorm = 0.0,
             maxiters = 2000,
             lb_loss = 0.0,
@@ -156,7 +156,7 @@ base_option = TrainParams(
     ),
 )
 
-g_1 = (:η, (1e-4, 1e-3, 1e-2, 1e-1))
+g_1 = (:log_η, (-4.0, -3.0, -2.0, -1.0))
 g_2 = (:β, (0.0, 0.25, 0.5, 0.75, 1.0))
 params_data = build_grid_search!(base_option, g_1, g_2);
 

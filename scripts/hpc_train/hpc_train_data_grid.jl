@@ -134,7 +134,7 @@ base_option = TrainParams(
         (
             sensealg = "Zygote",
             algorithm = "Adam",
-            η = 0.01,
+            log_η = -2.0,
             initial_stepnorm = 0.0,
             maxiters = 2000,
             lb_loss = 0.0,
@@ -158,15 +158,15 @@ base_option = TrainParams(
     ),
 )
 
-g1 = (:rng_seed, (min = 1, max = 1000)) 
+g1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
 g2 = (:initializer_n_layer, (1, 5))
-g3 = (:initializer_width_layers, (5,20))
+g3 = (:initializer_width_layers, (5, 20))
 g4 = (:dynamic_hidden_states, (5, 30))
 g5 = (:dynamic_n_layer, (1, 5))
 g6 = (:dynamic_width_layers, (5, 20))
 #OPTIMIZER PARAMETERS
-g7 = (:η, (min = 0.0, max = 0.1))
+g7 = (:log_η, (min = -6.0, max = -1.0))
 g8 = (:α, (min = 0.0, max = 1.0))
 g9 = (:β, (min = 0.0, max = 1.0))
 params_data = build_grid_search!(base_option, g1, g2, g3, g4, g5, g6, g7, g9)

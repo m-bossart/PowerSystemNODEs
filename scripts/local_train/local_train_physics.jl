@@ -1,63 +1,49 @@
 using Revise
 using PowerSimulationNODE
-import PowerSimulationsDynamicsSurrogates
+using PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
 using Logging
 using Serialization
 using Plots
 include("../build_datasets/utils.jl")
-train_folder = "train_local3"
-system_name = "CTESN_18bus_modified"
+include("../hpc_train/utils.jl")
+train_folder = "train_local_physics"
+system_name = "36Bus"
 project_folder = "PowerSystemNODEs"
 scratch_path = joinpath(pwd(), "..")
-#Copy the full system over to the training directory.
-mkpath(
-    joinpath(
-        scratch_path,
-        project_folder,
-        train_folder,
-        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
-    ),
-)
-cp(
-    joinpath(scratch_path, project_folder, "systems", string(system_name, ".json")),
-    joinpath(
-        scratch_path,
-        project_folder,
-        train_folder,
-        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
-        string(system_name, ".json"),
-    ),
-    force = true,
-)
-cp(
-    joinpath(
-        scratch_path,
-        project_folder,
-        "systems",
-        string(system_name, "_validation_descriptors.json"),
-    ),
-    joinpath(
-        scratch_path,
-        project_folder,
-        train_folder,
-        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
-        string(system_name, "_validation_descriptors.json"),
-    ),
-    force = true,
-)
 
-#p = params_data[2]
-#PowerSimulationNODE._rebase_path!(p, joinpath(scratch_path, project_folder, train_folder))
+_copy_full_system_to_train_directory(
+    scratch_path,
+    project_folder,
+    train_folder,
+    system_name,
+)
 
 ######################################################################################
 ################################### SET PARAMETERS ###################################
 ######################################################################################
-
 p = TrainParams(
-    base_path = joinpath(scratch_path, project_folder, train_folder),
-    system_path = joinpath("systems", "CTESN_18bus_modified.json"),
-    surrogate_buses = [20],
+    train_id = "BASE",
+    surrogate_buses = [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+    ],
     train_data = (
         id = "1",
         operating_points = PSIDS.SurrogateOperatingPoint[
@@ -67,7 +53,7 @@ p = TrainParams(
         ],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -77,21 +63,20 @@ p = TrainParams(
             tsave = 0.0:0.1:10.0,
             formulation = "MassMatrix",
             all_branches_dynamic = false,
-            all_lines_dynamic = true,
+            all_lines_dynamic = false,
             seed = 1,
         ),
         system = "full",
     ),
     validation_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[
-            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
-            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
-            PSIDS.GenerationLoadScale(generation_scale = 1.1, load_scale = 1.1),
-        ],
+        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+            generation_scale = 1.0,
+            load_scale = 1.0,
+        ),],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -101,7 +86,7 @@ p = TrainParams(
             tsave = 0.0:0.1:10.0,
             formulation = "MassMatrix",
             all_branches_dynamic = false,
-            all_lines_dynamic = true,
+            all_lines_dynamic = false,
             seed = 2,
         ),
     ),
@@ -113,7 +98,7 @@ p = TrainParams(
         ),],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            5,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -123,28 +108,11 @@ p = TrainParams(
             tsave = 0.0:0.1:10.0,
             formulation = "MassMatrix",
             all_branches_dynamic = false,       #possible with current version of PSID? 
-            all_lines_dynamic = true,
-            seed = 1,
+            all_lines_dynamic = false,
+            seed = 3,
         ),
     ),
-    model_params = SteadyStateNODEObsParams(
-        name = "source_1",
-        n_ports = 1,
-        initializer_layer_type = "dense",
-        initializer_n_layer = 2,
-        initializer_width_layers = 10,
-        initializer_activation = "hardtanh",
-        dynamic_layer_type = "dense",
-        dynamic_hidden_states = 10,
-        dynamic_n_layer = 2,
-        dynamic_width_layers = 10,
-        dynamic_activation = "hardtanh",
-        dynamic_σ2_initialization = 0.0,
-        observation_layer_type = "dense",
-        observation_n_layer = 1,
-        observation_width_layers = 10,
-        observation_activation = "hardtanh",
-    ),
+    model_params = MultiDeviceParams(name = "source_1"),
     steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
     dynamic_solver = (
         solver = "Rodas5",
@@ -154,52 +122,43 @@ p = TrainParams(
         force_tstops = true,
     ),
     optimizer = [
-        (  #PRIMARY! 
-            sensealg = "Zygote",
+        (
+            sensealg = "ForwardDiff",
             algorithm = "Adam",
-            η = 0.000000000001,
+            log_η = -9.0,
             initial_stepnorm = 0.0,
-            maxiters = 5,
+            maxiters = 10,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-            fix_params = [:initializer],
-            loss_function = (
-                component_weights = (
-                    initialization_weight = 1.0,
-                    dynamic_weight = 1.0,
-                    residual_penalty = 1.0e9,
-                ),
-                type_weights = (rmse = 1.0, mae = 0.0),
-            ),
+            fix_params = [
+                :P_fraction_1,
+                :Q_fraction_1,
+                :P_fraction_2,
+                :Q_fraction_2,
+                :P_fraction_3,
+                :Q_fraction_3,
+                :kffv_gfl,
+                :kffv_gfm,
+                :kffi,
+            ],
+            loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
-        #=         (  #Secondary 
-                    sensealg = "Zygote",
-                    algorithm = "Bfgs",
-                    η = 0.0,
-                    initial_stepnorm = 0.001,
-                    maxiters = 5,
-                    lb_loss = 0.0,
-                    curriculum = "individual faults",
-                    curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
-                    fix_params = [],
-                    loss_function = (
-                        component_weights = (
-                            initialization_weight = 1.0,
-                            dynamic_weight = 1.0,
-                            residual_penalty = 1.0e9,
-                        ),
-                        type_weights = (rmse = 1.0, mae = 0.0),
-                    ),
-                ), =#
     ],
-    p_start = [],
-    validation_loss_every_n = 100, #TODO modify 
+    validation_loss_every_n = 50,
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
+    base_path = joinpath(scratch_path, project_folder, train_folder),
+    system_path = joinpath(
+        scratch_path,
+        project_folder,
+        train_folder,
+        PowerSimulationNODE.INPUT_SYSTEM_FOLDER_NAME,
+        string(system_name, ".json"),
+    ),
 )
-##
+
 ######################################################################################
 ################################# BUILD AND GENERATE #################################
 ######################################################################################
@@ -217,7 +176,7 @@ validation_dataset = Serialization.deserialize(p.validation_data_path)
 display(visualize_dataset(validation_dataset))
 test_dataset = Serialization.deserialize(p.test_data_path)
 display(visualize_dataset(test_dataset))
-##
+
 ######################################################################################
 ####################################### TRAIN ########################################
 ######################################################################################

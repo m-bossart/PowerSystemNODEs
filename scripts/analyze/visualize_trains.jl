@@ -4,7 +4,7 @@ using Plots
 using JSON3
 using Logging
 #include("../system_data/dynamic_components_data.jl")
-train_folder = joinpath("transfers", "exp_01_19_23")
+train_folder = joinpath("transfers", "exp_02_17_23")
 
 configure_logging(console_level = Logging.Info)
 visualize_level = isempty(ARGS) ? 3 : parse(Int64, ARGS[1])
@@ -40,6 +40,6 @@ for file in train_files_with_output
     output_dict =
         JSON3.read(read(joinpath(path_to_output, "high_level_outputs")), Dict{String, Any})
     n_recorded_iterations = length(output_dict["recorded_iterations"])
-    visualize_training(file, vcat(2:6, (n_recorded_iterations - 4):n_recorded_iterations))
+    visualize_training(file, vcat(2:16, (n_recorded_iterations - 14):n_recorded_iterations))
     #animate_training(file, skip = 100)
 end
