@@ -1,7 +1,7 @@
 using PowerSimulationNODE
 using Plots
 
-train_folder = joinpath("transfers", "exp_02_20_23_physics_random")
+train_folder = joinpath("transfers", "exp_02_22_23_data_random")
 #plotlyjs()
 
 a = generate_summary(joinpath(pwd(), train_folder, "output_data"))

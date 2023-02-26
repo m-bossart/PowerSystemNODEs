@@ -161,10 +161,10 @@ base_option = TrainParams(
 total_runs = 10
 r1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
-r2 = (:initializer_n_layer, (min = 1, max = 5))
+r2 = (:initializer_n_layer, (min = 1, max = 1))
 r3 = (:initializer_width_layers, (min = 5, max = 20))
 r4 = (:dynamic_hidden_states, (min = 5, max = 30))
-r5 = (:dynamic_n_layer, (min = 1, max = 5))
+r5 = (:dynamic_n_layer, (min = 1, max = 1))
 r6 = (:dynamic_width_layers, (min = 5, max = 20))
 #r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
 #r = (:dynamic_activation, (min = "na", max = "na", set = ["relu"]))
