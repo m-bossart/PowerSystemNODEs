@@ -142,7 +142,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
     ],
-    p_start = Float32[
+    p_start = Float64[
         0.2,
         0.2,
         0.4,
@@ -197,7 +197,7 @@ base_option = TrainParams(
         0.07399999999999998,
         0.19999999999999998,
         0.009999999999999998,
-    ],    
+    ],
     validation_loss_every_n = 50,
     rng_seed = 1,
     output_mode_skip = 1,

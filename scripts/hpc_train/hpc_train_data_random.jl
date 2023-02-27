@@ -166,6 +166,7 @@ r3 = (:initializer_width_layers, (min = 5, max = 20))
 r4 = (:dynamic_hidden_states, (min = 5, max = 30))
 r5 = (:dynamic_n_layer, (min = 1, max = 1))
 r6 = (:dynamic_width_layers, (min = 5, max = 20))
+r11 = (:dynamic_σ2_initialization, (min = 0.001, max = 0.01))
 #r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
 #r = (:dynamic_activation, (min = "na", max = "na", set = ["relu"]))
 #r = (:dynamic_σ2_initialization, (min = "na", max = "na", set = [0.0]))
@@ -176,7 +177,7 @@ r8 = (:α, (min = 0.0, max = 1.0))   #tradeoff dynamic vs. initialization loss
 r9 = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
 
 params_data =
-    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7, r8, r9)
+    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7, r8, r9, r11)
 ##
 #=
  hpc_params = SavioHPCTrain(;
