@@ -201,7 +201,7 @@ p = TrainParams(
         0.19999999999999998,
         0.009999999999999998,
     ],
-    validation_loss_every_n = 50,
+    check_validation_loss_iterations = collect(1000:50:6000),
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,

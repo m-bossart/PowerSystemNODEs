@@ -120,7 +120,7 @@ base_option = TrainParams(
         dynamic_n_layer = 1,
         dynamic_width_layers = 10,
         dynamic_activation = "hardtanh",
-        dynamic_σ2_initialization = 0.0,
+        dynamic_σ2_initialization = 0.01,
     ),
     steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
     dynamic_solver = (
@@ -144,7 +144,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
     ],
-    validation_loss_every_n = 50,
+    check_validation_loss_iterations = collect(1000:50:6000),
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -166,18 +166,17 @@ r3 = (:initializer_width_layers, (min = 5, max = 20))
 r4 = (:dynamic_hidden_states, (min = 5, max = 30))
 r5 = (:dynamic_n_layer, (min = 1, max = 1))
 r6 = (:dynamic_width_layers, (min = 5, max = 20))
-r11 = (:dynamic_σ2_initialization, (min = 0.001, max = 0.01))
 #r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
 #r = (:dynamic_activation, (min = "na", max = "na", set = ["relu"]))
 #r = (:dynamic_σ2_initialization, (min = "na", max = "na", set = [0.0]))
 
 #OPTIMIZER PARAMETERS
-r7 = (:log_η, (min = -6.0, max = -2.0))
-r8 = (:α, (min = 0.0, max = 1.0))   #tradeoff dynamic vs. initialization loss 
+r7 = (:log_η, (min = -6.0, max = -1.0))
+r8 = (:α, (min = 0.1, max = 0.9))   #tradeoff dynamic vs. initialization loss 
 r9 = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
 
 params_data =
-    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7, r8, r9, r11)
+    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7, r8, r9)
 ##
 #=
  hpc_params = SavioHPCTrain(;

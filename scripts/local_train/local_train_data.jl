@@ -148,7 +148,7 @@ p = TrainParams(
             loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
     ],
-    validation_loss_every_n = 50,
+    check_validation_loss_iterations = collect(1000:50:6000),
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
