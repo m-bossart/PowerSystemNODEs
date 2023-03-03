@@ -112,12 +112,12 @@ base_option = TrainParams(
         name = "source_1",
         n_ports = 1,
         initializer_layer_type = "dense",
-        initializer_n_layer = 2,
+        initializer_n_layer = 3,
         initializer_width_layers = 15,
         initializer_activation = "hardtanh",
         dynamic_layer_type = "dense",
-        dynamic_hidden_states = 5,
-        dynamic_n_layer = 1,
+        dynamic_hidden_states = 10,
+        dynamic_n_layer = 3,
         dynamic_width_layers = 15,
         dynamic_activation = "hardtanh",
         dynamic_σ2_initialization = 0.0,
@@ -158,7 +158,7 @@ base_option = TrainParams(
     ),
 )
 
-g1 = (:rng_seed, (1, 1000))
+g1 = (:rng_seed, (1, 2, 3))
 #MODEL PARAMTERS
 g2 = (:initializer_n_layer, (1, 3))
 g3 = (:initializer_width_layers, (10, 15))
@@ -166,11 +166,11 @@ g4 = (:dynamic_hidden_states, (5, 10, 15))
 g5 = (:dynamic_n_layer, (1, 3))
 g6 = (:dynamic_width_layers, (10, 15))
 #OPTIMIZER PARAMETERS
-g7 = (:log_η, ( -4.0, -3.0, -2.0))
-g8 = (:α, (0.0, 1.0))
-g9 = (:β, (0.0, 1.0))
+g7 = (:log_η, (-3.0, -2.0))
+g8 = (:α, (0.2, 0.5, 0.8))
+g9 = (:β, (0.2, 0.5, 0.8))
 g10 = (:fix_params, ([], [:initializer]))
-params_data = build_grid_search!(base_option, g2, g4, g5, g7, g10)
+params_data = build_grid_search!(base_option, g1, g7, g8, g9)
 
 #=
  hpc_params = SavioHPCTrain(;
