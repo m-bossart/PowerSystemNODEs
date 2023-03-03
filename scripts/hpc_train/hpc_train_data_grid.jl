@@ -113,12 +113,12 @@ base_option = TrainParams(
         n_ports = 1,
         initializer_layer_type = "dense",
         initializer_n_layer = 2,
-        initializer_width_layers = 10,
+        initializer_width_layers = 15,
         initializer_activation = "hardtanh",
         dynamic_layer_type = "dense",
         dynamic_hidden_states = 5,
         dynamic_n_layer = 1,
-        dynamic_width_layers = 10,
+        dynamic_width_layers = 15,
         dynamic_activation = "hardtanh",
         dynamic_σ2_initialization = 0.0,
     ),
@@ -136,7 +136,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 2000,
+            maxiters = 100,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -160,16 +160,17 @@ base_option = TrainParams(
 
 g1 = (:rng_seed, (1, 1000))
 #MODEL PARAMTERS
-g2 = (:initializer_n_layer, (1, 5))
-g3 = (:initializer_width_layers, (5, 20))
-g4 = (:dynamic_hidden_states, (5, 30))
-g5 = (:dynamic_n_layer, (1, 5))
-g6 = (:dynamic_width_layers, (5, 20))
+g2 = (:initializer_n_layer, (1, 3))
+g3 = (:initializer_width_layers, (10, 15))
+g4 = (:dynamic_hidden_states, (5, 10, 15))
+g5 = (:dynamic_n_layer, (1, 3))
+g6 = (:dynamic_width_layers, (10, 15))
 #OPTIMIZER PARAMETERS
-g7 = (:log_η, (-6.0, -1.0))
+g7 = (:log_η, ( -4.0, -3.0, -2.0))
 g8 = (:α, (0.0, 1.0))
 g9 = (:β, (0.0, 1.0))
-params_data = build_grid_search!(base_option, g1, g2, g3, g4, g5, g6, g7, g9)
+g10 = (:fix_params, ([], [:initializer]))
+params_data = build_grid_search!(base_option, g2, g4, g5, g7, g10)
 
 #=
  hpc_params = SavioHPCTrain(;
