@@ -145,7 +145,7 @@ base_option = TrainParams(
         ),
     ],
     check_validation_loss_iterations = collect(1000:50:6000),
-    rng_seed = 1,
+    rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
     base_path = joinpath(SCRATCH_PATH, project_folder, train_folder),
@@ -170,7 +170,8 @@ g7 = (:log_η, (-3.0, -2.0))
 g8 = (:α, (0.2, 0.5, 0.8))
 g9 = (:β, (0.2, 0.5, 0.8))
 g10 = (:fix_params, ([], [:initializer]))
-params_data = build_grid_search!(base_option, g4, g7, g1)
+g11 = (:steady_state_solver, ((solver = "SSRootfind", abstol = 1e-3), (solver = "SSRootfind", abstol = 1e-2)))
+params_data = build_grid_search!(base_option, g4, g7, g11)
 
 #=
  hpc_params = SavioHPCTrain(;
