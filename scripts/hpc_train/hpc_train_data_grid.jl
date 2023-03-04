@@ -158,11 +158,11 @@ base_option = TrainParams(
     ),
 )
 
-g1 = (:rng_seed, (1, 2, 3))
+g1 = (:rng_seed, (11, 22))
 #MODEL PARAMTERS
 g2 = (:initializer_n_layer, (1, 3))
 g3 = (:initializer_width_layers, (10, 15))
-g4 = (:dynamic_hidden_states, (5, 10, 15))
+g4 = (:dynamic_hidden_states, (10, 15, 20, 25, 30))
 g5 = (:dynamic_n_layer, (1, 3))
 g6 = (:dynamic_width_layers, (10, 15))
 #OPTIMIZER PARAMETERS
@@ -170,7 +170,7 @@ g7 = (:log_η, (-3.0, -2.0))
 g8 = (:α, (0.2, 0.5, 0.8))
 g9 = (:β, (0.2, 0.5, 0.8))
 g10 = (:fix_params, ([], [:initializer]))
-params_data = build_grid_search!(base_option, g1, g7, g8, g9)
+params_data = build_grid_search!(base_option, g4, g7, g1)
 
 #=
  hpc_params = SavioHPCTrain(;
