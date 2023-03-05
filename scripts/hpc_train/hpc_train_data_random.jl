@@ -120,7 +120,7 @@ base_option = TrainParams(
         dynamic_n_layer = 1,
         dynamic_width_layers = 10,
         dynamic_activation = "hardtanh",
-        dynamic_σ2_initialization = 0.01,
+        dynamic_σ2_initialization = 0.0,
     ),
     steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
     dynamic_solver = (
@@ -136,7 +136,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 6000,
+            maxiters = 4000,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -144,7 +144,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
     ],
-    check_validation_loss_iterations = collect(1000:50:6000),
+    check_validation_loss_iterations = collect(2000:50:4000),
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -158,25 +158,25 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 10
+total_runs = 100
 r1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
-r2 = (:initializer_n_layer, (min = 1, max = 1))
+r2 = (:initializer_n_layer, (min = 1, max = 3))
 r3 = (:initializer_width_layers, (min = 5, max = 20))
-r4 = (:dynamic_hidden_states, (min = 5, max = 30))
-r5 = (:dynamic_n_layer, (min = 1, max = 1))
+r4 = (:dynamic_hidden_states, (min = 3, max = 15))  #go on the smaller side
+r5 = (:dynamic_n_layer, (min = 1, max = 3))
 r6 = (:dynamic_width_layers, (min = 5, max = 20))
 #r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
 #r = (:dynamic_activation, (min = "na", max = "na", set = ["relu"]))
 #r = (:dynamic_σ2_initialization, (min = "na", max = "na", set = [0.0]))
 
 #OPTIMIZER PARAMETERS
-r7 = (:log_η, (min = -6.0, max = -1.0))
+r7 = (:log_η, (min = -4.0, max = -1.0))
 r8 = (:α, (min = 0.1, max = 0.9))   #tradeoff dynamic vs. initialization loss 
 r9 = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
 
 params_data =
-    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7, r8, r9)
+    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7)
 ##
 #=
  hpc_params = SavioHPCTrain(;
