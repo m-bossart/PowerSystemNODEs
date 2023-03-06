@@ -1425,7 +1425,7 @@ version = "0.1.3"
 
 [[deps.PowerSimulationNODE]]
 deps = ["Arrow", "CUDA", "DataFrames", "Dates", "DiffEqCallbacks", "Flux", "ForwardDiff", "IterTools", "JSON3", "LaTeXStrings", "Logging", "Mustache", "NLsolve", "Optim", "Optimization", "OptimizationOptimJL", "OptimizationOptimisers", "OrdinaryDiffEq", "Plots", "PowerFlows", "PowerSimulationsDynamics", "PowerSimulationsDynamicsSurrogates", "PowerSystems", "PrettyTables", "Random", "Requires", "SciMLBase", "SciMLSensitivity", "Serialization", "Statistics", "StatsBase", "SteadyStateDiffEq", "StructTypes", "YAML", "Zygote"]
-git-tree-sha1 = "6a9cbc40bb5e3c790aea83b581d60be0d90e3161"
+git-tree-sha1 = "094a4b90c53f4d5f27e6a15ff55d7ac5eb387fc7"
 repo-rev = "main"
 repo-url = "https://github.com/HodgeLab/PowerSimulationNODE"
 uuid = "4b7d6be9-769c-4710-86e6-88f799a27627"
