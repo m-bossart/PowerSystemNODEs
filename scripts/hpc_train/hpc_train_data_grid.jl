@@ -136,7 +136,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 100,
+            maxiters = 20,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -170,8 +170,11 @@ g7 = (:log_η, (-3.0, -2.0))
 g8 = (:α, (0.2, 0.5, 0.8))
 g9 = (:β, (0.2, 0.5, 0.8))
 g10 = (:fix_params, ([], [:initializer]))
-g11 = (:steady_state_solver, ((solver = "SSRootfind", abstol = 1e-3), (solver = "SSRootfind", abstol = 1e-2)))
-params_data = build_grid_search!(base_option, g4, g7, g11)
+g11 = (
+    :steady_state_solver,
+    ((solver = "SSRootfind", abstol = 1e-3), (solver = "SSRootfind", abstol = 1e-2)),
+)
+params_data = build_grid_search!(base_option, g1)
 
 #=
  hpc_params = SavioHPCTrain(;
@@ -191,7 +194,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
-    force_generate_inputs = true,
+    train_folder_for_data = "exp_data_random", #"train_local_data",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
