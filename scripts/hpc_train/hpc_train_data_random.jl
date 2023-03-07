@@ -20,36 +20,22 @@ _copy_full_system_to_train_directory(
 
 base_option = TrainParams(
     train_id = "BASE",
-    surrogate_buses = [
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        31,
-        32,
-        33,
-        34,
-        35,
-        36,
-        37,
-        38,
-        39,
-    ],
+    surrogate_buses = vcat(21:29, 31:39),
     train_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[
-            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
-            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
-            PSIDS.GenerationLoadScale(generation_scale = 1.1, load_scale = 1.1),
-        ],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            10,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            10,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -60,19 +46,25 @@ base_option = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 1,
+            seed = 11,
         ),
         system = "full",
     ),
     validation_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            5,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            4,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -83,18 +75,24 @@ base_option = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 2,
+            seed = 22,
         ),
     ),
     test_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            5,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            4,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -103,9 +101,9 @@ base_option = TrainParams(
             tstops = 0.0:0.1:10.0,
             tsave = 0.0:0.1:10.0,
             formulation = "MassMatrix",
-            all_branches_dynamic = false,       #possible with current version of PSID? 
+            all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 3,
+            seed = 33,
         ),
     ),
     model_params = SteadyStateNODEParams(
@@ -144,7 +142,8 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
     ],
-    check_validation_loss_iterations = collect(2000:50:4000),
+    check_validation_loss_iterations = collect(1000:50:4000),
+    validation_loss_termination = "false", 
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -158,12 +157,12 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 100
+total_runs = 50
 r1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
 r2 = (:initializer_n_layer, (min = 1, max = 3))
 r3 = (:initializer_width_layers, (min = 5, max = 20))
-r4 = (:dynamic_hidden_states, (min = 3, max = 15))  #go on the smaller side
+r4 = (:dynamic_hidden_states, (min = 3, max = 15))
 r5 = (:dynamic_n_layer, (min = 1, max = 3))
 r6 = (:dynamic_width_layers, (min = 5, max = 20))
 #r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
@@ -172,11 +171,10 @@ r6 = (:dynamic_width_layers, (min = 5, max = 20))
 
 #OPTIMIZER PARAMETERS
 r7 = (:log_η, (min = -4.0, max = -1.0))
-r8 = (:α, (min = 0.1, max = 0.9))   #tradeoff dynamic vs. initialization loss 
-r9 = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
+#r = (:α, (min = 0.1, max = 0.9))   #tradeoff dynamic vs. initialization loss 
+#r = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
 
-params_data =
-    build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7)
+params_data = build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7)
 ##
 #=
  hpc_params = SavioHPCTrain(;
@@ -196,7 +194,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
-    force_generate_inputs = true,
+    train_folder_for_data = nothing,
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
