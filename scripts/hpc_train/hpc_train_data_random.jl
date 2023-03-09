@@ -142,7 +142,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
     ],
-    check_validation_loss_iterations = collect(1000:50:4000),
+    check_validation_loss_iterations = collect(2000:50:4000),
     validation_loss_termination = "false", 
     rng_seed = 1,
     output_mode_skip = 1,
@@ -194,7 +194,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data = nothing,
+    train_folder_for_data = "data_xiao_loadstep_100_20_20",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
