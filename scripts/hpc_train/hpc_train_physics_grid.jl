@@ -122,7 +122,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 4000,
+            maxiters = 5000,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -196,8 +196,8 @@ base_option = TrainParams(
         0.19999999999999998,
         0.009999999999999998,
     ],
-    check_validation_loss_iterations = collect(2000:50:4000),
-    validation_loss_termination = "false", 
+    check_validation_loss_iterations = [], #collect(2000:50:4000),
+    validation_loss_termination = "false",
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -211,7 +211,7 @@ base_option = TrainParams(
     ),
 )
 
-g1 = (:log_η, (-4.0, -3.0, -2.0, -1.0))
+g1 = (:log_η, (-7.0, -6.0, -5.0, -4.0, -3.0))
 g2 = (
     :fix_params,
     (

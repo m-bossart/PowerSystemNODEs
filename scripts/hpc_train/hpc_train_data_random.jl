@@ -134,7 +134,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 4000,
+            maxiters = 5000,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -142,8 +142,8 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
         ),
     ],
-    check_validation_loss_iterations = collect(2000:50:4000),
-    validation_loss_termination = "false", 
+    check_validation_loss_iterations = [], #collect(2000:50:4000),
+    validation_loss_termination = "false",
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -162,7 +162,7 @@ r1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
 r2 = (:initializer_n_layer, (min = 1, max = 3))
 r3 = (:initializer_width_layers, (min = 5, max = 20))
-r4 = (:dynamic_hidden_states, (min = 3, max = 15))
+r4 = (:dynamic_hidden_states, (min = 5, max = 12))
 r5 = (:dynamic_n_layer, (min = 1, max = 3))
 r6 = (:dynamic_width_layers, (min = 5, max = 20))
 #r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
@@ -170,7 +170,7 @@ r6 = (:dynamic_width_layers, (min = 5, max = 20))
 #r = (:dynamic_σ2_initialization, (min = "na", max = "na", set = [0.0]))
 
 #OPTIMIZER PARAMETERS
-r7 = (:log_η, (min = -4.0, max = -1.0))
+r7 = (:log_η, (min = -5.0, max = -2.0))
 #r = (:α, (min = 0.1, max = 0.9))   #tradeoff dynamic vs. initialization loss 
 #r = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
 
