@@ -60,6 +60,38 @@ set_active_power!(get_component(GenericBattery, sys, "GF_Battery-26"), 1.0)
 
 set_active_power!(get_component(GenericBattery, sys, "Gf_Battery-22"), 1.0)
 
+set_magnitude!(get_bus(get_component(GenericBattery, sys, "Gf_Battery-21")), 1.018)
+
+solve_powerflow!(sys)
+
+gf_bats = get_components(x -> isa(get_freq_estimator(get_dynamic_injector(x)), KauraPLL), GenericBattery, sys)
+
+for b in gf_bats
+    !get_available(b) && continue
+    bus = get_bus(b)
+    set_bustype!(bus, BusTypes.PQ)
+    @show get_name(b)
+    @show get_reactive_power(b)
+    @show get_active_power(b)
+    @show cos(atan(get_reactive_power(b)/get_active_power(b)))
+    #set_reactive_power!(b, 0.0)
+end
+
+gfm_bats = get_components(x -> !isa(get_freq_estimator(get_dynamic_injector(x)), KauraPLL), GenericBattery, sys)
+
+for b in gfm_bats
+    !get_available(b) && continue
+    bus = get_bus(b)
+    set_bustype!(bus, BusTypes.PV)
+    @show get_name(b)
+    @show get_reactive_power(b)
+    @show get_active_power(b)
+    @show cos(atan(get_reactive_power(b)/get_active_power(b)))
+    #set_reactive_power!(b, 0.0)
+end
+
+solve_powerflow!(sys)
+
 sim = Simulation(ResidualModel, sys, mktempdir(), (0.0, 10.0))
 sm = small_signal_analysis(sim)
 summary_eigenvalues(sm)
