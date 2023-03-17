@@ -16,6 +16,7 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
 [compat]
 Kaleido_jll = "0.1.0"
+PowerSystems = "<2.0.0"
 
 [extras]
 CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
