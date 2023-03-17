@@ -356,6 +356,7 @@ git-tree-sha1 = "15a24aa2414fad34136724c4a16e556f264ddd11"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
 version = "6.122.1"
 
+
 [[deps.DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "Markdown", "NLsolve", "Parameters", "RecipesBase", "RecursiveArrayTools", "SciMLBase", "StaticArraysCore"]
 git-tree-sha1 = "b497f63a13fe37e03ed7ac72d71b72aad17b46c4"
@@ -1428,9 +1429,7 @@ version = "0.11.0"
 
 [[deps.PowerSimulationsDynamicsSurrogates]]
 deps = ["InfrastructureSystems", "NLsolve", "OrdinaryDiffEq", "PowerFlows", "PowerSimulationsDynamics", "PowerSystems", "Random", "Sundials"]
-git-tree-sha1 = "d978b7ad46877f98ef17c9078db0c14ffaed2363"
-repo-rev = "main"
-repo-url = "https://github.com/m-bossart/PowerSimulationsDynamicsSurrogates.jl"
+path = "/Users/jlara/.julia/dev/PowerSimulationsDynamicsSurrogates"
 uuid = "de933368-4bb5-470a-b916-9fff09bf2720"
 version = "0.1.0"
 
@@ -1745,6 +1744,12 @@ deps = ["IfElse"]
 git-tree-sha1 = "08be5ee09a7632c32695d954a602df96a877bf0d"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
 version = "0.8.6"
+
+[[deps.StaticArrayInterface]]
+deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "Static", "SuiteSparse"]
+git-tree-sha1 = "fd5f417fd7e103c121b0a0b4a6902f03991111f4"
+uuid = "0d7ed370-da01-4f52-bd93-41d350b8b718"
+version = "1.3.0"
 
 [[deps.StaticArrayInterface]]
 deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "Static", "SuiteSparse"]

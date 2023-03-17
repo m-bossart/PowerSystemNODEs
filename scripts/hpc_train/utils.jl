@@ -39,4 +39,5 @@ function _copy_full_system_to_train_directory(
         ),
         force = true,
     )
+    return
 end
