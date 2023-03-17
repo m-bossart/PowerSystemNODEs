@@ -2,6 +2,7 @@
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+Kaleido_jll = "f7e6163d-2fa5-5f23-b69c-1db539e41963"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 PlotlyJS = "f0f68f2c-4968-5e81-91da-67840de0976a"
@@ -14,7 +15,7 @@ PowerSystems = "bcd98974-b02a-5e2f-9ee0-a103f5c450dd"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
 [compat]
-Plots = "< 1.25.10"
+Kaleido_jll = "0.1.0"
 
 [extras]
 CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
