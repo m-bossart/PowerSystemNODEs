@@ -42,14 +42,19 @@ base_option = TrainParams(
     ],
     train_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[
-            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
-            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
-            PSIDS.GenerationLoadScale(generation_scale = 1.1, load_scale = 1.1),
-        ],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            10,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -60,19 +65,25 @@ base_option = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 1,
+            seed = 11,
         ),
         system = "full",
     ),
     validation_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            5,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            2,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -83,18 +94,24 @@ base_option = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 2,
+            seed = 22,
         ),
     ),
     test_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            5,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            15,
+            2,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -103,9 +120,9 @@ base_option = TrainParams(
             tstops = 0.0:0.1:10.0,
             tsave = 0.0:0.1:10.0,
             formulation = "MassMatrix",
-            all_branches_dynamic = false,       #possible with current version of PSID? 
+            all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 3,
+            seed = 33,
         ),
     ),
     model_params = SteadyStateNODEParams(
@@ -113,13 +130,13 @@ base_option = TrainParams(
         n_ports = 1,
         initializer_layer_type = "dense",
         initializer_n_layer = 3,
-        initializer_width_layers = 15,
-        initializer_activation = "hardtanh",
+        initializer_width_layers_relative_input = 15,
+        initializer_activation = "tanh",
         dynamic_layer_type = "dense",
         dynamic_hidden_states = 10,
         dynamic_n_layer = 3,
-        dynamic_width_layers = 15,
-        dynamic_activation = "hardtanh",
+        dynamic_width_layers_relative_input = 15,
+        dynamic_activation = "tanh",
         dynamic_σ2_initialization = 0.0,
     ),
     steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
@@ -136,12 +153,12 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 20,
+            maxiters = 100,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
             fix_params = [],
-            loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e9),
         ),
     ],
     check_validation_loss_iterations = collect(1000:50:6000),
@@ -158,24 +175,13 @@ base_option = TrainParams(
     ),
 )
 
-g1 = (:rng_seed, (11, 22))
-#MODEL PARAMTERS
-g2 = (:initializer_n_layer, (1, 3))
-g3 = (:initializer_width_layers, (10, 15))
-g4 = (:dynamic_hidden_states, (10, 15, 20, 25, 30))
-g5 = (:dynamic_n_layer, (1, 3))
-g6 = (:dynamic_width_layers, (10, 15))
-#OPTIMIZER PARAMETERS
-g7 = (:log_η, (-3.0, -2.0))
-g8 = (:α, (0.2, 0.5, 0.8))
-g9 = (:β, (0.2, 0.5, 0.8))
-g10 = (:fix_params, ([], [:initializer]))
-g11 = (
-    :steady_state_solver,
-    ((solver = "SSRootfind", abstol = 1e-3), (solver = "SSRootfind", abstol = 1e-2)),
-)
-params_data = build_grid_search!(base_option, g1)
+g1 = (:dynamic_last_layer_bias, (true, false))
+g2 = (:dynamic_hidden_states, (10, 15))
+g3 = (:dynamic_width_layers_relative_input, (-5, 0, 5))
+g4 = (:log_η, (-4.0, -3.0, -2.0))
 
+params_data = build_grid_search!(base_option, g1, g2, g3, g4)
+##
 #=
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
@@ -194,7 +200,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data = "train_local_data",
+    train_folder_for_data = nothing, #"train_local_data",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)

@@ -93,13 +93,13 @@ base_option = TrainParams(
         n_ports = 1,
         initializer_layer_type = "dense",
         initializer_n_layer = 2,
-        initializer_width_layers = 10,
-        initializer_activation = "hardtanh",
+        initializer_width_layers_relative_input = 10,
+        initializer_activation = "tanh",
         dynamic_layer_type = "dense",
         dynamic_hidden_states = 5,
         dynamic_n_layer = 1,
-        dynamic_width_layers = 10,
-        dynamic_activation = "hardtanh",
+        dynamic_width_layers_relative_input = 10,
+        dynamic_activation = "tanh",
         dynamic_σ2_initialization = 0.0,
     ),
     steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
@@ -141,10 +141,10 @@ base_option = TrainParams(
 g1 = (:rng_seed, (min = 1, max = 1000))
 #MODEL PARAMTERS
 g2 = (:initializer_n_layer, (1, 5))
-g3 = (:initializer_width_layers, (5, 20))
+g3 = (:initializer_width_layers_relative_input, (5, 20))
 g4 = (:dynamic_hidden_states, (5, 30))
 g5 = (:dynamic_n_layer, (1, 5))
-g6 = (:dynamic_width_layers, (5, 20))
+g6 = (:dynamic_width_layers_relative_input, (5, 20))
 #OPTIMIZER PARAMETERS
 g7 = (:log_η, (-5.0, -4.0, -3.0, -2.0))
 g8 = (:α, (0.0, 0.33, 0.66, 1.0))
