@@ -301,8 +301,6 @@ function visualize_dataset(dataset::Vector{PSIDS.SteadyStateNODEData})
     total_faults = length(dataset)
     stable_faults = length(filter(x -> x.stable == true, dataset))
     unstable_faults = length(filter(x -> x.stable == false, dataset))
-    @warn "\n connecting resistance: $(dataset[1].connecting_resistance)\n"
-    @warn "\n connecting reactance: $(dataset[1].connecting_reactance)\n"
     @warn "\n total faults: $total_faults \n stable faults: $stable_faults \n unstable faults: $unstable_faults \n"
     l_tstops = [length(d.tstops) for d in dataset]
     l_tsteps = [length(d.tsteps) for d in dataset]

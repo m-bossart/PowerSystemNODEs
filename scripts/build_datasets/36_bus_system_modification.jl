@@ -4,7 +4,7 @@ using PowerSimulationsDynamics
 using Sundials
 using Random
 
-sys = System("systems/36Bus.json")
+sys = System("systems/36Bus_CR.json")
 
 power_flow_results_pre = run_powerflow(sys)
 
