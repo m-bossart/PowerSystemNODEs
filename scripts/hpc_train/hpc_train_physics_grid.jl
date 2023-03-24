@@ -36,7 +36,7 @@ base_option = TrainParams(
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            10,
+            3,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -65,7 +65,7 @@ base_option = TrainParams(
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            4,
+            2,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -93,7 +93,7 @@ base_option = TrainParams(
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            4,
+            2,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -137,7 +137,7 @@ base_option = TrainParams(
                 :kffv_gfm,
                 :kffi,
             ],
-            loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
     p_start = Float64[
@@ -431,7 +431,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data = "data_xiao_loadstep_100_20_20",
+    train_folder_for_data = "exp_data_grid", #"data_xiao_loadstep_100_20_20",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
