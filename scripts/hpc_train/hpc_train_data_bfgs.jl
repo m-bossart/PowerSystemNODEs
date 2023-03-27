@@ -165,7 +165,7 @@ base_option = TrainParams(
             curriculum = "simultaneous",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
             fix_params = [],
-            loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
     p_start = Float32[

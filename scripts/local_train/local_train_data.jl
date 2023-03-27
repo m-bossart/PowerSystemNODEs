@@ -8,7 +8,7 @@ using Plots
 include("../build_datasets/utils.jl")
 include("../hpc_train/utils.jl")
 train_folder = "train_local_data"
-system_name = "36Bus"
+system_name = "36Bus_CR"
 project_folder = "PowerSystemNODEs"
 scratch_path = joinpath(pwd(), "..")
 
@@ -46,14 +46,19 @@ p = TrainParams(
     ],
     train_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[
-            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
-            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
-            PSIDS.GenerationLoadScale(generation_scale = 1.1, load_scale = 1.1),
-        ],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            5,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            3,
+            6,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -64,19 +69,25 @@ p = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 1,
+            seed = 11,
         ),
         system = "full",
     ),
     validation_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            5,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            3,
+            2,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -87,18 +98,24 @@ p = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 2,
+            seed = 22,
         ),
     ),
     test_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            5,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            3,
+            2,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -107,9 +124,9 @@ p = TrainParams(
             tstops = 0.0:0.1:10.0,
             tsave = 0.0:0.1:10.0,
             formulation = "MassMatrix",
-            all_branches_dynamic = false,       #possible with current version of PSID? 
+            all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 3,
+            seed = 33,
         ),
     ),
     model_params = SteadyStateNODEParams(
@@ -117,12 +134,12 @@ p = TrainParams(
         n_ports = 1,
         initializer_layer_type = "dense",
         initializer_n_layer = 2,
-        initializer_width_layers = 10,
+        initializer_width_layers_relative_input = 7,
         initializer_activation = "hardtanh",
         dynamic_layer_type = "dense",
         dynamic_hidden_states = 5,
         dynamic_n_layer = 1,
-        dynamic_width_layers = 10,
+        dynamic_width_layers_relative_input = 1,
         dynamic_activation = "hardtanh",
         dynamic_σ2_initialization = 0.0,
     ),
@@ -145,7 +162,7 @@ p = TrainParams(
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
             fix_params = [],
-            loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
     check_validation_loss_iterations = collect(1000:50:6000),
@@ -167,19 +184,22 @@ p = TrainParams(
 ######################################################################################
 build_subsystems(p)
 mkpath(joinpath(p.base_path, PowerSimulationNODE.INPUT_FOLDER_NAME))
+##
 generate_train_data(p)
+train_dataset = Serialization.deserialize(p.train_data_path)
+
+display(visualize_dataset(train_dataset))
 generate_validation_data(p)
 generate_test_data(p)
 
 ##########################
 # Visualize datasets (use before attempting to train)
-train_dataset = Serialization.deserialize(p.train_data_path)
-display(visualize_dataset(train_dataset))
+
 validation_dataset = Serialization.deserialize(p.validation_data_path)
 display(visualize_dataset(validation_dataset))
 test_dataset = Serialization.deserialize(p.test_data_path)
 display(visualize_dataset(test_dataset))
-
+##
 ######################################################################################
 ####################################### TRAIN ########################################
 ######################################################################################

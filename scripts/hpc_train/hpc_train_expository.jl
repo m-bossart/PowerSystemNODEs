@@ -7,8 +7,8 @@ if Sys.iswindows() || Sys.isapple()
 else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
-train_folder = "exp_expository"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "CTESN_18bus_modified"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+train_folder = "exp_data_grid_expository"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+system_name = "36Bus_CR"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 _copy_full_system_to_train_directory(
@@ -20,15 +20,34 @@ _copy_full_system_to_train_directory(
 
 base_option = TrainParams(
     train_id = "BASE",
-    surrogate_buses = [20],
+    surrogate_buses = [
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+    ],
     train_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = PSIDS.SurrogateOperatingPoint[
+            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
+            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
+        ],
         perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            [[PSIDS.RandomLoadChange(time = 3.0, load_multiplier_range = (0.0, 2.0))]],
             1,
         ),
         params = PSIDS.GenerateDataParams(
@@ -40,16 +59,22 @@ base_option = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 1,
+            seed = 11,
         ),
         system = "full",
     ),
     validation_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            1,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             1,
@@ -63,15 +88,21 @@ base_option = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 2,
+            seed = 22,
         ),
     ),
     test_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
-            generation_scale = 1.0,
-            load_scale = 1.0,
-        ),],
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            1,
+        ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             1,
@@ -83,9 +114,9 @@ base_option = TrainParams(
             tstops = 0.0:0.1:10.0,
             tsave = 0.0:0.1:10.0,
             formulation = "MassMatrix",
-            all_branches_dynamic = false,       #possible with current version of PSID? 
+            all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 3,
+            seed = 33,
         ),
     ),
     model_params = SteadyStateNODEParams(
@@ -93,14 +124,15 @@ base_option = TrainParams(
         n_ports = 1,
         initializer_layer_type = "dense",
         initializer_n_layer = 2,
-        initializer_width_layers_relative_input = 10,
+        initializer_width_layers_relative_input = 5,
         initializer_activation = "tanh",
         dynamic_layer_type = "dense",
-        dynamic_hidden_states = 5,
-        dynamic_n_layer = 1,
-        dynamic_width_layers_relative_input = 10,
+        dynamic_hidden_states = 10,
+        dynamic_n_layer = 3,
+        dynamic_width_layers_relative_input = 5,
         dynamic_activation = "tanh",
         dynamic_σ2_initialization = 0.0,
+        dynamic_last_layer_bias = false,
     ),
     steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
     dynamic_solver = (
@@ -114,18 +146,18 @@ base_option = TrainParams(
         (
             sensealg = "Zygote",
             algorithm = "Adam",
-            log_η = -2.0,
+            log_η = -3.0,
             initial_stepnorm = 0.0,
-            maxiters = 6000,
+            maxiters = 2000,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
             fix_params = [],
-            loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = collect(1000:50:6000),
-    rng_seed = 1,
+    check_validation_loss_iterations = [], #collect(1000:50:6000),
+    rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
     base_path = joinpath(SCRATCH_PATH, project_folder, train_folder),
@@ -137,20 +169,12 @@ base_option = TrainParams(
         string(system_name, ".json"),
     ),
 )
+g1 = (:rng_seed, (1, 2))
+g2 = (:dynamic_hidden_states, (5, 10))
+g3 = (:log_η, (-4.0, -3.0, -2.0))
 
-g1 = (:rng_seed, (min = 1, max = 1000))
-#MODEL PARAMTERS
-g2 = (:initializer_n_layer, (1, 5))
-g3 = (:initializer_width_layers_relative_input, (5, 20))
-g4 = (:dynamic_hidden_states, (5, 30))
-g5 = (:dynamic_n_layer, (1, 5))
-g6 = (:dynamic_width_layers_relative_input, (5, 20))
-#OPTIMIZER PARAMETERS
-g7 = (:log_η, (-5.0, -4.0, -3.0, -2.0))
-g8 = (:α, (0.0, 0.33, 0.66, 1.0))
-g9 = (:β, (0.0, 0.33, 0.66, 1.0))
-params_data = build_grid_search!(base_option, g7, g8, g9)
-
+params_data = build_grid_search!(base_option, g1, g2, g3);
+##
 #=
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
