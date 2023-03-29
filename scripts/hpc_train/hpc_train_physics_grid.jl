@@ -207,7 +207,18 @@ base_option = TrainParams(
         30.29304511089825,
         42.88608307322704,
         5.813096036884918,
-        ⋮,
+        11.866710997978585,
+        0.0,
+        600.0,
+        512.595400211324,
+        0.08625118210709415,
+        4.482557140304551,
+        0.049999999999999996,
+        0.0020000000000000005,
+        0.049999999999999996,
+        0.09999999999999999,
+        0.009999999999999998,
+        18000.0,
         1574.074074074074,
         0.04991162961714421,
         30.411293940730967,
@@ -281,7 +292,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data =  nothing, #"exp_data_grid", #"data_xiao_loadstep_100_20_20",
+    train_folder_for_data = nothing, #"exp_data_grid", #"data_xiao_loadstep_100_20_20",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
