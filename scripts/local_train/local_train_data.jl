@@ -8,7 +8,7 @@ using Plots
 include("../build_datasets/utils.jl")
 include("../hpc_train/utils.jl")
 train_folder = "train_local_data"
-system_name = "36Bus_CR"
+system_name = "36Bus"
 project_folder = "PowerSystemNODEs"
 scratch_path = joinpath(pwd(), "..")
 
@@ -46,20 +46,36 @@ p = TrainParams(
     ],
     train_data = (
         id = "1",
-        operating_points = repeat(
-            [
-                RandomOperatingPointXiao(
-                    generator_voltage_range = (0.94, 1.06),
-                    generator_power_range = (0.0, 1.0),
-                    load_multiplier_range = (0.5, 1.5),
-                ),
-            ],
-            5,
-        ),
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            6,
-        ),
+        #=         operating_points = repeat(
+                    [
+                        RandomOperatingPointXiao(
+                            generator_voltage_range = (0.94, 1.06),  #(0.94, 1.06)
+                            generator_power_range = (0.2, 1.2),      #(0.0, 1.0)
+                            load_multiplier_range = (0.2, 1.8),      #(0.5, 1.5)
+                        ),
+                    ],
+                    5, #5
+                 ), =#
+
+        operating_points = PSIDS.SurrogateOperatingPoint[PSIDS.GenerationLoadScale(
+            generation_scale = 1.0,
+            load_scale = 1.0,
+        ),],
+        #=         perturbations = repeat(
+                    [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+                    2, #6
+                ),   =#
+        #=         perturbations = repeat(
+                    [[PSIDS.RandomBranchTrip(time = 1.0)]],
+                    2,
+                ), =#
+        #=          perturbations = repeat(
+                    [[PSIDS.RandomGenerationChange(time = 1.0, P_multiplier_range = (0.0, 2.0))]],
+                    2, #6
+                ),   =#
+        perturbations = [[
+            PowerSimulationsDynamics.BranchTrip(1.0, Line, "Bus 6-Bus 26-i_2"),
+        ]],
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -69,7 +85,7 @@ p = TrainParams(
             formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 11,
+            seed = 11, #11
         ),
         system = "full",
     ),
@@ -184,11 +200,11 @@ p = TrainParams(
 ######################################################################################
 build_subsystems(p)
 mkpath(joinpath(p.base_path, PowerSimulationNODE.INPUT_FOLDER_NAME))
-##
 generate_train_data(p)
 train_dataset = Serialization.deserialize(p.train_data_path)
-
 display(visualize_dataset(train_dataset))
+
+##
 generate_validation_data(p)
 generate_test_data(p)
 
@@ -199,7 +215,7 @@ validation_dataset = Serialization.deserialize(p.validation_data_path)
 display(visualize_dataset(validation_dataset))
 test_dataset = Serialization.deserialize(p.test_data_path)
 display(visualize_dataset(test_dataset))
-##
+
 ######################################################################################
 ####################################### TRAIN ########################################
 ######################################################################################

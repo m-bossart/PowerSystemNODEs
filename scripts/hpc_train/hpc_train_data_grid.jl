@@ -177,8 +177,8 @@ base_option = TrainParams(
 g1 = (:dynamic_n_layer, (1, 2, 3))
 #g1 = (:dynamic_last_layer_bias, (true, false))
 g2 = (:dynamic_hidden_states, (5, 10, 15))
-g3 = (:dynamic_width_layers_relative_input, (0, 5, 10))
-g4 = (:log_η, (-4.0, -3.0, -2.0))
+g3 = (:dynamic_width_layers_relative_input, (0, 10))
+g4 = (:log_η, (-2.5, -2.0, -1.5, -1.0))
 
 params_data = build_grid_search!(base_option, g1, g2, g3, g4)
 ##
@@ -200,7 +200,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data = "exp_data_grid", # nothing, #"train_local_data",
+    train_folder_for_data = nothing, #"exp_data_grid", # nothing, #"train_local_data",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)

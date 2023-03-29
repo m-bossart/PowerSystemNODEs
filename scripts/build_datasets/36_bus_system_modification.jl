@@ -56,9 +56,10 @@ function transform_load_to_constant_impedance(load::PSY.StandardLoad)
 end
 
 sys = System("systems/36Bus_CR.json")
-for l in get_components(StandardLoad, sys)
-    transform_load_to_constant_impedance(l)
-end 
+#for l in get_components(StandardLoad, sys)
+#    transform_load_to_constant_impedance(l)
+#end 
+#to_json(sys, "systems/36Bus_CR.json"; force = true)
 
 power_flow_results_pre = run_powerflow(sys)
 
@@ -104,6 +105,17 @@ gfm_bats = get_components(
 
 for b in gfm_bats
     @show gfm_available = round(rand()) > 0
+    gfm_available =
+        !(
+            get_name(b) in [
+                "Gfl_Battery-26",
+                "Gfl_Battery-21",
+                "Gfl_Battery-33",
+                "Gfl_Battery-36",
+                "Gfl_Battery-3",
+                "Gfl_Battery-22",
+            ]
+        )
     gfl_bat = collect(get_components(x -> get_bus(x) == get_bus(b), GenericBattery, sys))
     gfl_bat =
         filter(x -> !isa(get_freq_estimator(get_dynamic_injector(x)), KauraPLL), gfl_bat)
@@ -119,7 +131,7 @@ set_active_power!(get_component(GenericBattery, sys, "GFM_Battery-26"), 1.0)
 
 set_active_power!(get_component(GenericBattery, sys, "Gfl_Battery-22"), 1.0)
 
-set_magnitude!(get_bus(get_component(GenericBattery, sys, "Gfl_Battery-21")), 1.018)
+set_magnitude!(get_bus(get_component(GenericBattery, sys, "Gfl_Battery-21")), 1.018) #1.018
 
 run_powerflow!(sys)
 

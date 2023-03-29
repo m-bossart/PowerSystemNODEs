@@ -50,12 +50,12 @@ for i in get_components(
         p_gfl[PSN.gfl_indices[:params][:rated_voltage_gfl]] += get_rated_voltage(converter)
         p_gfl[PSN.gfl_indices[:params][:rated_current_gfl]] += get_rated_current(converter)
 
-        active_power = get_active_power(get_outer_control(i))
+        active_power = PSY.get_active_power_control(get_outer_control(i))
         p_gfl[PSN.gfl_indices[:params][:Kp_p]] += get_Kp_p(active_power)
         p_gfl[PSN.gfl_indices[:params][:Ki_p]] += get_Ki_p(active_power)
         p_gfl[PSN.gfl_indices[:params][:ωz_gfl]] += get_ωz(active_power)
 
-        reactive_power = get_reactive_power(get_outer_control(i))
+        reactive_power = PSY.get_reactive_power_control(get_outer_control(i))
         p_gfl[PSN.gfl_indices[:params][:Kp_q]] += get_Kp_q(reactive_power)
         p_gfl[PSN.gfl_indices[:params][:Ki_q]] += get_Ki_q(reactive_power)
         p_gfl[PSN.gfl_indices[:params][:ωf_gfl]] += get_ωf(reactive_power)
@@ -103,11 +103,11 @@ for i in get_components(
         p_gfm[PSN.gfm_indices[:params][:rated_voltage_gfm]] += get_rated_voltage(converter)
         p_gfm[PSN.gfm_indices[:params][:rated_current_gfm]] += get_rated_current(converter)
 
-        active_power = get_active_power(get_outer_control(i))
+        active_power = PSY.get_active_power_control(get_outer_control(i))
         p_gfm[PSN.gfm_indices[:params][:Rp]] += get_Rp(active_power)
         p_gfm[PSN.gfm_indices[:params][:ωz_gfm]] += get_ωz(active_power)
 
-        reactive_power = get_reactive_power(get_outer_control(i))
+        reactive_power = PSY.get_reactive_power_control(get_outer_control(i))
         p_gfm[PSN.gfm_indices[:params][:kq]] += get_kq(reactive_power)
         p_gfm[PSN.gfm_indices[:params][:ωf_gfm]] += get_ωf(reactive_power)
 
@@ -139,28 +139,28 @@ end
 p_gfm = p_gfm ./ n_gfm
 
 n_load = 0
-for i in get_components(PowerLoad, sys)
+for i in get_components(StandardLoad, sys)
     if get_number(get_bus(i)) in surrogate_buses
         n_load += 1
-        if i.model == LoadModels.ConstantImpedance
-            p_load[PSN.zip_indices[:params][:max_active_power_Z]] += 1.0
-            p_load[PSN.zip_indices[:params][:max_reactive_power_Z]] += 1.0
-        elseif i.model == LoadModels.ConstantCurrent
-            p_load[PSN.zip_indices[:params][:max_active_power_I]] += 1.0
-            p_load[PSN.zip_indices[:params][:max_reactive_power_I]] += 1.0
-        elseif i.model == LoadModels.ConstantPower
-            p_load[PSN.zip_indices[:params][:max_active_power_P]] += 1.0
-            p_load[PSN.zip_indices[:params][:max_reactive_power_P]] += 1.0
-        else
-            @error "Load model not found"
-        end
+        p_load[PSN.zip_indices[:params][:max_active_power_Z]] +=
+            get_max_impedance_active_power(i)
+        p_load[PSN.zip_indices[:params][:max_reactive_power_Z]] +=
+            get_max_impedance_reactive_power(i)
+        p_load[PSN.zip_indices[:params][:max_active_power_I]] +=
+            get_max_current_active_power(i)
+        p_load[PSN.zip_indices[:params][:max_reactive_power_I]] +=
+            get_max_current_reactive_power(i)
+        p_load[PSN.zip_indices[:params][:max_active_power_P]] +=
+            get_max_constant_active_power(i)
+        p_load[PSN.zip_indices[:params][:max_reactive_power_P]] +=
+            get_max_constant_reactive_power(i)
     end
 end
 p_load = p_load ./ n_load
 p_powers = [n_load, n_load, n_gfl, n_gfl, n_gfm, n_gfm] ./ (n_load + n_gfl + n_gfm) #hardcoded order...
 
 p_start = vcat(p_powers, p_load, p_gfl, p_gfm)
-
+##
 p = TrainParams(
     train_id = "BASE",
     surrogate_buses = surrogate_buses,
