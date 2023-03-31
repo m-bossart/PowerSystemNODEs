@@ -1,5 +1,6 @@
 using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
+using Serialization
 const PSIDS = PowerSimulationsDynamicsSurrogates
 include(joinpath(@__DIR__, "utils.jl"))
 if Sys.iswindows() || Sys.isapple()
