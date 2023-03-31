@@ -1,6 +1,7 @@
 using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 using Serialization
+using JSON3
 const PSIDS = PowerSimulationsDynamicsSurrogates
 include(joinpath(@__DIR__, "utils.jl"))
 if Sys.iswindows() || Sys.isapple()
@@ -42,7 +43,7 @@ base_option = TrainParams(
     model_params = p.model_params,
     steady_state_solver = p.steady_state_solver,
     dynamic_solver = p.dynamic_solver,
-    optimizer = optimizer = [
+    optimizer = [
         (
             sensealg = "Zygote",
             algorithm = "Bfgs",
