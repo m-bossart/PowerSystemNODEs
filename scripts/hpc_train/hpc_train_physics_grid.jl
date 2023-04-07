@@ -1,4 +1,3 @@
-#TODO - decide on base data-set.
 using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 const PSIDS = PowerSimulationsDynamicsSurrogates
@@ -9,8 +8,16 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_physics_grid"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus_CR"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36Bus"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
+
+if Sys.iswindows() || Sys.isapple()
+    include(joinpath(pwd(), "scripts", "hpc_train", "utils.jl"))
+    sys = System(joinpath("systems", string(system_name, ".json")))
+    surrogate_buses = vcat(21:29, 21:39)
+    θ = determine_p_start(sys, surrogate_buses)
+    Serialization.serialize(joinpath("starting_parameters", "p_start_physics"), θ)
+end
 
 _copy_full_system_to_train_directory(
     SCRATCH_PATH,
@@ -32,11 +39,11 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            10,
+            23,
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            3,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -65,7 +72,7 @@ base_option = TrainParams(
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            2,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -93,7 +100,7 @@ base_option = TrainParams(
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            2,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -185,64 +192,8 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    p_start = Float64[
-        0.2,
-        0.2,
-        0.4,
-        0.4,
-        0.4,
-        0.4,
-        1.05,
-        0.0,
-        0.0,
-        0.3833333333333333,
-        0.0,
-        0.0,
-        18000.0,
-        4722.222222222223,
-        1.983545670222595,
-        30.679163077003267,
-        41.818017263110214,
-        3.899221794528066,
-        30.29304511089825,
-        42.88608307322704,
-        5.813096036884918,
-        11.866710997978585,
-        0.0,
-        600.0,
-        512.595400211324,
-        0.08625118210709415,
-        4.482557140304551,
-        0.049999999999999996,
-        0.0020000000000000005,
-        0.049999999999999996,
-        0.09999999999999999,
-        0.009999999999999998,
-        18000.0,
-        1574.074074074074,
-        0.04991162961714421,
-        30.411293940730967,
-        0.20184277498172729,
-        1006.7417873074659,
-        0.5795841261573581,
-        752.8680589602519,
-        0.0,
-        0.0,
-        0.19950887723724778,
-        1.2844250396816308,
-        1.2844250396816308,
-        0.0,
-        47.58554332620471,
-        0.19751498120113153,
-        600.0,
-        0.049999999999999996,
-        0.0020000000000000005,
-        0.049999999999999996,
-        0.09999999999999999,
-        0.009999999999999998,
-    ],
-    check_validation_loss_iterations = [], #collect(2000:50:4000),
-    validation_loss_termination = "false",
+    check_validation_loss_iterations = [],
+    p_start = Serialization.deserialize(joinpath("starting_parameters", "p_start_physics")),
     rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,

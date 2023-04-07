@@ -7,7 +7,7 @@ if Sys.iswindows() || Sys.isapple()
 else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
-train_folder = "exp_data_grid_full"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+train_folder = "exp_data_grid"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
 system_name = "36Bus"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
@@ -20,26 +20,7 @@ _copy_full_system_to_train_directory(
 
 base_option = TrainParams(
     train_id = "BASE",
-    surrogate_buses = [
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        31,
-        32,
-        33,
-        34,
-        35,
-        36,
-        37,
-        38,
-        39,
-    ],
+    surrogate_buses = vcat(21:29, 31:39),
     train_data = (
         id = "1",
         operating_points = repeat(
@@ -161,7 +142,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = [], #collect(1000:50:6000),
+    check_validation_loss_iterations = [],
     rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
