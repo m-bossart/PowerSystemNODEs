@@ -138,7 +138,7 @@ base_option = TrainParams(
         dynamic_width_layers_relative_input = 5,
         dynamic_activation = "tanh",
         dynamic_σ2_initialization = 0.0,
-        dynamic_last_layer_bias = false, 
+        dynamic_last_layer_bias = false,
     ),
     steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
     dynamic_solver = (
@@ -175,7 +175,7 @@ base_option = TrainParams(
         string(system_name, ".json"),
     ),
 )
-g = (:rng_seed, (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20))
+g = (:rng_seed, (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20))
 #g1 = (:dynamic_last_layer_bias, (true, false))
 #g2 = (:dynamic_hidden_states, (10, 15))
 #g3 = (:dynamic_width_layers_relative_input, (-5, 0, 5))

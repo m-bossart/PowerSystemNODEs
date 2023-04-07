@@ -139,7 +139,7 @@ base_option = TrainParams(
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
             fix_params = [],
-            loss_function = (α = 0.0, β = 0.5, residual_penalty = 1.0e9),
+            loss_function = (α = 0.0, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
     check_validation_loss_iterations = [], #collect(2000:50:4000),

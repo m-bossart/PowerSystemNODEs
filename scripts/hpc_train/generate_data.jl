@@ -1,6 +1,5 @@
 using PowerSystems
 using PowerSimulationNODE
-using Serialization
 using Logging
 
 train_params_file = split(ARGS[1], ",")[1]

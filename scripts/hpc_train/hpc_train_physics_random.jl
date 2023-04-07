@@ -139,7 +139,7 @@ base_option = TrainParams(
                 :kffv_gfm,
                 :kffi,
             ],
-            loss_function = (α = 0.5, β = 0.5, residual_penalty = 1.0e9),
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
     p_start = Float64[

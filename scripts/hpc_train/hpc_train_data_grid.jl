@@ -7,8 +7,8 @@ if Sys.iswindows() || Sys.isapple()
 else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
-train_folder = "exp_data_grid_full"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus_CR"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+train_folder = "exp_data_grid"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+system_name = "36Bus"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 _copy_full_system_to_train_directory(
@@ -20,26 +20,7 @@ _copy_full_system_to_train_directory(
 
 base_option = TrainParams(
     train_id = "BASE",
-    surrogate_buses = [
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        31,
-        32,
-        33,
-        34,
-        35,
-        36,
-        37,
-        38,
-        39,
-    ],
+    surrogate_buses = vcat(21:29, 31:39),
     train_data = (
         id = "1",
         operating_points = repeat(
@@ -50,11 +31,11 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            10,
+            23,
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            3,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -83,7 +64,7 @@ base_option = TrainParams(
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            2,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -111,7 +92,7 @@ base_option = TrainParams(
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            2,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -153,7 +134,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 5000,
+            maxiters = 20000,
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -161,7 +142,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = [], #collect(1000:50:6000),
+    check_validation_loss_iterations = [],
     rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -177,8 +158,8 @@ base_option = TrainParams(
 g1 = (:dynamic_n_layer, (1, 2, 3))
 #g1 = (:dynamic_last_layer_bias, (true, false))
 g2 = (:dynamic_hidden_states, (5, 10, 15))
-g3 = (:dynamic_width_layers_relative_input, (0, 5, 10))
-g4 = (:log_η, (-4.0, -3.0, -2.0))
+g3 = (:dynamic_width_layers_relative_input, (0, 10))
+g4 = (:log_η, (-2.5, -2.0, -1.5))
 
 params_data = build_grid_search!(base_option, g1, g2, g3, g4)
 ##
@@ -196,11 +177,11 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "23:59:59",             #Options: ["00:30:00", "23:59:59"]
+    time_limit_train = "71:59:59",             #Options: ["00:30:00", "23:59:59"]
     time_limit_generate_data = "02:00:00",
-    QoS = "normal",
+    QoS = "long",
     partition = "amilan",
-    train_folder_for_data = "exp_data_grid", # nothing, #"train_local_data",
+    train_folder_for_data = nothing, #"exp_data_grid", # nothing, #"train_local_data",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
