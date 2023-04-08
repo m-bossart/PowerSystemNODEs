@@ -244,7 +244,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "0-02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data = nothing, #"exp_data_grid", #"data_xiao_loadstep_100_20_20",
+    train_folder_for_data = "data_newsys_20_5_5", #"exp_data_grid", #"data_xiao_loadstep_100_20_20",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
