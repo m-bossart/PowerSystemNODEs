@@ -5,7 +5,7 @@ using JSON3
 using Logging
 using Serialization
 #include("../system_data/dynamic_components_data.jl")
-train_folder = joinpath("transfers", "exp_03_25_23_data_grid")
+train_folder = joinpath("transfers", "exp_04_16_23_data_grid_long")
 
 configure_logging(console_level = Logging.Info)
 visualize_level = isempty(ARGS) ? 3 : parse(Int64, ARGS[1])
@@ -34,7 +34,7 @@ train_files_with_output = filter(
 gr()
 run_validation = true
 a = time()
-for file in [train_files_with_output[52]]
+for file in train_files_with_output
     rebase_path!(file, train_folder)
     params = TrainParams(file)
     path_to_output = joinpath(params.output_data_path, params.train_id)

@@ -8,7 +8,7 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_data_random"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus_CR"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36Bus_fix"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 _copy_full_system_to_train_directory(
@@ -31,11 +31,11 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            10,
+            23,
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            10,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -60,11 +60,11 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            5,
+            20,
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            4,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -88,11 +88,11 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            5,
+            100,
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            4,
+            1,
         ),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
@@ -110,41 +110,40 @@ base_option = TrainParams(
         name = "source_1",
         n_ports = 1,
         initializer_layer_type = "dense",
-        initializer_n_layer = 2,
-        initializer_width_layers_relative_input = 10,
+        initializer_n_layer = 3,
+        initializer_width_layers_relative_input = 15,
         initializer_activation = "tanh",
         dynamic_layer_type = "dense",
-        dynamic_hidden_states = 5,
-        dynamic_n_layer = 1,
-        dynamic_width_layers_relative_input = 10,
+        dynamic_hidden_states = 10,
+        dynamic_n_layer = 3,
+        dynamic_width_layers_relative_input = 15,
         dynamic_activation = "tanh",
         dynamic_σ2_initialization = 0.0,
-    ),
-    steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
-    dynamic_solver = (
-        solver = "Rodas5",
-        reltol = 1e-3,
-        abstol = 1e-6,
-        maxiters = 1e5,
-        force_tstops = true,
     ),
     optimizer = [
         (
             sensealg = "Zygote",
             algorithm = "Adam",
-            log_η = -2.0,
+            log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 100,
+            maxiters = 1000,
+            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            dynamic_solver = (
+                solver = "Rodas5",
+                reltol = 1e-3,
+                abstol = 1e-6,
+                maxiters = 1e5,
+                force_tstops = true,
+            ),
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
             fix_params = [],
-            loss_function = (α = 0.0, β = 1.0, residual_penalty = 1.0e2),
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = [], #collect(2000:50:4000),
-    validation_loss_termination = "false",
-    rng_seed = 1,
+    check_validation_loss_iterations = [],
+    rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
     base_path = joinpath(SCRATCH_PATH, project_folder, train_folder),
@@ -157,22 +156,15 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 50
-r1 = (:rng_seed, (min = 1, max = 1000))
-#MODEL PARAMTERS
-r2 = (:initializer_n_layer, (min = 1, max = 3))
-r3 = (:initializer_width_layers_relative_input, (min = 5, max = 20))
-r4 = (:dynamic_hidden_states, (min = 5, max = 12))
-r5 = (:dynamic_n_layer, (min = 1, max = 3))
-r6 = (:dynamic_width_layers_relative_input, (min = 5, max = 20))
-#r = (:initializer_activation, (min = "na", max = "na", set = ["relu"]))
-#r = (:dynamic_activation, (min = "na", max = "na", set = ["relu"]))
-#r = (:dynamic_σ2_initialization, (min = "na", max = "na", set = [0.0]))
-
-#OPTIMIZER PARAMETERS
-r7 = (:log_η, (min = -5.0, max = -2.0))
-#r = (:α, (min = 0.1, max = 0.9))   #tradeoff dynamic vs. initialization loss 
-#r = (:β, (min = 0.0, max = 1.0))   #tradeoff mae vs. rmse 
+total_runs = 100
+#r1 = (:rng_seed, (min = 1, max = 1000))
+r1 = (:initializer_n_layer, (min = 1, max = 2))
+r2 = (:initializer_width_layers_relative_input, (min = 0, max = 15))
+r3 = (:dynamic_n_layer, (min = 1, max = 2))
+r4 = (:dynamic_hidden_states, (min = 2, max = 10))
+r5 = (:dynamic_width_layers_relative_input, (min = 0, max = 15))
+r6 = (:log_η, (min = -3.0, max = -1.0))
+r7 = (:α, (min = 0.1, max = 0.9))
 
 params_data = build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7)
 ##
@@ -190,11 +182,11 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "23:59:59",             #Options: ["00:30:00", "23:59:59"]
-    time_limit_generate_data = "02:00:00",
+    time_limit_train = "0-23:59:59",
+    time_limit_generate_data = "0-02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data = "data_xiao_loadstep_100_20_20",
+    train_folder_for_data = nothing,
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)

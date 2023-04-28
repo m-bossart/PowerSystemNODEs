@@ -1,3 +1,4 @@
+using PowerSystems
 using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 using Serialization
@@ -9,7 +10,7 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_physics_grid"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36Bus_fix"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 if Sys.iswindows() || Sys.isapple()
@@ -69,7 +70,7 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            5,
+            20,
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
@@ -97,7 +98,7 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            5,
+            100,
         ),
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
@@ -116,21 +117,21 @@ base_option = TrainParams(
         ),
     ),
     model_params = MultiDeviceParams(name = "source_1"),
-    steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
-    dynamic_solver = (
-        solver = "Rodas5",
-        reltol = 1e-3,
-        abstol = 1e-6,
-        maxiters = 1e5,
-        force_tstops = true,
-    ),
     optimizer = [
         (
             sensealg = "ForwardDiff",
             algorithm = "Adam",
             log_η = -2.0,
             initial_stepnorm = 0.0,
-            maxiters = 5000,
+            maxiters = 1000,
+            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            dynamic_solver = (
+                solver = "Rodas5",
+                reltol = 1e-3,
+                abstol = 1e-6,
+                maxiters = 1e5,
+                force_tstops = true,
+            ),
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -141,12 +142,14 @@ base_option = TrainParams(
                 #:Q_fraction_2,
                 #:P_fraction_3,
                 #:Q_fraction_3,
+                :base_power_zip,
                 :max_active_power_Z,
                 :max_active_power_I,
                 :max_active_power_P,
                 :max_reactive_power_Z,
                 :max_reactive_power_I,
                 :max_reactive_power_P,
+                :base_power_gfl,
                 :rated_voltage_gfl,
                 :rated_current_gfl,
                 #:Kp_p,
@@ -167,6 +170,7 @@ base_option = TrainParams(
                 :cf_gfl,
                 :lg_gfl,
                 :rg_gfl,
+                :base_power_gfm,
                 :rated_voltage_gfm,
                 :rated_current_gfm,
                 #:Rp,    
@@ -210,20 +214,6 @@ base_option = TrainParams(
 
 g1 =
     (:log_η, (-7.0, -6.5, -6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0))
-
-#= full_param_symbols = vcat(
-    :P_fraction_1,
-    :Q_fraction_1,
-    :P_fraction_2,
-    :Q_fraction_2,
-    :P_fraction_3,
-    :Q_fraction_3,
-    PowerSimulationNODE.ordered_param_symbols(ZIPParams()),
-    PowerSimulationNODE.ordered_param_symbols(GFLParams()),
-    PowerSimulationNODE.ordered_param_symbols(GFMParams()),
-)
- =#
-#g3 = (:β, (0.0, 0.25, 0.5, 0.75, 1.0))
 params_data = build_grid_search!(base_option, g1);
 
 #=
@@ -240,11 +230,11 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "0-23:59:59",           
+    time_limit_train = "0-23:59:59",
     time_limit_generate_data = "0-02:00:00",
     QoS = "normal",
     partition = "amilan",
-    train_folder_for_data = "data_newsys_20_5_5", #"exp_data_grid", #"data_xiao_loadstep_100_20_20",
+    train_folder_for_data = nothing,
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)

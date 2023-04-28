@@ -10,23 +10,19 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_data_bfgs"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus_CR"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36Bus_fix"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 if Sys.iswindows() || Sys.isapple()
     starting_file =
         joinpath("transfers", "exp_03_30_23_data_grid", "input_data", "train_028.json")
     θ = _get_parameters_from_prior_training(starting_file)
-    Serialization.serialize(joinpath("starting_parameters", "starting_parameters"), θ)
+    Serialization.serialize(joinpath("starting_parameters", "p_start_bfgs"), θ)
     p = TrainParams(starting_file)
-    PowerSimulationNODE.serialize(
-        p,
-        joinpath("starting_parameters", "starting_parameters_trainparams"),
-    )
+    PowerSimulationNODE.serialize(p, joinpath("starting_parameters", "trainparams_bfgs"))
 end
 
-
-p = TrainParams(joinpath("starting_parameters", "starting_parameters_trainparams"))
+p = TrainParams(joinpath("starting_parameters", "trainparams_bfgs"))
 _copy_full_system_to_train_directory(
     SCRATCH_PATH,
     project_folder,
@@ -41,8 +37,6 @@ base_option = TrainParams(
     validation_data = p.validation_data,
     test_data = p.test_data,
     model_params = p.model_params,
-    steady_state_solver = p.steady_state_solver,
-    dynamic_solver = p.dynamic_solver,
     optimizer = [
         (
             sensealg = "Zygote",
@@ -50,6 +44,8 @@ base_option = TrainParams(
             log_η = -2.0,
             initial_stepnorm = 0.01,
             maxiters = 100,
+            steadystate_solver = p.steady_state_solver,
+            dynamic_solver = p.dynamic_solver,
             lb_loss = 0.0,
             curriculum = "simultaneous",    #must be simultaneous for BFGS? 
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -57,9 +53,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    p_start = Serialization.deserialize(
-        joinpath("starting_parameters", "starting_parameters"),
-    ),
+    p_start = Serialization.deserialize(joinpath("starting_parameters", "p_start_bfgs")),
     check_validation_loss_iterations = p.check_validation_loss_iterations,
     validation_loss_termination = p.validation_loss_termination,
     rng_seed = p.rng_seed,
@@ -93,8 +87,8 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "23:59:59",             #Options: ["00:30:00", "23:59:59"]
-    time_limit_generate_data = "02:00:00",
+    time_limit_train = "0-23:59:59",
+    time_limit_generate_data = "0-02:00:00",
     QoS = "normal",
     partition = "amilan",
     train_folder_for_data = "xiao_loadchange_30_10_10",

@@ -8,7 +8,7 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_data_grid_expository"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus_CR"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36Bus_fix"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 _copy_full_system_to_train_directory(
@@ -134,14 +134,6 @@ base_option = TrainParams(
         dynamic_σ2_initialization = 0.0,
         dynamic_last_layer_bias = false,
     ),
-    steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
-    dynamic_solver = (
-        solver = "Rodas5",
-        reltol = 1e-3,
-        abstol = 1e-6,
-        maxiters = 1e5,
-        force_tstops = true,
-    ),
     optimizer = [
         (
             sensealg = "Zygote",
@@ -149,6 +141,14 @@ base_option = TrainParams(
             log_η = -3.0,
             initial_stepnorm = 0.0,
             maxiters = 2000,
+            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            dynamic_solver = (
+                solver = "Rodas5",
+                reltol = 1e-3,
+                abstol = 1e-6,
+                maxiters = 1e5,
+                force_tstops = true,
+            ),
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -189,8 +189,8 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "23:59:59",             #Options: ["00:30:00", "23:59:59"]
-    time_limit_generate_data = "02:00:00",
+    time_limit_train = "0-23:59:59",
+    time_limit_generate_data = "0-02:00:00",
     QoS = "normal",
     partition = "amilan",
     train_folder_for_data = nothing,
