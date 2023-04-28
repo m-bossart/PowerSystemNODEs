@@ -10,7 +10,7 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_data_bfgs"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36Bus_fix"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36bus_fix"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 if Sys.iswindows() || Sys.isapple()
@@ -44,7 +44,7 @@ base_option = TrainParams(
             log_η = -2.0,
             initial_stepnorm = 0.01,
             maxiters = 100,
-            steadystate_solver = p.steady_state_solver,
+            steadystate_solver = p.steadystate_solver,
             dynamic_solver = p.dynamic_solver,
             lb_loss = 0.0,
             curriculum = "simultaneous",    #must be simultaneous for BFGS? 

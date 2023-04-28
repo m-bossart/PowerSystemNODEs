@@ -8,7 +8,7 @@ using Plots
 include("../build_datasets/utils.jl")
 include("../hpc_train/utils.jl")
 train_folder = "train_local_physics"
-system_name = "36Bus"
+system_name = "36bus_fix"
 project_folder = "PowerSystemNODEs"
 scratch_path = joinpath(pwd(), "..")
 

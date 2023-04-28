@@ -10,7 +10,7 @@ using Plots
 include("build_datasets/utils.jl")
 include("hpc_train/utils.jl")
 train_folder = "exp_starting_parameters"
-system_name = "36Bus_fix"
+system_name = "36bus_fix"
 project_folder = "PowerSystemNODEs"
 scratch_path = joinpath(pwd(), "..")
 
