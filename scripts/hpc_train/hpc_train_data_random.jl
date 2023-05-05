@@ -1,5 +1,6 @@
 using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
+using Random
 const PSIDS = PowerSimulationsDynamicsSurrogates
 include(joinpath(@__DIR__, "utils.jl"))
 if Sys.iswindows() || Sys.isapple()
@@ -143,6 +144,8 @@ base_option = TrainParams(
         ),
     ],
     check_validation_loss_iterations = [],
+    final_validation_loss = true, 
+    time_limit_buffer_seconds = 7200,
     rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -166,6 +169,7 @@ r5 = (:dynamic_width_layers_relative_input, (min = 0, max = 15))
 r6 = (:log_η, (min = -3.0, max = -1.0))
 r7 = (:α, (min = 0.1, max = 0.9))
 
+Random.seed!(1234)
 params_data = build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7)
 ##
 #=
@@ -187,7 +191,7 @@ hpc_params = AlpineHPCTrain(;
     QoS = "normal",
     partition = "amilan",
     train_folder_for_data = nothing,
-    mb_per_cpu = 9600,  #Avoide OOM error on HPC 
+    mb_per_cpu = 11250,  #Avoide OOM error on HPC?
 )
 generate_train_files(hpc_params)
 ##                                   
