@@ -128,7 +128,7 @@ base_option = TrainParams(
             log_η = -7.0,
             initial_stepnorm = 0.0,
             maxiters = 1000,
-            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            steadystate_solver = (solver = "NLSolveJL", abstol = 1e-4),
             dynamic_solver = (
                 solver = "Rodas5",
                 reltol = 1e-3,
