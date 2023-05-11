@@ -127,7 +127,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 1000,
+            maxiters = 15000,
             steadystate_solver = (solver = "NLSolveJL", reltol = 1e-4, abstol = 1e-4, termination = "RelSafeBest"),
             dynamic_solver = (
                 solver = "Rodas5",
