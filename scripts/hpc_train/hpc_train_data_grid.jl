@@ -7,7 +7,7 @@ if Sys.iswindows() || Sys.isapple()
 else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
-train_folder = "exp_data_grid_timing"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+train_folder = "exp_data_grid"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
 system_name = "36bus_fix"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
@@ -122,14 +122,20 @@ base_option = TrainParams(
     ),
     optimizer = [
         (
-            sensealg = "Zygote",
+            auto_sensealg = "Zygote",
             algorithm = "Adam",
             log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 50,
-            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            maxiters = 15000,
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
             dynamic_solver = (
                 solver = "Rodas5",
+                sensealg = "QuadratureAdjoint",
                 reltol = 1e-3,
                 abstol = 1e-6,
                 maxiters = 1e5,
@@ -143,6 +149,8 @@ base_option = TrainParams(
         ),
     ],
     check_validation_loss_iterations = [],
+    final_validation_loss = true,
+    time_limit_buffer_seconds = 7200,
     rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -156,15 +164,101 @@ base_option = TrainParams(
     ),
 )
 
-g1 = (:initializer_n_layer, (1, 2))
-g2 = (:initializer_width_layers_relative_input, (0, 15))
-g3 = (:dynamic_n_layer, (1, 2))
-g4 = (:dynamic_hidden_states, (2, 10))
-g5 = (:dynamic_width_layers_relative_input, (0, 15))
+g1 = (
+    :optimizer,
+    ([
+        (
+            auto_sensealg = "Zygote",
+            algorithm = "Adam",
+            log_η = -2.0,
+            initial_stepnorm = 0.0,
+            maxiters = 10000,
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
+            dynamic_solver = (
+                solver = "Rodas5",
+                sensealg = "QuadratureAdjoint",
+                reltol = 1e-3,
+                abstol = 1e-6,
+                maxiters = Int64(1e5),
+                force_tstops = true,
+            ),
+            lb_loss = 0.0,
+            curriculum = "individual faults",
+            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
+            fix_params = Symbol[],
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
+        )
+    ],
+    [
+        (
+            auto_sensealg = "Zygote",
+            algorithm = "Adam",
+            log_η = -2.0,
+            initial_stepnorm = 0.0,
+            maxiters = 5000,
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
+            dynamic_solver = (
+                solver = "Rodas5",
+                sensealg = "QuadratureAdjoint",
+                reltol = 1e-3,
+                abstol = 1e-6,
+                maxiters = Int64(1e5),
+                force_tstops = true,
+            ),
+            lb_loss = 0.0,
+            curriculum = "individual faults",
+            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
+            fix_params = Symbol[],
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
+        ),
+        (
+            auto_sensealg = "Zygote",
+            algorithm = "Bfgs",
+            log_η = -2.0,
+            initial_stepnorm = 0.0,
+            maxiters = 100,
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
+            dynamic_solver = (
+                solver = "Rodas5",
+                sensealg = "QuadratureAdjoint",
+                reltol = 1e-3,
+                abstol = 1e-6,
+                maxiters = Int64(1e5),
+                force_tstops = true,
+            ),
+            lb_loss = 0.0,
+            curriculum = "simultaneous",
+            curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
+            fix_params = Symbol[],
+            loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
+        )
+    ],
+)
+)
+#g1 = (:initializer_n_layer, (1, 2))
+#g2 = (:initializer_width_layers_relative_input, (0, 15))
+#g3 = (:dynamic_n_layer, (1, 2))
+#g4 = (:dynamic_hidden_states, (2, 10))
+#g5 = (:dynamic_width_layers_relative_input, (0, 15))
 #g6 = (:log_η, (-2.5, -2.0))
 #TODO- add in alpha for random search! 
 
-params_data = build_grid_search!(base_option, g1, g2, g3, g4, g5)
+params_data = build_grid_search!(base_option, g1)
 ##
 #Add a code to check the number of parameters in each option. 
 
@@ -188,7 +282,7 @@ hpc_params = AlpineHPCTrain(;
     QoS = "normal",
     partition = "amilan",
     train_folder_for_data = nothing, #"exp_data_grid", # nothing, #"train_local_data",
-    mb_per_cpu = 9600,  #Avoide OOM error on HPC 
+    mb_per_cpu = 11250,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)
 ##                                   
