@@ -127,8 +127,13 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 15000,
-            steadystate_solver = (solver = "NLSolveJL", reltol = 1e-4, abstol = 1e-4, termination = "RelSafeBest"),
+            maxiters = 30000,
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
             dynamic_solver = (
                 solver = "Rodas5",
                 sensealg = "QuadratureAdjoint",
@@ -145,7 +150,7 @@ base_option = TrainParams(
         ),
     ],
     check_validation_loss_iterations = [],
-    final_validation_loss = true, 
+    final_validation_loss = true,
     time_limit_buffer_seconds = 7200,
     rng_seed = 11,
     output_mode_skip = 1,
@@ -160,13 +165,13 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 100
+total_runs = 200
 #r1 = (:rng_seed, (min = 1, max = 1000))
-r1 = (:initializer_n_layer, (min = 1, max = 2))
-r2 = (:initializer_width_layers_relative_input, (min = 0, max = 15))
-r3 = (:dynamic_n_layer, (min = 1, max = 2))
-r4 = (:dynamic_hidden_states, (min = 2, max = 10))
-r5 = (:dynamic_width_layers_relative_input, (min = 0, max = 15))
+r1 = (:initializer_n_layer, (min = 1, max = 3))
+r2 = (:initializer_width_layers_relative_input, (min = 0, max = 20))
+r3 = (:dynamic_n_layer, (min = 1, max = 3))
+r4 = (:dynamic_hidden_states, (min = 2, max = 15))
+r5 = (:dynamic_width_layers_relative_input, (min = 0, max = 20))
 r6 = (:log_η, (min = -3.0, max = -1.0))
 r7 = (:α, (min = 0.1, max = 0.9))
 
@@ -187,12 +192,12 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "0-23:59:59",
+    time_limit_train = "5-23:59:59",
     time_limit_generate_data = "0-02:00:00",
-    QoS = "normal",
+    QoS = "long",
     partition = "amilan",
-    train_folder_for_data = nothing,
-    mb_per_cpu = 11250,  #Avoide OOM error on HPC?
+    train_folder_for_data = "data",
+    mb_per_cpu = 9600,  #Avoide OOM error on HPC
 )
 generate_train_files(hpc_params)
 ##                                   

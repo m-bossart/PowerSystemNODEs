@@ -119,14 +119,20 @@ base_option = TrainParams(
     model_params = MultiDeviceParams(name = "source_1"),
     optimizer = [
         (
-            sensealg = "ForwardDiff",
+            auto_sensealg = "ForwardDiff",
             algorithm = "Adam",
-            log_η = -2.0,
+            log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 1000,
-            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            maxiters = 30000,
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
             dynamic_solver = (
                 solver = "Rodas5",
+                sensealg = "QuadratureAdjoint",
                 reltol = 1e-3,
                 abstol = 1e-6,
                 maxiters = 1e5,
@@ -199,6 +205,8 @@ base_option = TrainParams(
     ],
     check_validation_loss_iterations = [],
     p_start = Serialization.deserialize(joinpath("starting_parameters", "p_start_physics")),
+    final_validation_loss = true,
+    time_limit_buffer_seconds = 7200,
     rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -230,12 +238,12 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "0-23:59:59",
+    time_limit_train = "5-23:59:59",
     time_limit_generate_data = "0-02:00:00",
-    QoS = "normal",
+    QoS = "long",
     partition = "amilan",
-    train_folder_for_data = nothing,
-    mb_per_cpu = 9600,  #Avoide OOM error on HPC 
+    train_folder_for_data = "data",
+    mb_per_cpu = 9600,  #Avoide OOM error on HPC
 )
 generate_train_files(hpc_params)
 ##                                   
