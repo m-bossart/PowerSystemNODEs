@@ -1,0 +1,28 @@
+
+source_1 (PowerSimulationsDynamicsSurrogates.SteadyStateNODE):
+   name: source_1
+   initializer_structure: Tuple{Int64, Int64, Bool, String}[(3, 18, 1, "tanh"), (18, 18, 1, "tanh"), (18, 18, 1, "tanh"), (18, 12, 1, "identity")]
+   initializer_parameters: [0.0]
+   node_structure: Tuple{Int64, Int64, Bool, String}[(14, 29, 1, "tanh"), (29, 29, 1, "tanh"), (29, 29, 1, "tanh"), (29, 10, 0, "identity")]
+   node_parameters: [0.0]
+   input_min: [-0.14132034681808225, 0.9870385636056281]
+   input_max: [0.09322679959975304, 1.0382651565915557]
+   input_lims: (-1.0, 1.0)
+   target_min: [-0.14870148536083538, -1.1419085454518787]
+   target_max: [0.6643530141643215, -0.7744748864326373]
+   target_lims: (-1.0, 1.0)
+   base_power: 100.0
+   states: [:r1, :r2, :r3, :r4, :r5, :r6, :r7, :r8, :r9, :r10]
+   n_states: 10
+   ext: Dict{String, Any}()
+   internal: InfrastructureSystems.InfrastructureSystemsInternalChain(
+  Dense(3 => 18, tanh),                 # 72 parameters
+  Dense(18 => 18, tanh),                # 342 parameters
+  Dense(18 => 18, tanh),                # 342 parameters
+  Dense(18 => 12),                      # 228 parameters
+)                   # Total: 8 arrays, 984 parameters, 4.344 KiB.Chain(
+  Dense(14 => 29, tanh),                # 435 parameters
+  Dense(29 => 29, tanh),                # 870 parameters
+  Dense(29 => 29, tanh),                # 870 parameters
+  Dense(29 => 10; bias=false),          # 290 parameters
+)                   # Total: 7 arrays, 2_465 parameters, 10.090 KiB.Chain(#179)

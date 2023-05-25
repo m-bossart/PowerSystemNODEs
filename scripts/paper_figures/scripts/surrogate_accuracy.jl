@@ -15,21 +15,21 @@ include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
 dataset_to_compare = "test"
 results_to_compare = [
     (
-        exp_folder = "transfers/exp_05_22_23_data_grid",
+        exp_folder = "data_from_hpc/05_22_23_data_grid",
         train_id = "002",
         chosen_iteration = 0,
         name = "data-driven surrogate-02",
         generate_data = false,
     ),
     (
-        exp_folder = "transfers/exp_05_22_23_data_grid",
+        exp_folder = "data_from_hpc/05_22_23_data_grid",
         train_id = "003",
         chosen_iteration = 0,
         name = "data-driven surrogate-03",
         generate_data = false,
     ),
     (
-        exp_folder = "transfers/exp_05_22_23_data_grid",
+        exp_folder = "data_from_hpc/05_22_23_data_grid",
         train_id = "004",
         chosen_iteration = 0,
         name = "data-driven surrogate-4",
