@@ -53,8 +53,8 @@ results_to_compare = [
 
 #Fix all the paths if the results have been copied to a new directory
 for r in results_to_compare
-    file =  joinpath(pwd(), exp_folder, PowerSimulationNODE.INPUT_FOLDER_NAME, string("train_", r.train_id, ".json"))
-    rebase_path!(file, exp_folder)
+    file =  joinpath(pwd(), r.exp_folder, PowerSimulationNODE.INPUT_FOLDER_NAME, string("train_", r.train_id, ".json"))
+    rebase_path!(file, r.exp_folder)
 end 
 
 # REGENERATE DATASETS 
