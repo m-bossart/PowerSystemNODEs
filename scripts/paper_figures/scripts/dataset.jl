@@ -90,6 +90,7 @@ p.plot.layout.yaxis4 =
     attr(title = "Imag current (p.u.)", showgrid = true, zeroline = false)
 p.plot.layout.font_size = 18
 #display(p)
+mkpath(joinpath(@__DIR__, "..", "outputs"))
 PlotlyJS.savefig(
     p,
     joinpath(@__DIR__, "..", "outputs", "dataset.png"),

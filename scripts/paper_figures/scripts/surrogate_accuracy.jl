@@ -10,7 +10,7 @@ using LaTeXStrings
 using JSON3
 
 include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
-
+mkpath(joinpath(@__DIR__, "..", "outputs"))
 ########### INPUT DATA ###########
 dataset_to_compare = "test"
 results_to_compare = [
@@ -51,6 +51,11 @@ results_to_compare = [
         ), =#
 ]
 
+#Fix all the paths if the results have been copied to a new directory
+for r in results_to_compare
+    file =  joinpath(pwd(), exp_folder, PowerSimulationNODE.INPUT_FOLDER_NAME, string("train_", r.train_id, ".json"))
+    rebase_path!(file, exp_folder)
+end 
 
 # REGENERATE DATASETS 
 _regenerate_datasets(dataset_to_compare, results_to_compare)
