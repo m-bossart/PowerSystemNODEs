@@ -113,14 +113,6 @@ p = TrainParams(
         ),
     ),
     model_params = MultiDeviceParams(name = "source_1"),
-    steady_state_solver = (solver = "SSRootfind", abstol = 1e-4),
-    dynamic_solver = (
-        solver = "Rodas5",
-        reltol = 1e-3,
-        abstol = 1e-6,
-        maxiters = 1e5,
-        force_tstops = true,
-    ),
     optimizer = [
         (
             sensealg = "ForwardDiff",
@@ -128,6 +120,14 @@ p = TrainParams(
             log_η = -9.0,
             initial_stepnorm = 0.0,
             maxiters = 10,
+            steadystate_solver = (solver = "Tsit5", abstol = 1e-4),
+            dynamic_solver = (
+                solver = "Rodas5",
+                reltol = 1e-3,
+                abstol = 1e-6,
+                maxiters = 1e5,
+                force_tstops = true,
+            ),
             lb_loss = 0.0,
             curriculum = "individual faults",
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
@@ -214,7 +214,7 @@ p = TrainParams(
         string(system_name, ".json"),
     ),
 )
-
+##
 ######################################################################################
 ################################# BUILD AND GENERATE #################################
 ######################################################################################

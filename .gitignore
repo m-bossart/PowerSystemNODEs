@@ -32,12 +32,11 @@ exp_*
 
 #figures
 figs/
-output_data/
+predictions 
 power-systems.log
 power-simulations-dynamics.log
 
-input_data/
-output_data/
+
 train_*/
 transfers/
 

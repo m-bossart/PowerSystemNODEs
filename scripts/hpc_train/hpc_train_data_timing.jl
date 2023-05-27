@@ -216,7 +216,10 @@ g5 = (
         [(tspan = (0.0, 10.0), batching_sample_factor = 0.2)],
     ),
 )
-g6 = (:steadystate_solver, ((solver = "SSRootfind", abstol = 1e-4), (solver = "Tsit5", abstol = 1e-4)))
+g6 = (
+    :steadystate_solver,
+    ((solver = "SSRootfind", abstol = 1e-4), (solver = "Tsit5", abstol = 1e-4)),
+)
 #params_data = build_grid_search!(base_option, g1, g2, g3)   #vary n_params
 #params_data = build_grid_search!(base_option, g4)           #vary t_stops 
 #params_data = build_grid_search!(base_option, g5)           #vary t_collocation 

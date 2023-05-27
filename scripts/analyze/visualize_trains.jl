@@ -5,7 +5,7 @@ using JSON3
 using Logging
 using Serialization
 #include("../system_data/dynamic_components_data.jl")
-train_folder = joinpath("transfers", "exp_04_16_23_data_grid_long")
+train_folder = joinpath("transfers", "exp_05_22_23_data_grid")
 
 configure_logging(console_level = Logging.Info)
 visualize_level = isempty(ARGS) ? 3 : parse(Int64, ARGS[1])
@@ -32,7 +32,7 @@ train_files_with_output = filter(
 )
 ##
 gr()
-run_validation = true
+run_validation = false
 a = time()
 for file in train_files_with_output
     rebase_path!(file, train_folder)
@@ -41,7 +41,7 @@ for file in train_files_with_output
     output_dict =
         JSON3.read(read(joinpath(path_to_output, "high_level_outputs")), Dict{String, Any})
     n_recorded_iterations = length(output_dict["recorded_iterations"])
-    visualize_training(file, vcat(1:50, (n_recorded_iterations - 50):n_recorded_iterations))
+    visualize_training(file, vcat(1:50, (n_recorded_iterations - 150):n_recorded_iterations))
     #animate_training(file, skip = 100) 
     if run_validation
         validation_sys = node_load_system(params.modified_surrogate_system_path)
@@ -58,6 +58,7 @@ for file in train_files_with_output
             indexin(output_dict["chosen_iteration"], output_dict["recorded_iterations"])[1]
         θ = df_predictions[chosen_iteration_index, "parameters"][1]
         first_sol = df_predictions[1, "surrogate_solution"]
+        println(first_sol.destats)
         #        @warn first_sol.deq_iterations  
         #surrogate_dataset_validation = Serialization.deserialize(string(p.output_data_path, "surrogate_validation_dataset"))  #If already generated the data
         surrogate_dataset_validation = generate_surrogate_dataset(

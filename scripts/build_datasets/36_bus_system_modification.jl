@@ -131,7 +131,7 @@ set_active_power!(get_component(GenericBattery, sys, "GFM_Battery-26"), 1.0)
 
 set_active_power!(get_component(GenericBattery, sys, "Gfl_Battery-22"), 1.0)
 
-set_magnitude!(get_bus(get_component(GenericBattery, sys, "Gfl_Battery-21")), 1.018) #1.018
+set_magnitude!(get_bus(get_component(GenericBattery, sys, "Gfl_Battery-21")), 1.0) #1.018
 
 run_powerflow!(sys)
 
