@@ -86,8 +86,8 @@ p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare);
 PlotlyJS.savefig(
     p_accuracy,
     joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.pdf"),
-    width = 500,
-    height = 400,
+    width = 400,
+    height = 300,
     scale = 1,
 );
 
@@ -95,9 +95,9 @@ p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
 #display(p_timing)
 PlotlyJS.savefig(
     p_timing,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_times.png"),
-    width = 500,
-    height = 400,
+    joinpath(@__DIR__, "..", "outputs", "box_plot_times.pdf"),
+    width = 400,
+    height = 300,
     scale = 1,
 )
 

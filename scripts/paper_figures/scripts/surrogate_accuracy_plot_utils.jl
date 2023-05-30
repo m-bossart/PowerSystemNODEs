@@ -265,10 +265,11 @@ layout = Layout(;
         xanchor = "right",
         orientation = "h",
     ),
-    width = 500,
-    height = 400,
+    #width = 50,
+    #height = 40,
     boxmode = "group",
     template = "plotly_white",
+    margin = (b =20, t=0, r = 50, l =50)
 )
 
 return PlotlyJS.plot(traces, layout)
@@ -352,8 +353,9 @@ trace1 = box(;
 push!(traces, trace1)
 
 layout = Layout(;
-    xaxis = attr(font_size = 12),
-    yaxis = attr(title = "Simulation time per fault (s)", font_size = 12, zeroline = false),
+    font_family = "Times New Roman",
+    xaxis = attr(font_size = 12, showline=true, linewidth=1, linecolor="black"),
+    yaxis = attr(title = "Simulation time per fault (s)", font_size = 12, zeroline = false, showline=true, linewidth=1, linecolor="black"),
     legend = attr(
         x = 1,
         y = 1.0,
@@ -362,12 +364,15 @@ layout = Layout(;
         xanchor = "right",
         orientation = "h",
     ),
-    width = 500,
-    height = 400,
     boxmode = "group",
+    template = "plotly_white",
+    margin = (b =20, t=30, r = 50, l =50)
 )
 return  PlotlyJS.plot(traces, layout)
 end 
+
+
+
 
 function _display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
     f1 = joinpath(

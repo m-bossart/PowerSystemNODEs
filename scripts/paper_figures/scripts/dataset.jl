@@ -37,7 +37,7 @@ p = make_subplots(
     specs = [Spec() Spec(); Spec() Spec()],
     #subplot_titles = ["Neural ODE States" "Real Current (p.u.)" "Imaginary Current (p.u.)" missing],
     vertical_spacing = 0.1,
-    horizontal_spacing = 0.11,
+    horizontal_spacing = 0.2,
 )
 
 if plot_train
@@ -77,25 +77,35 @@ if plot_train
     end
 end
 relayout!(p, showlegend = false)
-p.plot.layout.xaxis = attr(title = "Time (s)", showgrid = true, zeroline = false)
-p.plot.layout.xaxis2 = attr(title = "Time (s)", showgrid = true, zeroline = false)
-p.plot.layout.xaxis3 = attr(title = "Time (s)", showgrid = true, zeroline = false)
-p.plot.layout.xaxis4 = attr(title = "Time (s)", showgrid = true, zeroline = false)
-p.plot.layout.yaxis = attr(title = "Real voltage (p.u.)", showgrid = true, zeroline = false)
+p.plot.layout.xaxis = attr( showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.xaxis2 = attr( showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.xaxis3 = attr(title = "Time (s)", showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.xaxis4 = attr(title = "Time (s)", showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.yaxis = attr(title = "Real voltage (p.u.)", showgrid = true, zeroline = false, linecolor="black")
 p.plot.layout.yaxis2 =
-    attr(title = "Imag. voltage (p.u.)", showgrid = true, zeroline = false)
+    attr(title = "Imag. voltage (p.u.)", showgrid = true, zeroline = false, linecolor="black")
 p.plot.layout.yaxis3 =
-    attr(title = "Real current (p.u.)", showgrid = true, zeroline = false)
+    attr(title = "Real current (p.u.)", showgrid = true, zeroline = false, linecolor="black")
 p.plot.layout.yaxis4 =
-    attr(title = "Imag current (p.u.)", showgrid = true, zeroline = false)
-p.plot.layout.font_size = 18
+    attr(title = "Imag current (p.u.)", showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.font_size = 12
+p.plot.layout.font_family = "Times New Roman"
+p.plot.layout.template = "plotly_white"
+p.plot.layout.margin = (
+    t=20,  #top margin
+    b=35,
+    r=20,
+    l=50,
+) 
 #display(p)
 mkpath(joinpath(@__DIR__, "..", "outputs"))
 PlotlyJS.savefig(
     p,
-    joinpath(@__DIR__, "..", "outputs", "dataset.png"),
+    joinpath(@__DIR__, "..", "outputs", "dataset.pdf"),
     scale = 1.0,
-    height = Int64(2.25 * 300),
-    width = Int64(3.5 * 300),
+    width = 500,
+    height = 450,
+    #height = Int64(2.25 * 300),
+    #width = Int64(3.5 * 300),
 )
 
