@@ -61,7 +61,7 @@ end
 _regenerate_datasets(dataset_to_compare, results_to_compare)
 
 # PLOT HISTOGRAM OF ERRORS
-p_ir, p_ii = _plot_historgram_all_errors(dataset_to_compare, results_to_compare)
+p_ir, p_ii = _plot_historgram_all_errors(dataset_to_compare, results_to_compare);
 #display(p_ir)
 PlotlyJS.savefig(
     p_ir, 
@@ -80,16 +80,16 @@ PlotlyJS.savefig(
 )
 
 # PLOT BOX PLOTS OF MEAN ERRORS 
-p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare)
+include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
+p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare);
 #display(p_accuracy)
 PlotlyJS.savefig(
     p_accuracy,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.png"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.pdf"),
     width = 500,
     height = 400,
     scale = 1,
-)
-
+);
 
 p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
 #display(p_timing)

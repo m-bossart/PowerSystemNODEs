@@ -238,7 +238,7 @@ for r in results_to_compare
     ii_mean_error = loss_dict["mae_ii"]
 
     x0_data =
-        vcat(repeat(["Ir"], length(ir_mean_error)), repeat(["Ii"], length(ii_mean_error)))
+        vcat(repeat(["Iᵣ"], length(ir_mean_error)), repeat(["Iᵢ"], length(ii_mean_error)))
 
     trace1 = box(;
         y = vcat(ir_mean_error, ii_mean_error),
@@ -254,8 +254,9 @@ for r in results_to_compare
     push!(traces, trace1)
 end
 layout = Layout(;
-    xaxis = attr(font_size = 12),
-    yaxis = attr(title = "MAE per fault (p.u. current)", font_size = 12, zeroline = false),
+    font_family = "Times New Roman",
+    xaxis = attr(font_size = 12,showline=true, linewidth=1, linecolor="black"),
+    yaxis = attr(title = "MAE per fault (p.u. current)",font_size = 12, zeroline = false, showline=true, linewidth=1, linecolor="black"),
     legend = attr(
         x = 1,
         y = 1.0,
@@ -267,6 +268,7 @@ layout = Layout(;
     width = 500,
     height = 400,
     boxmode = "group",
+    template = "plotly_white",
 )
 
 return PlotlyJS.plot(traces, layout)
