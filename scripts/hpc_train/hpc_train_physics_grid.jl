@@ -1,4 +1,5 @@
 using PowerSystems
+using PowerFlows
 using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 using Serialization
@@ -119,14 +120,20 @@ base_option = TrainParams(
     model_params = MultiDeviceParams(name = "source_1"),
     optimizer = [
         (
-            sensealg = "ForwardDiff",
+            auto_sensealg = "ForwardDiff",
             algorithm = "Adam",
-            log_η = -2.0,
+            log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 1000,
-            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            maxiters = 5000,
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
             dynamic_solver = (
                 solver = "Rodas5",
+                sensealg = "QuadratureAdjoint",
                 reltol = 1e-3,
                 abstol = 1e-6,
                 maxiters = 1e5,
@@ -137,11 +144,9 @@ base_option = TrainParams(
             curriculum_timespans = [(tspan = (0.0, 10.0), batching_sample_factor = 1.0)],
             fix_params = [   #fix zip to constant impedance 
                 #:P_fraction_1,
-                #:Q_fraction_1,
                 #:P_fraction_2,
-                #:Q_fraction_2,
                 #:P_fraction_3,
-                #:Q_fraction_3,
+                #:Q_fraction_1,
                 :base_power_zip,
                 :max_active_power_Z,
                 :max_active_power_I,
@@ -199,6 +204,8 @@ base_option = TrainParams(
     ],
     check_validation_loss_iterations = [],
     p_start = Serialization.deserialize(joinpath("starting_parameters", "p_start_physics")),
+    final_validation_loss = true,
+    time_limit_buffer_seconds = 7200,
     rng_seed = 11,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -212,8 +219,8 @@ base_option = TrainParams(
     ),
 )
 
-g1 =
-    (:log_η, (-7.0, -6.5, -6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0))
+
+g1 = (:log_η, tuple(-7.0:0.2:-1.0 ...,))
 params_data = build_grid_search!(base_option, g1);
 
 #=
@@ -230,11 +237,11 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "0-23:59:59",
+    time_limit_train = "1-23:59:59",
     time_limit_generate_data = "0-02:00:00",
-    QoS = "normal",
+    QoS = "long",
     partition = "amilan",
-    train_folder_for_data = nothing,
+    train_folder_for_data = "data",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)

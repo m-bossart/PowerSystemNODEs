@@ -72,14 +72,18 @@ function _serialize_starting_parameters(θ)
     )
 end
 
+
 function determine_p_start(sys, surrogate_buses)
-    p_powers = zeros(6)
+    PowerFlows.run_powerflow!(sys)
+    settings_unit_cache = deepcopy(sys.units_settings.unit_system)
+    set_units_base_system!(sys, "device_base")  #Return to original setting?
+
+    p_powers = zeros(4)
     p_gfl = zeros(length(PowerSimulationNODE.default_params(PSIDS.GFLParams())))
     p_gfm = zeros(length(PowerSimulationNODE.default_params(PSIDS.GFMParams())))
     p_load = zeros(length(PowerSimulationNODE.default_params(PSIDS.ZIPParams())))
 
     #CALCULATE AVERAGE GFL PARAMETERS 
-    n_gfl = 0
     for i in get_components(
         DynamicInverter{
             AverageConverter,
@@ -92,14 +96,13 @@ function determine_p_start(sys, surrogate_buses)
         sys,
     )
         static_injector = get_component(StaticInjection, sys, get_name(i))
-        if get_number(get_bus(static_injector)) in surrogate_buses
+        if get_number(get_bus(static_injector)) in surrogate_buses && get_available(static_injector)
             println(
                 "name:    ",
                 get_name(static_injector),
                 "       base power: ",
                 get_base_power(static_injector),
             )
-            n_gfl += 1
             base_power = get_base_power(static_injector)
             @assert get_dynamic_injector(static_injector) !== nothing
             @assert get_base_power(get_dynamic_injector(static_injector)) ==
@@ -158,7 +161,11 @@ function determine_p_start(sys, surrogate_buses)
                 get_lg(filter) * base_power
             p_gfl[PowerSimulationNODE.gfl_indices[:params][:rg_gfl]] +=
                 get_rg(filter) * base_power
+            p_powers[2] += get_active_power(static_injector)  .* base_power
+            @show  get_active_power(static_injector)  .* base_power
+            @show get_reactive_power(static_injector)  .* base_power
         end
+        set_units_base_system!(sys, settings_unit_cache)
     end
     p_gfl = vcat(p_gfl[1], p_gfl[2:end] ./ p_gfl[1])  #first parameter is base power, every other parameter is base power weighted average.
 
@@ -175,7 +182,7 @@ function determine_p_start(sys, surrogate_buses)
         sys,
     )
         static_injector = get_component(StaticInjection, sys, get_name(i))
-        if get_number(get_bus(static_injector)) in surrogate_buses
+        if get_number(get_bus(static_injector)) in surrogate_buses  && get_available(static_injector)
             println(
                 "name:    ",
                 get_name(static_injector),
@@ -220,7 +227,7 @@ function determine_p_start(sys, surrogate_buses)
             p_gfm[PowerSimulationNODE.gfm_indices[:params][:kpc_gfm]] +=
                 get_kpc(inner_control) * base_power
             p_gfm[PowerSimulationNODE.gfm_indices[:params][:kic_gfm]] +=
-                get_kpc(inner_control) * base_power
+                get_kic(inner_control) * base_power
             p_gfm[PowerSimulationNODE.gfm_indices[:params][:kffi]] +=
                 get_kffi(inner_control) * base_power
             p_gfm[PowerSimulationNODE.gfm_indices[:params][:ωad]] +=
@@ -245,13 +252,17 @@ function determine_p_start(sys, surrogate_buses)
                 get_lg(filter) * base_power
             p_gfm[PowerSimulationNODE.gfm_indices[:params][:rg_gfm]] +=
                 get_rg(filter) * base_power
+            p_powers[3] += get_active_power(static_injector) .* base_power
+
+            @show  get_active_power(static_injector)  .* base_power
+            @show get_reactive_power(static_injector)  .* base_power
         end
     end
     p_gfm = vcat(p_gfm[1], p_gfm[2:end] ./ p_gfm[1])  #first parameter is base power, every other parameter is base power weighted average.
 
     n_load = 0
     for i in get_components(StandardLoad, sys)
-        if get_number(get_bus(i)) in surrogate_buses
+        if get_number(get_bus(i)) in surrogate_buses  && get_available(i)
             println("name:    ", get_name(i), "       base power: ", get_base_power(i))
             n_load += 1
             base_power = get_base_power(i)
@@ -268,13 +279,18 @@ function determine_p_start(sys, surrogate_buses)
                 get_max_constant_active_power(i) .* base_power
             p_load[PowerSimulationNODE.zip_indices[:params][:max_reactive_power_P]] +=
                 get_max_constant_reactive_power(i) .* base_power
+            p_powers[1] += (get_constant_active_power(i) + get_impedance_active_power(i) + get_current_active_power(i))  .* base_power
+            p_powers[4] += (get_constant_reactive_power(i) + get_impedance_reactive_power(i) + get_current_reactive_power(i))  .* base_power
+            @show  (get_constant_active_power(i) + get_impedance_active_power(i) + get_current_active_power(i))  .* base_power
+            @show (get_constant_reactive_power(i) + get_impedance_reactive_power(i) + get_current_reactive_power(i))  .* base_power
         end
     end
     p_load = vcat(p_load[1], p_load[2:end] ./ p_load[1])  #first parameter is base power, every other parameter is base power weighted average.
 
-    p_powers =
-        [p_load[1], p_load[1], p_gfl[1], p_gfl[1], p_gfm[1], p_gfm[1]] ./
-        (p_load[1] + p_gfl[1] + p_gfm[1]) #hardcoded order... #should this be proportion of base power? 
+ 
+    #Parameters are in device base, but the same orientation (generating power is positive), therefore need to scale the load powers by -1
+    load_orientation_scale = -1.0 
+    p_powers = vcat(load_orientation_scale .* p_powers[1] ./ p_load[1], p_powers[2] ./ p_gfl[1], p_powers[3] ./ p_gfm[1], load_orientation_scale .* p_powers[4] ./ p_load[1] )
 
     p_start = vcat(p_powers, p_load, p_gfl, p_gfm)
     return p_start
