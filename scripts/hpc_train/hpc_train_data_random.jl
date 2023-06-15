@@ -34,10 +34,7 @@ base_option = TrainParams(
             ],
             23,
         ),
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            1,
-        ),
+        perturbations = repeat([[BranchTrip(1.0, Line, "Bus 6-Bus 26-i_2")]],1),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -63,10 +60,7 @@ base_option = TrainParams(
             ],
             20,
         ),
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            1,
-        ),
+        perturbations = repeat([[BranchTrip(1.0, Line, "Bus 6-Bus 26-i_2")]],1),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -91,10 +85,7 @@ base_option = TrainParams(
             ],
             100,
         ),
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
-            1,
-        ),
+        perturbations = repeat([[BranchTrip(1.0, Line, "Bus 6-Bus 26-i_2")]],1),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -153,7 +144,7 @@ base_option = TrainParams(
     final_validation_loss = true,
     time_limit_buffer_seconds = 7200,
     rng_seed = 11,
-    output_mode_skip = 1,
+    output_mode_skip = 100,   #Increase this to collect less data! 
     train_time_limit_seconds = 1e9,
     base_path = joinpath(SCRATCH_PATH, project_folder, train_folder),
     system_path = joinpath(
@@ -165,7 +156,7 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 200
+total_runs = 50
 #r1 = (:rng_seed, (min = 1, max = 1000))
 r1 = (:initializer_n_layer, (min = 1, max = 3))
 r2 = (:initializer_width_layers_relative_input, (min = 0, max = 20))
@@ -196,7 +187,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "0-02:00:00",
     QoS = "long",
     partition = "amilan",
-    train_folder_for_data = "data",
+    train_folder_for_data = nothing, #"data",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC
 )
 generate_train_files(hpc_params)

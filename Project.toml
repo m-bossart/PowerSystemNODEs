@@ -2,6 +2,7 @@
 Arrow = "69666777-d1a9-59fb-9406-91d4454c9d45"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 Kaleido_jll = "f7e6163d-2fa5-5f23-b69c-1db539e41963"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
