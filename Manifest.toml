@@ -1423,7 +1423,7 @@ version = "0.11.0"
 
 [[deps.PowerSimulationsDynamicsSurrogates]]
 deps = ["InfrastructureSystems", "NLsolve", "OrdinaryDiffEq", "PowerFlows", "PowerSimulationsDynamics", "PowerSystems", "Random", "Sundials"]
-git-tree-sha1 = "9f43121fcd856decb1141b7942a67a2f8811166f"
+git-tree-sha1 = "39e4868333e7c5f595d6db18e0dbcca0267854d2"
 repo-rev = "main"
 repo-url = "https://github.com/m-bossart/PowerSimulationsDynamicsSurrogates.jl"
 uuid = "de933368-4bb5-470a-b916-9fff09bf2720"
