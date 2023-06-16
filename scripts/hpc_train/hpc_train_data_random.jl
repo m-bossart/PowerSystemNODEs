@@ -1,4 +1,6 @@
 using PowerSimulationNODE
+using PowerSystems
+using PowerSimulationsDynamics
 using PowerSimulationsDynamicsSurrogates
 using Random
 const PSIDS = PowerSimulationsDynamicsSurrogates
@@ -34,7 +36,7 @@ base_option = TrainParams(
             ],
             23,
         ),
-        perturbations = repeat([[BranchTrip(1.0, Line, "Bus 6-Bus 26-i_2")]],1),
+        perturbations = repeat([[LineTrip(time =1.0, line_name = "Bus 6-Bus 26-i_2")]],1),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -60,7 +62,7 @@ base_option = TrainParams(
             ],
             20,
         ),
-        perturbations = repeat([[BranchTrip(1.0, Line, "Bus 6-Bus 26-i_2")]],1),
+        perturbations = repeat([[LineTrip(time =1.0, line_name = "Bus 6-Bus 26-i_2")]],1),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -85,7 +87,7 @@ base_option = TrainParams(
             ],
             100,
         ),
-        perturbations = repeat([[BranchTrip(1.0, Line, "Bus 6-Bus 26-i_2")]],1),
+        perturbations = repeat([[LineTrip(time =1.0, line_name = "Bus 6-Bus 26-i_2")]],1),
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
