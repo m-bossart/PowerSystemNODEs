@@ -1,0 +1,54 @@
+{
+    "name": "",
+    "description": "",
+    "frequency": 60,
+    "time_series_resolution_milliseconds": 0,
+    "component_counts": [
+        {
+            "type": "Arc",
+            "count": 39
+        },
+        {
+            "type": "Area",
+            "count": 1
+        },
+        {
+            "type": "Bus",
+            "count": 36
+        },
+        {
+            "type": "DynamicBranch",
+            "count": 28
+        },
+        {
+            "type": "DynamicGenerator",
+            "count": 6
+        },
+        {
+            "type": "DynamicInverter",
+            "count": 17
+        },
+        {
+            "type": "GenericBattery",
+            "count": 34
+        },
+        {
+            "type": "LoadZone",
+            "count": 1
+        },
+        {
+            "type": "StandardLoad",
+            "count": 12
+        },
+        {
+            "type": "ThermalStandard",
+            "count": 6
+        },
+        {
+            "type": "Transformer2W",
+            "count": 12
+        }
+    ],
+    "time_series_counts": [
+    ]
+}

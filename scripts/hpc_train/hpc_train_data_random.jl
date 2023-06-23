@@ -11,7 +11,7 @@ else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
 train_folder = "exp_data_random"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36bus_fix"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+system_name = "36bus_4x_line_Z"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 _copy_full_system_to_train_directory(
@@ -36,7 +36,10 @@ base_option = TrainParams(
             ],
             23,
         ),
-        perturbations = repeat([[LineTrip(time =1.0, line_name = "Bus 6-Bus 26-i_2")]],1),
+         perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            1,
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -62,7 +65,10 @@ base_option = TrainParams(
             ],
             20,
         ),
-        perturbations = repeat([[LineTrip(time =1.0, line_name = "Bus 6-Bus 26-i_2")]],1),
+         perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            1,
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -87,7 +93,10 @@ base_option = TrainParams(
             ],
             100,
         ),
-        perturbations = repeat([[LineTrip(time =1.0, line_name = "Bus 6-Bus 26-i_2")]],1),
+         perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            1,
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
