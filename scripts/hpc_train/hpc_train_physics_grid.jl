@@ -202,7 +202,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = [],
+    check_validation_loss_iterations = [1000, 2000, 3000, 4000],
     p_start = Serialization.deserialize(joinpath("starting_parameters", "p_start_physics")),
     final_validation_loss = true,
     time_limit_buffer_seconds = 7200,
@@ -241,7 +241,7 @@ hpc_params = AlpineHPCTrain(;
     time_limit_generate_data = "0-02:00:00",
     QoS = "long",
     partition = "amilan",
-    train_folder_for_data = "data",
+    train_folder_for_data = nothing, #"data",
     mb_per_cpu = 9600,  #Avoide OOM error on HPC 
 )
 generate_train_files(hpc_params)

@@ -167,7 +167,7 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 20
+total_runs = 50
 #r1 = (:rng_seed, (min = 1, max = 1000))
 r1 = (:initializer_n_layer, (min = 1, max = 3))
 r2 = (:initializer_width_layers_relative_input, (min = 0, max = 20))
@@ -179,7 +179,7 @@ r7 = (:α, (min = 0.1, max = 0.9))
 
 Random.seed!(1234)
 params_data = build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7)
-##
+
 #=
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
