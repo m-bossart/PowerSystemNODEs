@@ -263,52 +263,24 @@ function getSystemProperties(sys)
     return busCap, totalGen, ibrBus, ibrGen, syncGen
 end =#
 
-#TODO - add a GFL 
-#TODO - add a zoom option for visualize dataset (to see the fast transients)
-#TODO - add P and Q to the plots
-function visualize_dataset(dataset::Vector{PSIDS.SteadyStateNODEData})
-    p1 = plot()
-    p2 = plot()
-    p3 = plot()
-    p4 = plot()
-    p5 = plot()
-    p6 = plot()
-    p7 = plot()
-    p8 = plot()
+function visualize_dataset(dataset::Vector{PSIDS.TerminalData})
+    p =  generate_empty_plot(TerminalData)
     total_faults = length(dataset)
     for (ix, d) in enumerate(dataset)
-        #@assert size(dataset[1].groundtruth_current)[1] == 2    #Surrogate should have a single connecting line 
-        if dataset[ix].stable == true
-            Vr = dataset[ix].surrogate_real_voltage[:]
-            Vi = dataset[ix].surrogate_imag_voltage[:]
-            Ir = dataset[ix].real_current[:]
-            Ii = dataset[ix].imag_current[:]
-            Vm = sqrt.(Vr .^ 2 + Vi .^ 2)
-            Im = sqrt.(Ir .^ 2 + Ii .^ 2)
-            Vθ = atan.(Vi ./ Vr)
-            Iθ = atan.(Ii ./ Ir)
-            plot!(p1, dataset[ix].tsteps, Vr, title = "Vr", legend = false)
-            plot!(p2, dataset[ix].tsteps, Ir, title = "Ir", legend = false)
-            plot!(p3, dataset[ix].tsteps, Vi, title = "Vi", legend = false)
-            plot!(p4, dataset[ix].tsteps, Ii, title = "Ii", legend = false)
-            plot!(p5, dataset[ix].tsteps, Vm, title = "Vm", legend = false)
-            plot!(p6, dataset[ix].tsteps, Im, title = "Im", legend = false)
-            plot!(p7, dataset[ix].tsteps, Vθ, title = "Vθ", legend = false)
-            plot!(p8, dataset[ix].tsteps, Iθ, title = "Iθ", legend = false)
+        if d.stable == true
+            add_data_trace!(p, d)
         end
     end
-    plot!(p8, label = "test")
     total_faults = length(dataset)
     stable_faults = length(filter(x -> x.stable == true, dataset))
     unstable_faults = length(filter(x -> x.stable == false, dataset))
     @warn "\n total faults: $total_faults \n stable faults: $stable_faults \n unstable faults: $unstable_faults \n"
     l_tstops = [length(d.tstops) for d in dataset]
     l_tsteps = [length(d.tsteps) for d in dataset]
-
     @warn "length tstops", l_tstops
     @warn "length tsteps", l_tsteps
 
-    return plot(p1, p2, p3, p4, p5, p6, p7, p8, layout = (4, 2), size = (700, 800))
+    return p
 end
 
 function add_battery(sys, battery_name, bus_name, capacity, P, Q)

@@ -74,7 +74,7 @@ end
 
 
 function determine_p_start(sys, surrogate_buses)
-    PowerFlows.run_powerflow!(sys)
+    PowerFlows.solve_powerflow!(sys)
     settings_unit_cache = deepcopy(sys.units_settings.unit_system)
     set_units_base_system!(sys, "device_base")  #Return to original setting?
 
