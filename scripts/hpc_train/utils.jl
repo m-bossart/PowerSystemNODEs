@@ -165,7 +165,6 @@ function determine_p_start(sys, surrogate_buses)
             @show  get_active_power(static_injector)  .* base_power
             @show get_reactive_power(static_injector)  .* base_power
         end
-        set_units_base_system!(sys, settings_unit_cache)
     end
     p_gfl = vcat(p_gfl[1], p_gfl[2:end] ./ p_gfl[1])  #first parameter is base power, every other parameter is base power weighted average.
 
@@ -293,5 +292,6 @@ function determine_p_start(sys, surrogate_buses)
     p_powers = vcat(load_orientation_scale .* p_powers[1] ./ p_load[1], p_powers[2] ./ p_gfl[1], p_powers[3] ./ p_gfm[1], load_orientation_scale .* p_powers[4] ./ p_load[1] )
 
     p_start = vcat(p_powers, p_load, p_gfl, p_gfm)
+    set_units_base_system!(sys, settings_unit_cache)
     return p_start
 end
