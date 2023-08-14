@@ -207,9 +207,9 @@ version = "0.1.12"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "a1311bb989badecfef02feafff5c287677a990dd"
+git-tree-sha1 = "a1296f0fe01a4c3f9bf0dc2934efbf4416f5db31"
 uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.3"
+version = "1.3.4"
 
 [[deps.CodecLz4]]
 deps = ["Lz4_jll", "TranscodingStreams"]
@@ -872,9 +872,9 @@ version = "2.1.91+0"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "6a125e6a4cb391e0b9adbd1afa9e771c2179f8ef"
+git-tree-sha1 = "e8ab063deed72e14666f9d8af17bd5f9eab04392"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.23"
+version = "0.9.24"
 
 [[deps.JuliaVariables]]
 deps = ["MLStyle", "NameResolution"]
@@ -1535,7 +1535,7 @@ version = "0.12.1"
 
 [[deps.PowerSimulationsDynamicsSurrogates]]
 deps = ["DataFrames", "DiffEqCallbacks", "Distributions", "InfrastructureSystems", "NLsolve", "OrdinaryDiffEq", "PlotlyJS", "PowerFlows", "PowerSimulationsDynamics", "PowerSystems", "Random", "SciMLBase", "Sundials"]
-git-tree-sha1 = "e64bbac662fb333194be4f898b241d9fb991be34"
+git-tree-sha1 = "2d698a2c64514b0e4c1b1c56571e1a9fde9a74fe"
 repo-rev = "main"
 repo-url = "https://github.com/m-bossart/PowerSimulationsDynamicsSurrogates.jl"
 uuid = "de933368-4bb5-470a-b916-9fff09bf2720"
@@ -1656,9 +1656,9 @@ version = "2.38.7"
 
 [[deps.RecursiveFactorization]]
 deps = ["LinearAlgebra", "LoopVectorization", "Polyester", "PrecompileTools", "StrideArraysCore", "TriangularSolve"]
-git-tree-sha1 = "34fd98298dc3fcfc657d65559491b18ab3f7f28c"
+git-tree-sha1 = "2b6d4a40339aa02655b1743f4cd7c03109f520c1"
 uuid = "f2c3362d-daeb-58d1-803e-2bc74f2840b4"
-version = "0.2.19"
+version = "0.2.20"
 
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
@@ -1709,9 +1709,9 @@ version = "0.4.0+0"
 
 [[deps.RuntimeGeneratedFunctions]]
 deps = ["ExprTools", "SHA", "Serialization"]
-git-tree-sha1 = "237edc1563bbf078629b4f8d194bd334e97907cf"
+git-tree-sha1 = "6aacc5eefe8415f47b3e34214c1d79d2674a0ba2"
 uuid = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
-version = "0.5.11"
+version = "0.5.12"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -2344,9 +2344,9 @@ version = "1.5.5+0"
 
 [[deps.Zygote]]
 deps = ["AbstractFFTs", "ChainRules", "ChainRulesCore", "DiffRules", "Distributed", "FillArrays", "ForwardDiff", "GPUArrays", "GPUArraysCore", "IRTools", "InteractiveUtils", "LinearAlgebra", "LogExpFunctions", "MacroTools", "NaNMath", "PrecompileTools", "Random", "Requires", "SparseArrays", "SpecialFunctions", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "5be3ddb88fc992a7d8ea96c3f10a49a7e98ebc7b"
+git-tree-sha1 = "e2fe78907130b521619bc88408c859a472c4172b"
 uuid = "e88e6eb3-aa80-5325-afca-941959d7151f"
-version = "0.6.62"
+version = "0.6.63"
 
 [[deps.ZygoteRules]]
 deps = ["ChainRulesCore", "MacroTools"]
