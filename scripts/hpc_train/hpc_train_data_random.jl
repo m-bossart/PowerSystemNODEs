@@ -129,7 +129,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 12000,
+            maxiters = 10100,
             steadystate_solver = (
                 solver = "NLSolveJL",
                 reltol = 1e-4,
@@ -151,7 +151,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = [2000, 4000, 6000, 8000, 10000],
+    check_validation_loss_iterations = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
     final_validation_loss = true,
     time_limit_buffer_seconds = 7200,
     rng_seed = 11,
@@ -167,7 +167,7 @@ base_option = TrainParams(
     ),
 )
 
-total_runs = 50
+total_runs = 200
 #r1 = (:rng_seed, (min = 1, max = 1000))
 r1 = (:initializer_n_layer, (min = 1, max = 3))
 r2 = (:initializer_width_layers_relative_input, (min = 0, max = 20))
