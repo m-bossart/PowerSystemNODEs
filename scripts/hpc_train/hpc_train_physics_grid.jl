@@ -124,7 +124,7 @@ base_option = TrainParams(
             algorithm = "Adam",
             log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 5000,
+            maxiters = 2010,
             steadystate_solver = (
                 solver = "NLSolveJL",
                 reltol = 1e-4,
@@ -202,7 +202,7 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = [1000, 2000, 3000, 4000],
+    check_validation_loss_iterations = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000], #, 2000, 3000, 4000],
     p_start = Serialization.deserialize(joinpath("starting_parameters", "p_start_physics")),
     final_validation_loss = true,
     time_limit_buffer_seconds = 7200,
