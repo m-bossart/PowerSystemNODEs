@@ -1,3 +1,4 @@
+using Statistics 
 function show_parameter_change(file)
     params = TrainParams(file)
     path_to_output = joinpath(file, "..", "..", "output_data", params.train_id)
@@ -272,8 +273,17 @@ for r in results_to_compare
 end
 layout = Layout(;
     font_family = "Times New Roman",
-    xaxis = attr(font_size = 12,showline=true, linewidth=1, linecolor="black"),
-    yaxis = attr(title = "MAE per fault (p.u. current)",font_size = 12, zeroline = false, showline=true, type="log", linewidth=1, linecolor="black"),
+    xaxis = attr(font_size = 12, showline=true, linewidth=1, linecolor="black"),
+    yaxis = attr(title = "MAE per fault (p.u. current)",
+                 tickvals = [1e-4, 1e-3, 0.01, 0.1], 
+                 ticktext=["1e-4", "1e-3", "1e-2", "1e-1"], 
+                 font_size = 12, 
+                 zeroline = false, 
+                 showline=true, 
+                 type="log", 
+                 linewidth=1, 
+                 linecolor="black"
+                 ),
     legend = attr(
         x = 1,
         y = 1.0,
@@ -377,7 +387,10 @@ push!(traces, trace1)
 layout = Layout(;
     font_family = "Times New Roman",
     xaxis = attr(font_size = 12, showline=true, linewidth=1, linecolor="black"),
-    yaxis = attr(title = "Simulation time per fault (s)", font_size = 12, zeroline = false, type = "log", showline=true, linewidth=1, linecolor="black"),
+    yaxis = attr(title = "Simulation time per fault (s)", 
+    tickvals = [1, 2, 5, 10], 
+    #ticktext=["1e-4", "1e-3", "1e-2", "1e-1"], 
+    font_size = 12, zeroline = false, type = "log", showline=true, linewidth=1, linecolor="black"),
     legend = attr(
         x = 1,
         y = 1.0,

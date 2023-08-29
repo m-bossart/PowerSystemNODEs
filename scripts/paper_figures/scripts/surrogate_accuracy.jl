@@ -24,21 +24,21 @@ results_to_compare = [
         train_id = "185",
         chosen_iteration = 8000,
         name = "data-driven surrogate",
-        generate_data = true,
+        generate_data = false,
     ),
     (
         exp_folder = "data_from_hpc/exp_08_15_23_physics_grid",
         train_id = "001",
         chosen_iteration = 1,
         name = "physics-based surrogate (untrained)",
-        generate_data = true,
+        generate_data = false,
     ),
     (
         exp_folder = "data_from_hpc/exp_08_15_23_physics_grid",
         train_id = "001",
         chosen_iteration = 0,
         name = "physics-based surrogate (trained)",
-        generate_data = true,
+        generate_data = false,
     ), 
 ]
 
@@ -137,7 +137,7 @@ p_ir, p_ii = _plot_historgram_all_errors(dataset_to_compare, results_to_compare)
 #display(p_ir)
 PlotlyJS.savefig(
     p_ir, 
-    joinpath(@__DIR__, "..", "outputs", "histogram_ir.png"),
+    joinpath(@__DIR__, "..", "outputs", "histogram_ir.pdf"),
     width = 500,
     height = 400,
     scale = 1,
@@ -145,7 +145,7 @@ PlotlyJS.savefig(
 #display(p_ii)
 PlotlyJS.savefig(
     p_ii, 
-    joinpath(@__DIR__, "..", "outputs", "histogram_ii.png"),
+    joinpath(@__DIR__, "..", "outputs", "histogram_ii.pdf"),
     width = 500,
     height = 400,
     scale = 1,
@@ -157,7 +157,7 @@ p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare);
 display(p_accuracy)
 PlotlyJS.savefig(
     p_accuracy,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.png"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.pdf"),
     width = 400,
     height = 300,
     scale = 1,
@@ -167,7 +167,7 @@ p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
 #display(p_timing)
 PlotlyJS.savefig(
     p_timing,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_times.png"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_times.pdf"),
     width = 400,
     height = 300,
     scale = 1,
@@ -175,7 +175,7 @@ PlotlyJS.savefig(
 
 
 # LOOK AT INDIVIDUAL DATA TRACES 
-_display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
+#display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
 
 
 
