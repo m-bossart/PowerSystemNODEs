@@ -33,10 +33,11 @@ function generate_and_serialize_dataset(file, dataset_type; chosen = 0)
     df_predictions = PowerSimulationNODE.read_arrow_file_to_dataframe(
         joinpath(path_to_output, "predictions"),
     )
-    chosen_iteration_index =
-        indexin(output_dict["chosen_iteration"], output_dict["recorded_iterations"])[1]
-    if chosen !== 0
-        chosen_iteration_index = chosen
+    if chosen == 0 
+        chosen_iteration_index =
+            indexin(output_dict["chosen_iteration"], output_dict["recorded_iterations"])[1]
+    else chosen !== 0
+        chosen_iteration_index = indexin(chosen, output_dict["recorded_iterations"])[1]
     end
     @warn "chosen_iteration_index = $chosen_iteration_index"
     θ = df_predictions[chosen_iteration_index, "parameters"][1]
@@ -46,6 +47,7 @@ function generate_and_serialize_dataset(file, dataset_type; chosen = 0)
     display(Simulation(MassMatrixModel, validation_sys, pwd(), (0.0, 1.0)))
 
     if dataset_type == "test"
+        dataset_id = params.test_data.id
         surrogate_dataset = generate_surrogate_dataset(
             validation_sys,
             validation_sys_aux,
@@ -56,6 +58,7 @@ function generate_and_serialize_dataset(file, dataset_type; chosen = 0)
             params.model_params,
         )
     elseif dataset_type == "validation"
+        dataset_id = params.validation_data.id
         surrogate_dataset = generate_surrogate_dataset(
             validation_sys,
             validation_sys_aux,
@@ -66,6 +69,7 @@ function generate_and_serialize_dataset(file, dataset_type; chosen = 0)
             params.model_params,
         )
     elseif dataset_type == "train"
+        dataset_id = params.train_data.id
         surrogate_dataset = generate_surrogate_dataset(
             validation_sys,
             validation_sys_aux,
@@ -81,20 +85,19 @@ function generate_and_serialize_dataset(file, dataset_type; chosen = 0)
         joinpath(
             params.output_data_path,
             params.train_id,
-            string("surrogate_", dataset_type, "_", string(chosen), "_dataset"),
+            string("surrogate_", dataset_type, "_", string(dataset_id), "_", string(chosen), "_dataset"),
         ),
         surrogate_dataset,
     )
 end
 
-#Change this for only the ones where both datasets are stable
 function all_current_errors(dataset_1, dataset_2)
     ir_errors = Float64[]
     ii_errors = Float64[]
     for (x, y) in zip(dataset_1, dataset_2)
         if x.stable && y.stable
-            ir_errors = vcat(ir_errors, abs.(x.real_current .- y.real_current)')
-            ii_errors = vcat(ii_errors, abs.(x.imag_current .- y.imag_current)')
+            ir_errors = vcat(ir_errors, abs.(get_device_terminal_data(x)[:ir] .- get_device_terminal_data(y)[:ir]))
+            ii_errors = vcat(ii_errors, abs.(get_device_terminal_data(x)[:ii] .- get_device_terminal_data(y)[:ii]))
         end
     end
     return vec(ir_errors), vec(ii_errors)
@@ -102,13 +105,13 @@ end
 
 function loss_metrics(dataset_surrogate, dataset_groundtruth)
     times = [s.solve_time for s in dataset_surrogate]
+    times = filter(x-> x != 0.0, times)
     avg_time = sum(times) / length(times)
-    println("all times:", times)
     println("average times:   ", avg_time)
 
     times_ground_truth = [s.solve_time for s in dataset_groundtruth]
+    times_ground_truth = filter(x-> x != 0.0, times_ground_truth)
     avg_time_ground_truth = sum(times_ground_truth) / length(times_ground_truth)
-    println("all times ground truth:   ", times_ground_truth)
     println("average time ground truth:   ", avg_time_ground_truth)
 
     loss_dict = evaluate_loss(dataset_surrogate, dataset_groundtruth)
@@ -135,10 +138,13 @@ function _plot_historgram_all_errors(dataset_to_compare, results_to_compare)
         file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
         params = TrainParams(file)
         if dataset_to_compare == "train"
+            dataset_id = params.train_data.id
             data_ground_truth = Serialization.deserialize(params.train_data_path)
         elseif dataset_to_compare == "validation"
+            dataset_id = params.validation_data.id
             data_ground_truth = Serialization.deserialize(params.validation_data_path)
         elseif dataset_to_compare == "test"
+            dataset_id = params.test_data.id
             data_ground_truth = Serialization.deserialize(params.test_data_path)
         end
         data_surrogate = Serialization.deserialize(
@@ -148,6 +154,8 @@ function _plot_historgram_all_errors(dataset_to_compare, results_to_compare)
                 string(
                     "surrogate_",
                     dataset_to_compare,
+                    "_",
+                    string(dataset_id),
                     "_",
                     string(r.chosen_iteration),
                     "_dataset",
@@ -211,10 +219,13 @@ for r in results_to_compare
     file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
     params = TrainParams(file)
     if dataset_to_compare == "train"
+        dataset_id = params.train_data.id
         data_ground_truth = Serialization.deserialize(params.train_data_path)
     elseif dataset_to_compare == "validation"
+        dataset_id = params.validation_data.id
         data_ground_truth = Serialization.deserialize(params.validation_data_path)
     elseif dataset_to_compare == "test"
+        dataset_id = params.test_data.id
         data_ground_truth = Serialization.deserialize(params.test_data_path)
     end
     data_surrogate = Serialization.deserialize(
@@ -224,6 +235,8 @@ for r in results_to_compare
             string(
                 "surrogate_",
                 dataset_to_compare,
+                "_",
+                string(dataset_id),
                 "_",
                 string(r.chosen_iteration),
                 "_dataset",
@@ -237,6 +250,10 @@ for r in results_to_compare
     ir_mean_error = loss_dict["mae_ir"]
     ii_mean_error = loss_dict["mae_ii"]
 
+    #Don't include 0.0 values 
+    ir_mean_error = filter(x->x != 0.0, ir_mean_error)
+    ii_mean_error = filter(x->x != 0.0, ii_mean_error)
+    @error "mean error" Statistics.mean(vcat(ir_mean_error, ii_mean_error))
     x0_data =
         vcat(repeat(["Iᵣ"], length(ir_mean_error)), repeat(["Iᵢ"], length(ii_mean_error)))
 
@@ -256,7 +273,7 @@ end
 layout = Layout(;
     font_family = "Times New Roman",
     xaxis = attr(font_size = 12,showline=true, linewidth=1, linecolor="black"),
-    yaxis = attr(title = "MAE per fault (p.u. current)",font_size = 12, zeroline = false, showline=true, linewidth=1, linecolor="black"),
+    yaxis = attr(title = "MAE per fault (p.u. current)",font_size = 12, zeroline = false, showline=true, type="log", linewidth=1, linecolor="black"),
     legend = attr(
         x = 1,
         y = 1.0,
@@ -282,10 +299,13 @@ for r in results_to_compare
     file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
     params = TrainParams(file)
     if dataset_to_compare == "train"
+        dataset_id = params.train_data.id
         data_ground_truth = Serialization.deserialize(params.train_data_path)
     elseif dataset_to_compare == "validation"
+        dataset_id = params.validation_data.id
         data_ground_truth = Serialization.deserialize(params.validation_data_path)
     elseif dataset_to_compare == "test"
+        dataset_id = params.test_data.id
         data_ground_truth = Serialization.deserialize(params.test_data_path)
     end
     data_surrogate = Serialization.deserialize(
@@ -295,6 +315,8 @@ for r in results_to_compare
             string(
                 "surrogate_",
                 dataset_to_compare,
+                "_",
+                string(dataset_id),
                 "_",
                 string(r.chosen_iteration),
                 "_dataset",
@@ -355,7 +377,7 @@ push!(traces, trace1)
 layout = Layout(;
     font_family = "Times New Roman",
     xaxis = attr(font_size = 12, showline=true, linewidth=1, linecolor="black"),
-    yaxis = attr(title = "Simulation time per fault (s)", font_size = 12, zeroline = false, showline=true, linewidth=1, linecolor="black"),
+    yaxis = attr(title = "Simulation time per fault (s)", font_size = 12, zeroline = false, type = "log", showline=true, linewidth=1, linecolor="black"),
     legend = attr(
         x = 1,
         y = 1.0,
@@ -389,21 +411,65 @@ function _display_comparisons_individual_traces(dataset_to_compare, results_to_c
     elseif dataset_to_compare == "test"
         data_ground_truth = Serialization.deserialize(p1.test_data_path)
     end
-
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c"]
     for (ix, d) in enumerate(data_ground_truth)
         if d.stable == true 
+            p = make_subplots(
+                rows = 1,
+                cols = 2,
+                specs = [Spec() Spec()],
+               # subplot_titles = ["Real Current (p.u.)" "Imaginary Current (p.u.)" ],
+                horizontal_spacing = 0.15,
+            )
             traces_2 = GenericTrace{Dict{Symbol, Any}}[] 
-            for r in results_to_compare 
+            for (i,r) in enumerate(results_to_compare)
                 file =  joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
                 params = TrainParams(file)
-                dataset_surrogate = Serialization.deserialize(joinpath(params.output_data_path, params.train_id, string("surrogate_", dataset_to_compare, "_", string(r.chosen_iteration), "_dataset")))
-                trace_surrogate = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y=vec(dataset_surrogate[ix].real_current), mode="lines",  name =r.name)
-                push!(traces_2, trace_surrogate)
+                dataset_surrogate = Serialization.deserialize(joinpath(params.output_data_path, params.train_id, string("surrogate_", dataset_to_compare, "_", string(params.test_data.id), "_", string(r.chosen_iteration), "_dataset")))
+                if  dataset_surrogate[ix].stable ==true 
+                    if i == 3 
+                        trace_surrogate_ir = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ir],  mode="lines",  name =r.name, line_dash = "dashdot", line_color = colors[i])
+                        trace_surrogate_ii = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ii],  mode="lines",  name =r.name, line_dash = "dashdot", line_color = colors[i],  showlegend=false)
+                    else 
+                        trace_surrogate_ir = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ir],  mode="lines",  name =r.name, line_color = colors[i])
+                        trace_surrogate_ii = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ii],  mode="lines",  name =r.name, line_color = colors[i],  showlegend=false)
+                    end 
+                    add_trace!(p, trace_surrogate_ir, row =1, col=1)
+                    add_trace!(p, trace_surrogate_ii, row =1, col=2)
+
+                end 
             end 
-            trace_ground_truth =  PlotlyJS.scatter(;x=d.tsteps, y=vec(d.real_current), mode="lines", name = "ground truth", line_color = "black")
-            #trace_ground_truth =  PlotlyJS.scatter(;x=[1,2], y=[3,4], mode="lines", name = "ground truth")
-            push!(traces_2, trace_ground_truth)
-            display(PlotlyJS.plot(traces_2))
+            trace_ground_truth_ir =  PlotlyJS.scatter(;x=d.tsteps, y= get_device_terminal_data(d)[:ir], mode="lines", name = "ground truth", line_color = "black")
+            trace_ground_truth_ii =  PlotlyJS.scatter(;x=d.tsteps, y= get_device_terminal_data(d)[:ii], mode="lines", name = "ground truth", line_color = "black", showlegend=false)
+            add_trace!(p, trace_ground_truth_ir, row =1, col=1)
+            add_trace!(p, trace_ground_truth_ii, row =1, col=2)
+
+
+            relayout!(p, showlegend = true)
+            p.plot.layout.xaxis = attr(title = "Time (s)", font_size = 12,  zeroline = false,  linecolor="black" )
+            p.plot.layout.xaxis2 = attr(title = "Time (s)", font_size =12, linecolor="black")
+            p.plot.layout.yaxis =  attr(title = "Real current (p.u.)", font_size =12, linecolor ="black", zeroline = false) # range = [-1.85, -1.5]
+            p.plot.layout.yaxis2 = attr(title = "Imag. current (p.u.)", font_size =12, linecolor="black",  zeroline = false)
+            p.plot.layout.template = "plotly_white"
+            p.plot.layout.font_family = "Times New Roman"
+            p.plot.layout.legend = attr(
+                x = 0.09,
+                y = 1.05,
+                font_size = 12,
+                yanchor = "bottom",
+                xanchor = "middle",
+                orientation = "h",
+            )
+            display(p)
+
+            PlotlyJS.savefig(
+                p,
+                joinpath(@__DIR__, "..", "outputs", string("traces", ix, ".pdf")), 
+                width = 400,
+                height = 300,
+                scale = 1,
+            )
         end 
     end  
 end 
+

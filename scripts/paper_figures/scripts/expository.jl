@@ -1,11 +1,15 @@
 #https://stackoverflow.com/questions/69016568/unable-to-export-plotly-images-to-png-with-kaleido
+using Pkg
+exp_folder = "transfers/exp_03_23_23_data_grid_expository"
+Pkg.activate(exp_folder)
+Pkg.instantiate()
 using PowerSimulationNODE
 using Serialization
 using LaTeXStrings
 using PlotlyJS
 
 ########### INPUT DATA ########### 
-exp_folder = "transfers/exp_03_23_23_data_grid_expository"
+
 train_id = "010"
 pre_train_iteration = 2#1
 post_train_iteration = 2000 #2198
@@ -44,9 +48,24 @@ for (i, surrogate_prediction) in
         rows = 2,
         cols = 2,
         specs = [Spec(rowspan = 2) Spec(); missing Spec()],
-        subplot_titles = ["Neural ODE States" "Real Current (p.u.)" "Imaginary Current (p.u.)" missing],
-        vertical_spacing = 0.2,
+        #subplot_titles = ["Neural ODE States" "Real Current (p.u.)" "Imaginary Current (p.u.)" missing],
+        vertical_spacing = 0.1,
+        horizontal_spacing = 0.15,
     )
+    add_trace!(
+        p,
+        PlotlyJS.scatter(;
+            x = t_series,
+            y = r_series[1, :],
+            mode = "lines",
+            :line => Dict(:color => "gray", :width => 2),
+            showlegend = true,
+            name = "neural ODE states",
+        ),
+        row = 1,
+        col = 1,
+    )
+
     add_trace!(
         p,
         PlotlyJS.scatter(;
@@ -61,6 +80,19 @@ for (i, surrogate_prediction) in
         ),
         row = 1,
         col = 2,
+    )
+    add_trace!(
+        p,
+        PlotlyJS.scatter(;
+            x = zeros(dim_r),
+            y = r0_pred,
+            mode = "markers",
+            :line => Dict(:color => "black", :width => 3),
+            showlegend = true,
+            name = "predicted initial conditions",
+        ),
+        row = 1,
+        col = 1,
     )
     add_trace!(
         p,
@@ -120,40 +152,25 @@ for (i, surrogate_prediction) in
             col = 1,
         )
     end
-    add_trace!(
-        p,
-        PlotlyJS.scatter(;
-            x = t_series,
-            y = r_series[1, :],
-            mode = "lines",
-            :line => Dict(:color => "gray", :width => 2),
-            showlegend = true,
-            name = "neural ode states",
-        ),
-        row = 1,
-        col = 1,
-    )
-    add_trace!(
-        p,
-        PlotlyJS.scatter(;
-            x = zeros(dim_r),
-            y = r0_pred,
-            mode = "markers",
-            :line => Dict(:color => "black", :width => 3),
-            showlegend = true,
-            name = "predicted initial conditions",
-        ),
-        row = 1,
-        col = 1,
-    )
+
+
     relayout!(p, showlegend = true)
-    p.plot.layout.xaxis = attr(title = "Time (s)", showgrid = false, zeroline = true)
-    p.plot.layout.xaxis2 = attr(title = "Time (s)", showgrid = false, zeroline = false)
-    p.plot.layout.xaxis3 = attr(title = "Time (s)", showgrid = false, zeroline = false)
-    p.plot.layout.yaxis = attr(range = [-1.5, 1.5])
-    p.plot.layout.yaxis2 = attr(range = [-1.85, -1.5])
-    p.plot.layout.yaxis3 = attr(range = [0, 0.2])
-    p.plot.layout.font_size = 18
+    p.plot.layout.xaxis = attr(title = "Time (s)", font_size = 12,  zeroline = false,  linecolor="black" )
+    p.plot.layout.xaxis2 = attr( zeroline = true ,  font_size = 12, linecolor="black")
+    p.plot.layout.xaxis3 = attr(title = "Time (s)",  font_size =12,  zeroline = true , linecolor="black")
+    p.plot.layout.yaxis =  attr(title = "Neural ODE States", font_size =12, linecolor ="black", zeroline = false,  range = [-1.5, 1.5])
+    p.plot.layout.yaxis2 = attr(title = "Real current (p.u.)", font_size =12, linecolor="black",  range = [-1.85, -1.5])
+    p.plot.layout.yaxis3 = attr(title = "Imag. current (p.u.)", font_size =12, linecolor="black", range = [0, 0.2])
+    p.plot.layout.template = "plotly_white"
+    p.plot.layout.font_family = "Times New Roman"
+    p.plot.layout.legend = attr(
+        x = 0.09,
+        y = 1.05,
+        font_size = 12,
+        yanchor = "bottom",
+        xanchor = "middle",
+        orientation = "h",
+    )
     #p.plot.layout.xaxis_domain=[0, 10.0],
     #yaxis_domain=[0, 0.45],
     #xaxis4=attr(domain=[0.55, 1.0], anchor="y4"),
@@ -161,36 +178,26 @@ for (i, surrogate_prediction) in
     #yaxis3_domain=[0.55, 1],
     #yaxis4=attr(domain=[0.55, 1], anchor="x4")
     if i == 1
+        p.plot.layout.showlegend = true 
         PlotlyJS.savefig(
             p,
-            joinpath(@__DIR__, "expository_before.pdf"),
+            joinpath(@__DIR__, "..", "outputs", "expository_before.pdf"),
             scale = 1.0,
-            height = Int64(2.25 * 300),
-            width = Int64(3.5 * 300),
+            height = 400,
+            width = 500,
         )
+    else 
+        p.plot.layout.showlegend = true
+        #p.plot.layout.margin = (t=0)
         PlotlyJS.savefig(
             p,
-            joinpath(@__DIR__, "expository_before.png"),
+            joinpath(@__DIR__, "..", "outputs", "expository_after.pdf"),
             scale = 1.0,
-            height = Int64(2.25 * 300),
-            width = Int64(3.5 * 300),
-        )
-        PlotlyJS.savefig(
-            p,
-            joinpath(@__DIR__, "expository_after.pdf"),
-            scale = 1.0,
-            height = Int64(2.25 * 300),
-            width = Int64(3.5 * 300),
-        )
-        PlotlyJS.savefig(
-            p,
-            joinpath(@__DIR__, "expository_after.png"),
-            scale = 1.0,
-            height = Int64(2.25 * 300),
-            width = Int64(3.5 * 300),
+            height = 400,
+            width = 500,
         )
     end
-    display(p)
+
     #=     p1 = PlotlyJS.plot([p1_trace1, p1_trace2], Layout(;title="Real current", legend =true) )
         p2 = PlotlyJS.plot([p2_trace1, p2_trace2])
         p3 = PlotlyJS.plot(p3_traces)
