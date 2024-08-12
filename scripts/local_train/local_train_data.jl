@@ -41,52 +41,33 @@ end
 ######################################################################################
 p = TrainParams(
     train_id = "BASE",
-    surrogate_buses = [
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        31,
-        32,
-        33,
-        34,
-        35,
-        36,
-        37,
-        38,
-        39,
-    ],
+    surrogate_buses = vcat(21:29, 31:39),
     train_data = (
         id = "1",
         operating_points = repeat(
             [
                 RandomOperatingPointXiao(
-                    generator_voltage_range = (0.94, 1.06),  #(0.94, 1.06)
-                    generator_power_range = (0.0, 1.0),      #(0.0, 1.0)
-                    load_multiplier_range = (0.5, 1.5),      #(0.5, 1.5)
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            1,
-        ),
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             23,
         ),
+         perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            1,
+        ), 
         params = PSIDS.GenerateDataParams(
-            solver = "Rodas5", #"Rodas5
+            solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
             tspan = (0.0, 10.0),
             tstops = 0.0:0.1:10.0,
             tsave = 0.0:0.1:10.0,
-            formulation = "MassMatrix", #"MassMatrix"
+            formulation = "MassMatrix",
             all_branches_dynamic = false,
             all_lines_dynamic = false,
-            seed = 11, #11
+            seed = 11,
         ),
         system = "full",
     ),
@@ -100,12 +81,12 @@ p = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            1,
+            20,
         ),
-        perturbations = repeat(
+         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             1,
-        ),
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -128,12 +109,12 @@ p = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            100,
+            2,
         ),
-        perturbations = repeat(
+         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             1,
-        ),
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -162,14 +143,15 @@ p = TrainParams(
     ),
     optimizer = [
         (
-            sensealg = "Zygote",
+            auto_sensealg = "Zygote",
             algorithm = "Adam",
             log_η = -9.0,
             initial_stepnorm = 0.0,
             maxiters = 25,        #CHanged to proof of concept 
-            steadystate_solver = (solver = "Tsit5", abstol = 1e-4),
+            steadystate_solver = (solver = "NLSolveJL",reltol = 1e-4, abstol = 1e-4, termination="RelSafeBest"),
             dynamic_solver = (
                 solver = "Rodas5",
+                sensealg =  "QuadratureAdjoint",
                 reltol = 1e-3,
                 abstol = 1e-6,
                 maxiters = Int64(1e5),
@@ -182,7 +164,7 @@ p = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = collect(1000:50:6000),
+    check_validation_loss_iterations =[2],
     rng_seed = 1,
     output_mode_skip = 1,
     train_time_limit_seconds = 1e9,
@@ -195,7 +177,7 @@ p = TrainParams(
         string(system_name, ".json"),
     ),
 )
-##
+
 #= function _modify_test_data(p_path, new_test_data_params)
     p_old = TrainParams(p_path)
     p_old.test_data = new_test_data_params
@@ -219,6 +201,7 @@ _modify_test_data(
 build_subsystems(p)
 mkpath(joinpath(p.base_path, PowerSimulationNODE.INPUT_FOLDER_NAME))
 generate_train_data(p)
+###
 generate_validation_data(p)
 generate_test_data(p)
 data_collection_location_validation =
@@ -226,30 +209,18 @@ data_collection_location_validation =
 ##########################
 # Visualize datasets (use before attempting to train)
 train_dataset = Serialization.deserialize(p.train_data_path)
+#display(visualize_dataset(train_dataset))
 validation_dataset = Serialization.deserialize(p.validation_data_path)
-display(visualize_dataset(validation_dataset))
+#display(visualize_dataset(validation_dataset))
 test_dataset = Serialization.deserialize(p.test_data_path)
-display(visualize_dataset(test_dataset))
+#display(visualize_dataset(test_dataset))
+
 _ = PowerSimulationNODE.instantiate_surrogate_flux(p, p.model_params, train_dataset)    #Just to instantiate the surrogate to see how many parameters it has. 
 
-##############################################################################
-####################################### TRAIN ########################################
-######################################################################################
+###############################################################################
+######################################## TRAIN ########################################
+#######################################################################################
 train(p)
 ######################################################################################
 ############################### ANALYZE AND VISUALIZE ################################
 ######################################################################################
-#= ##
-input_param_file = joinpath(p.base_path, "input_data", "input_test1.json")
-PowerSimulationNODE.serialize(p, input_param_file)
-visualize_training(input_param_file, skip = 1)
-##
-animate_training(input_param_file, skip = 1)
-a = generate_summary(joinpath(p.base_path, "output_data"))
-pp = visualize_summary(a)
-print_high_level_output_overview(a, p.base_path)
-
-#= sys = System(joinpath(pwd(), "systems", "IEEE_14bus_modified.json"))
-sys_train = System(joinpath(pwd(), "train_11", "system_data", "train_system.json"))
-sys_validation = System(joinpath(pwd(), "train_11", "system_data", "validation_system.json")) =#
- =#
