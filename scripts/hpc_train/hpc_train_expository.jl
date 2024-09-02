@@ -136,14 +136,20 @@ base_option = TrainParams(
     ),
     optimizer = [
         (
-            sensealg = "Zygote",
+            auto_sensealg = "Zygote",
             algorithm = "Adam",
             log_η = -3.0,
             initial_stepnorm = 0.0,
             maxiters = 2000,
-            steadystate_solver = (solver = "SSRootfind", abstol = 1e-4),
+            steadystate_solver = (
+                solver = "NLSolveJL",
+                reltol = 1e-4,
+                abstol = 1e-4,
+                termination = "RelSafeBest",
+            ),
             dynamic_solver = (
                 solver = "Rodas5",
+                sensealg = "QuadratureAdjoint",
                 reltol = 1e-3,
                 abstol = 1e-6,
                 maxiters = 1e5,
