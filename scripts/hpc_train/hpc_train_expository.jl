@@ -44,7 +44,7 @@ base_option = TrainParams(
         id = "1",
         operating_points = PSIDS.SurrogateOperatingPoint[
             PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
-            PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),
+            #PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),   #Try a single operating point for expository 
         ],
         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 3.0, load_multiplier_range = (0.0, 2.0))]],
