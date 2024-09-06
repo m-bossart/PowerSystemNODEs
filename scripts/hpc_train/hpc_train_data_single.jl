@@ -10,7 +10,7 @@ if Sys.iswindows() || Sys.isapple()
 else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
-train_folder = "exp_data_single"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+train_folder = "exp_data_sample_0.1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
 system_name = "36bus_fix"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
@@ -173,7 +173,7 @@ r1 = (:initializer_n_layer, (min = 2, max = 2))
 r2 = (:initializer_width_layers_relative_input, (min = 14, max = 14))
 r3 = (:dynamic_n_layer, (min = 1, max = 1))
 r4 = (:dynamic_hidden_states, (min = 14, max = 14))
-r5 = (:dynamic_width_layers_relative_input, (min = 2, max = 20))
+r5 = (:dynamic_width_layers_relative_input, (min = 2, max = 2))
 r6 = (:log_η, (min = -1.5222667876898068, max = -1.5222667876898068))
 r7 = (:α, (min = 0.7583466574469843, max = 0.7583466574469843))
 
