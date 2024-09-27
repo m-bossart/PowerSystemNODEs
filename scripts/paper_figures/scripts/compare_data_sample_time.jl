@@ -20,26 +20,30 @@ dataset_to_compare = "test"
 new_test_dataset = nothing  #defaults to the test_dataset from TrainParams
 results_to_compare = [
     (
-        exp_folder = "data_from_hpc/exp_08_23_23_data_random",
-        train_id = "185",
-        chosen_iteration = 8000,
-        name = "data-driven surrogate",
+        exp_folder = "data_from_hpc/exp_data_sample_0.1",
+        train_id = "001",
+        chosen_iteration = 3000,
+        name = "Data-driven Surrogate (100 ms sample)",
+        color = "#2ca02c",  
         generate_data = false,
     ),
     (
-        exp_folder = "data_from_hpc/exp_08_15_23_physics_grid",
+        exp_folder = "data_from_hpc/exp_data_sample_0.05",
         train_id = "001",
-        chosen_iteration = 1,
-        name = "physics-based surrogate (untrained)",
+        chosen_iteration = 2000,    
+        name = "Data-driven Surrogate (50 ms sample)",
+        color = "#1f77b4",  
         generate_data = false,
     ),
     (
-        exp_folder = "data_from_hpc/exp_08_15_23_physics_grid",
+        exp_folder = "data_from_hpc/exp_data_sample_0.2",
         train_id = "001",
-        chosen_iteration = 0,
-        name = "physics-based surrogate (trained)",
+        chosen_iteration = 5000,  
+        name = "Data-driven Surrogate (200 ms sample)",
+        color = "#ff7f0e",
         generate_data = false,
-    ), 
+    ),
+
 ]
 
 
@@ -112,7 +116,6 @@ new_test_data = (
 for r in results_to_compare
     file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
     params = TrainParams(file)   
-    display(params)
 end 
 function change_test_dataset(results_to_compare, new_test_data)
     for r in results_to_compare
@@ -122,49 +125,36 @@ function change_test_dataset(results_to_compare, new_test_data)
         params.test_data_path = string(rstrip(x->x ∈ ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], params.test_data_path), new_test_data.id)
         PowerSimulationNODE.serialize(params, file)
         if r.generate_data == true 
-            PowerSimulationNODE.generate_test_data(params) 
+            #PowerSimulationNODE.generate_test_data(params) 
         end 
     end 
 end 
-change_test_dataset(results_to_compare, original_test_data)
+change_test_dataset(results_to_compare, original_test_data) #Need this to change the ID! 
 
 
 # REGENERATE DATASETS 
 _regenerate_datasets(dataset_to_compare, results_to_compare)
 
-# PLOT HISTOGRAM OF ERRORS
-p_ir, p_ii = _plot_historgram_all_errors(dataset_to_compare, results_to_compare);
-#display(p_ir)
-PlotlyJS.savefig(
-    p_ir, 
-    joinpath(@__DIR__, "..", "outputs", "histogram_ir.pdf"),
-    width = 500,
-    height = 400,
-    scale = 1,
-)
-#display(p_ii)
-PlotlyJS.savefig(
-    p_ii, 
-    joinpath(@__DIR__, "..", "outputs", "histogram_ii.pdf"),
-    width = 500,
-    height = 400,
-    scale = 1,
-)
-
 # PLOT BOX PLOTS OF MEAN ERRORS 
 include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
 p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare);
-display(p_accuracy)
 PlotlyJS.savefig(
     p_accuracy,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.pdf"),
-    width = 400,
-    height = 300,
+    joinpath(@__DIR__, "..", "outputs", "box_plot_sample_time_error.pdf"),
+    width = 600,
+    height = 350,
+    scale = 1,
+);
+PlotlyJS.savefig(
+    p_accuracy,
+    joinpath(@__DIR__, "..", "outputs", "box_plot_sample_time_error.png"),
+    width = 600,
+    height = 350,
     scale = 1,
 );
 
+
 p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
-#display(p_timing)
 PlotlyJS.savefig(
     p_timing,
     joinpath(@__DIR__, "..", "outputs", "box_plot_times.pdf"),
@@ -172,10 +162,17 @@ PlotlyJS.savefig(
     height = 300,
     scale = 1,
 )
-
+p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
+PlotlyJS.savefig(
+    p_timing,
+    joinpath(@__DIR__, "..", "outputs", "box_plot_times.png"),
+    width = 400,
+    height = 300,
+    scale = 1,
+)
 
 # LOOK AT INDIVIDUAL DATA TRACES 
-#display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
+_display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
 
 
 

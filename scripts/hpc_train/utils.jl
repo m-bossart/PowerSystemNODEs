@@ -290,8 +290,14 @@ function determine_p_start(sys, surrogate_buses)
     #Parameters are in device base, but the same orientation (generating power is positive), therefore need to scale the load powers by -1
     load_orientation_scale = -1.0 
     p_powers = vcat(load_orientation_scale .* p_powers[1] ./ p_load[1], p_powers[2] ./ p_gfl[1], p_powers[3] ./ p_gfm[1], load_orientation_scale .* p_powers[4] ./ p_load[1] )
+    #p_powers = vcat(load_orientation_scale .* p_powers[1] ./ 100.0, p_powers[2] ./ 100.0, p_powers[3] ./ 100.0, load_orientation_scale .* p_powers[4] ./ 100.0 )
 
     p_start = vcat(p_powers, p_load, p_gfl, p_gfm)
+    @error p_powers
+    @error p_load
+    @error p_gfl
+    @error p_gfm
+
     set_units_base_system!(sys, settings_unit_cache)
     return p_start
 end

@@ -15,26 +15,51 @@ const PSIDS = PowerSimulationsDynamicsSurrogates
 
 include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
 mkpath(joinpath(@__DIR__, "..", "outputs"))
+
 ########### INPUT DATA ###########
 dataset_to_compare = "test"
 new_test_dataset = nothing  #defaults to the test_dataset from TrainParams
 results_to_compare = [
     (
-        exp_folder = "data_from_hpc/exp_08_23_23_data_random",
-        train_id = "185",
-        chosen_iteration = 8000,
-        name = "Data-driven Surrogate",
-        color = "#2ca02c",  
-        generate_data = false,
-    ),
-    (
         exp_folder = "data_from_hpc/exp_09_08_24_Load+GFL+GFM",
         train_id = "001",
-        chosen_iteration = 1,
+        chosen_iteration = 0,
         name = "Load + GFL + GFM",
         color = "#1f77b4",
         generate_data = false,
-    ),
+    ), 
+    (
+        exp_folder = "data_from_hpc/exp_08_15_23_physics_grid",
+        train_id = "001",
+        chosen_iteration = 1,
+        name = "Load + GFL + GFM (trained)",
+        color = "#d62728",
+        generate_data = false,
+    ), 
+    (
+        exp_folder = "data_from_hpc/exp_09_08_24_Load+GFM",
+        train_id = "001",
+        chosen_iteration = 1,
+        name = "Load + GFM",
+        color = "#9467bd",
+        generate_data = false,
+    ), 
+    (
+        exp_folder = "data_from_hpc/exp_09_08_24_Load+GFL",
+        train_id = "001",
+        chosen_iteration = 1,
+        name = "Load + GFL",
+        color = "#e377c2",
+        generate_data = false,
+    ), 
+    (
+        exp_folder = "data_from_hpc/exp_09_08_24_GFL",
+        train_id = "001",
+        chosen_iteration = 1,
+        name = "GFL",
+        color = "#8c564b",
+        generate_data = false,
+    ), 
     (
         exp_folder = "data_from_hpc/exp_09_08_24_GFM",
         train_id = "001",
@@ -43,7 +68,7 @@ results_to_compare = [
         color = "#ff7f0e",
         generate_data = false,
     ), 
-]
+] 
 
 
 #Fix all the paths if the results have been copied to a new directory
@@ -112,6 +137,7 @@ new_test_data = (
         seed = 33,
     ),
 )
+
 for r in results_to_compare
     file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
     params = TrainParams(file)   
@@ -129,8 +155,7 @@ function change_test_dataset(results_to_compare, new_test_data)
         end 
     end 
 end 
-change_test_dataset(results_to_compare, new_test_data)
-
+change_test_dataset(results_to_compare, original_test_data)
 
 # REGENERATE DATASETS 
 _regenerate_datasets(dataset_to_compare, results_to_compare)
@@ -138,44 +163,18 @@ _regenerate_datasets(dataset_to_compare, results_to_compare)
 # PLOT BOX PLOTS OF MEAN ERRORS 
 include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
 p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare);
+#display(p_accuracy)
 PlotlyJS.savefig(
     p_accuracy,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error_linetrip.pdf"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error_phys_surrogates.pdf"),
     width = 400,
-    height = 300,
+    height = 400,
     scale = 1,
 );
 PlotlyJS.savefig(
     p_accuracy,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error_linetrip.png"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error_phys_surrogates.png"),
     width = 400,
-    height = 300,
+    height = 400,
     scale = 1,
 );
-
-#= p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
-PlotlyJS.savefig(
-    p_timing,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_times_linetrip.pdf"),
-    width = 400,
-    height = 300,
-    scale = 1,
-)
-PlotlyJS.savefig(
-    p_timing,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_times_linetrip.png"),
-    width = 400,
-    height = 300,
-    scale = 1,
-) =#
-
-# LOOK AT INDIVIDUAL DATA TRACES 
-#_display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
-
-##
-#Parameter change plots 
-#= for r in results_to_compare
-    file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
-    show_parameter_change(file)
-end =#
-

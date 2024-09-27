@@ -61,7 +61,7 @@ sys = System("systems/36Bus_CR.json")
 #end 
 #to_json(sys, "systems/36Bus_CR.json"; force = true)
 
-power_flow_results_pre = run_powerflow(sys)
+power_flow_results_pre = solve_powerflow(PowerFlows.ACPowerFlow(), sys)
 
 line = get_component(DynamicBranch, sys, "Bus 6-Bus 26-i_1")
 set_x!(line.branch, get_x(line.branch) * 3.5)
@@ -69,7 +69,7 @@ set_b!(line.branch, (from = get_b(line.branch).from * 3, to = get_b(line.branch)
 new_line = deepcopy(line.branch)
 set_name!(new_line, "Bus 6-Bus 26-i_2")
 add_component!(sys, new_line)
-power_flow_results_post = run_powerflow(sys)
+power_flow_results_post = solve_powerflow(PowerFlows.ACPowerFlow(),sys)
 
 line = get_component(DynamicBranch, sys, "Bus 5-Bus 15-i_1")
 set_x!(line.branch, get_x(line.branch) * 2.5)
@@ -95,7 +95,7 @@ set_impedance_active_power!(load, get_impedance_active_power(load) * 0.8)
 load = get_component(StandardLoad, sys, "load61")
 set_impedance_active_power!(load, get_impedance_active_power(load) * 0.75)
 
-power_flow_results_post = run_powerflow(sys)
+power_flow_results_post = solve_powerflow(PowerFlows.ACPowerFlow(),sys)
 
 gfm_bats = get_components(
     x -> isa(get_freq_estimator(get_dynamic_injector(x)), KauraPLL),
@@ -133,7 +133,7 @@ set_active_power!(get_component(GenericBattery, sys, "Gfl_Battery-22"), 1.0)
 
 set_magnitude!(get_bus(get_component(GenericBattery, sys, "Gfl_Battery-21")), 1.0) #1.018
 
-run_powerflow!(sys)
+solve_powerflow!(sys)
 
 gf_bats = get_components(
     x -> isa(get_freq_estimator(get_dynamic_injector(x)), KauraPLL),
@@ -169,7 +169,7 @@ for b in gfm_bats
     #set_reactive_power!(b, 0.0)
 end
 
-run_powerflow!(sys)
+solve_powerflow!(sys)
 
 sim = Simulation(ResidualModel, sys, mktempdir(), (0.0, 10.0))
 sm = small_signal_analysis(sim)

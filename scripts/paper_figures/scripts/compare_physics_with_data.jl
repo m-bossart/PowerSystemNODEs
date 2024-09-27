@@ -115,7 +115,6 @@ new_test_data = (
 for r in results_to_compare
     file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
     params = TrainParams(file)   
-    display(params)
 end 
 function change_test_dataset(results_to_compare, new_test_data)
     for r in results_to_compare
@@ -129,7 +128,7 @@ function change_test_dataset(results_to_compare, new_test_data)
         end 
     end 
 end 
-change_test_dataset(results_to_compare, new_test_data)
+change_test_dataset(results_to_compare, original_test_data) #Need this to change the ID! 
 
 
 # REGENERATE DATASETS 
@@ -137,40 +136,45 @@ _regenerate_datasets(dataset_to_compare, results_to_compare)
 
 # PLOT BOX PLOTS OF MEAN ERRORS 
 include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
-p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare);
+p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare; selected_points=[[2, 91], [2, 91], [2, 92],  [2, 91]  ]);
 PlotlyJS.savefig(
     p_accuracy,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error_linetrip.pdf"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.pdf"),
     width = 400,
     height = 300,
     scale = 1,
 );
 PlotlyJS.savefig(
     p_accuracy,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error_linetrip.png"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.png"),
     width = 400,
     height = 300,
     scale = 1,
 );
 
-#= p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
+
+p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
 PlotlyJS.savefig(
     p_timing,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_times_linetrip.pdf"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_times.pdf"),
     width = 400,
     height = 300,
     scale = 1,
 )
+p_timing = _plot_timing_comparison(dataset_to_compare, results_to_compare)
 PlotlyJS.savefig(
     p_timing,
-    joinpath(@__DIR__, "..", "outputs", "box_plot_times_linetrip.png"),
+    joinpath(@__DIR__, "..", "outputs", "box_plot_times.png"),
     width = 400,
     height = 300,
     scale = 1,
-) =#
+)
 
 # LOOK AT INDIVIDUAL DATA TRACES 
-#_display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
+_display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
+
+
+
 
 ##
 #Parameter change plots 

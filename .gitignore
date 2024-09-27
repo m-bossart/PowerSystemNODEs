@@ -29,13 +29,16 @@ hpc_transfers/
 .vscode
 
 exp_*
-
+scripts/paper_figures/outputs/*
+_archive*
+tmp/*
 #figures
 figs/
 predictions 
 power-systems.log
 power-simulations-dynamics.log
 
+outputs_archive*
 
 train_*/
 transfers/

@@ -1,8 +1,8 @@
 #https://stackoverflow.com/questions/69016568/unable-to-export-plotly-images-to-png-with-kaleido
 using Pkg
-exp_folder = "transfers/exp_03_23_23_data_grid_expository"
-Pkg.activate(exp_folder)
-Pkg.instantiate()
+exp_folder = "transfers/exp_09_05_24_data_expository" #"transfers/exp_03_23_23_data_grid_expository"
+#Pkg.activate(exp_folder)
+#Pkg.instantiate()
 using PowerSimulationNODE
 using Serialization
 using LaTeXStrings
@@ -11,9 +11,9 @@ using PlotlyJS
 ########### INPUT DATA ########### 
 
 train_id = "010"
-pre_train_iteration = 2#1
-post_train_iteration = 2000 #2198
-dataset_iteration = 2
+pre_train_iteration = 1
+post_train_iteration = 950
+dataset_iteration = 1
 y_scale_states = (-1.5, 1.5)
 y_scale_ir = (-1.9, -1.5)
 y_scale_ii = (0, 0.2)
@@ -29,10 +29,11 @@ for (i, surrogate_prediction) in
     enumerate([surrogate_prediction_before, surrogate_prediction_after])
     train_dataset =
         Serialization.deserialize(joinpath(exp_folder, "input_data", "train_data_1"))[dataset_iteration]
-    fieldnames(typeof(train_dataset))
+    @error fieldnames(typeof(train_dataset))
+    @error train_dataset.device_terminal_data
     tsteps = train_dataset.tsteps
-    ground_truth_real_current = train_dataset.real_current
-    ground_truth_imag_current = train_dataset.imag_current
+    ground_truth_real_current = train_dataset.device_terminal_data["Bus 6 -> Bus 26"][:ir]
+    ground_truth_imag_current = train_dataset.device_terminal_data["Bus 6 -> Bus 26"][:ii]
 
     #lay = Plots.@layout [c{0.5w} [a; b]]
 
@@ -45,11 +46,11 @@ for (i, surrogate_prediction) in
     r_series = reshape(r_series, (dim_r, length(t_series)))    #Loses shape when serialized/deserialized to arrow
 
     p = make_subplots(
-        rows = 2,
-        cols = 2,
-        specs = [Spec(rowspan = 2) Spec(); missing Spec()],
+        rows = 3,
+        cols = 1,
+        specs = [Spec(); Spec(); Spec()][:, 1:1], #weird indexing makes matrix not vector    ,
         #subplot_titles = ["Neural ODE States" "Real Current (p.u.)" "Imaginary Current (p.u.)" missing],
-        vertical_spacing = 0.1,
+        vertical_spacing = 0.08,
         horizontal_spacing = 0.15,
     )
     add_trace!(
@@ -65,21 +66,20 @@ for (i, surrogate_prediction) in
         row = 1,
         col = 1,
     )
-
     add_trace!(
         p,
         PlotlyJS.scatter(;
             x = t_series,
-            y = ground_truth_real_current[1, :],
+            y = ground_truth_real_current,
             showlegend = true,
-            :line => Dict(:color => "red", :width => 3, :dash => "solid"),
+            :line => Dict(:color => "black", :width => 3, :dash => "solid"),
             mode = "lines",
             name = "ground truth output",
             xaxis = "x1",
             yaxis = "y1",
         ),
-        row = 1,
-        col = 2,
+        row = 2,
+        col = 1,
     )
     add_trace!(
         p,
@@ -87,7 +87,7 @@ for (i, surrogate_prediction) in
             x = zeros(dim_r),
             y = r0_pred,
             mode = "markers",
-            :line => Dict(:color => "black", :width => 3),
+            :line => Dict(:color => "#2ca02c", :width => 3),
             showlegend = true,
             name = "predicted initial conditions",
         ),
@@ -102,23 +102,23 @@ for (i, surrogate_prediction) in
             mode = "lines",
             showlegend = true,
             name = "surrogate predicted output",
-            :line => Dict(:color => "blue", :dash => "dashdot", :width => 3),
+            :line => Dict(:color => "#2ca02c", :dash => "dashdot", :width => 3),
         ),
-        row = 1,
-        col = 2,
+        row = 2,
+        col = 1,
     )
 
     add_trace!(
         p,
         PlotlyJS.scatter(;
             x = t_series,
-            y = ground_truth_imag_current[1, :],
+            y = ground_truth_imag_current,
             mode = "lines",
             showlegend = false,
-            :line => Dict(:color => "red", :dash => "solid", :width => 3),
+            :line => Dict(:color => "black", :dash => "solid", :width => 3),
         ),
-        row = 2,
-        col = 2,
+        row = 3,
+        col = 1,
     )
 
     add_trace!(
@@ -128,12 +128,12 @@ for (i, surrogate_prediction) in
             y = i_series[2, :],
             mode = "lines",
             showlegend = false,
-            :line => Dict(:color => "blue", :width => 3, :dash => "dashdot"),
+            :line => Dict(:color => "#2ca02c", :width => 3, :dash => "dashdot"),
             xaxis = "x2",
             yaxis = "y2",
         ),
-        row = 2,
-        col = 2,
+        row = 3,
+        col = 1,
     )
 
     for i in 1:size(r_series, 1)
@@ -155,20 +155,21 @@ for (i, surrogate_prediction) in
 
 
     relayout!(p, showlegend = true)
-    p.plot.layout.xaxis = attr(title = "Time (s)", font_size = 12,  zeroline = false,  linecolor="black" )
-    p.plot.layout.xaxis2 = attr( zeroline = true ,  font_size = 12, linecolor="black")
-    p.plot.layout.xaxis3 = attr(title = "Time (s)",  font_size =12,  zeroline = true , linecolor="black")
-    p.plot.layout.yaxis =  attr(title = "Neural ODE States", font_size =12, linecolor ="black", zeroline = false,  range = [-1.5, 1.5])
-    p.plot.layout.yaxis2 = attr(title = "Real current (p.u.)", font_size =12, linecolor="black",  range = [-1.85, -1.5])
-    p.plot.layout.yaxis3 = attr(title = "Imag. current (p.u.)", font_size =12, linecolor="black", range = [0, 0.2])
+    p.plot.layout.xaxis = attr( font_size = 12, autpomargin=true,  zeroline = false,  linecolor="black" )
+    p.plot.layout.xaxis2 = attr( zeroline = false ,  font_size = 12, linecolor="black")
+    p.plot.layout.xaxis3 = attr(title = "Time (s)",  font_size =12,  zeroline = false , linecolor="black")
+    p.plot.layout.yaxis =  attr(title = "Neural ODE States", font_size =12, linecolor ="black", zeroline = false)
+    p.plot.layout.yaxis2 = attr(title = "Real current (p.u.)", font_size =12, linecolor="black")
+    p.plot.layout.yaxis3 = attr(title = "Imag. current (p.u.)", font_size =12, linecolor="black", automargin=true ,zeroline = false)
     p.plot.layout.template = "plotly_white"
     p.plot.layout.font_family = "Times New Roman"
+    p.plot.layout.font_size = 18
     p.plot.layout.legend = attr(
-        x = 0.09,
+        x = -0.15,
         y = 1.05,
-        font_size = 12,
+        font_size = 17,
         yanchor = "bottom",
-        xanchor = "middle",
+        xanchor = "left",
         orientation = "h",
     )
     #p.plot.layout.xaxis_domain=[0, 10.0],
@@ -183,7 +184,14 @@ for (i, surrogate_prediction) in
             p,
             joinpath(@__DIR__, "..", "outputs", "expository_before.pdf"),
             scale = 1.0,
-            height = 400,
+            height = 800,
+            width = 500,
+        )
+        PlotlyJS.savefig(
+            p,
+            joinpath(@__DIR__, "..", "outputs", "expository_before.png"),
+            scale = 1.0,
+            height = 800,
             width = 500,
         )
     else 
@@ -193,7 +201,14 @@ for (i, surrogate_prediction) in
             p,
             joinpath(@__DIR__, "..", "outputs", "expository_after.pdf"),
             scale = 1.0,
-            height = 400,
+            height = 800,
+            width = 500,
+        )
+        PlotlyJS.savefig(
+            p,
+            joinpath(@__DIR__, "..", "outputs", "expository_after.png"),
+            scale = 1.0,
+            height = 800,
             width = 500,
         )
     end

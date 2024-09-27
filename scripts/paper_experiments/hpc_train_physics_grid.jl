@@ -4,7 +4,7 @@ using PowerSimulationNODE
 using PowerSimulationsDynamicsSurrogates
 using Serialization
 const PSIDS = PowerSimulationsDynamicsSurrogates
-include(joinpath(@__DIR__, "utils.jl"))
+include(joinpath(@__DIR__, "..", "hpc_train", "utils.jl"))
 if Sys.iswindows() || Sys.isapple()
     const SCRATCH_PATH = joinpath(pwd(), "..")
 else

@@ -4,7 +4,7 @@ using PowerSimulationsDynamics
 using PowerSimulationsDynamicsSurrogates
 using Random
 const PSIDS = PowerSimulationsDynamicsSurrogates
-include("../hpc_train/utils.jl")
+include(joinpath(@__DIR__, "..", "hpc_train", "utils.jl"))
 if Sys.iswindows() || Sys.isapple()
     const SCRATCH_PATH = joinpath(pwd(), "..")
 else

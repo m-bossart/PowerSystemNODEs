@@ -202,11 +202,11 @@ function _plot_historgram_all_errors(dataset_to_compare, results_to_compare)
                     zeroline = false,
                 ),
                 legend = attr(
-                    x = 1,
+                    x = -0.5,
                     y = 1.0,
                     font_size = 12,
                     yanchor = "bottom",
-                    xanchor = "right",
+                    xanchor = "left",
                     orientation = "h",
                 ),
             ),
@@ -214,9 +214,9 @@ function _plot_historgram_all_errors(dataset_to_compare, results_to_compare)
     return p1, p2 
 end 
 
-function _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare)
+function _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare; selected_points = nothing)
     traces = GenericTrace{Dict{Symbol, Any}}[]
-for r in results_to_compare
+for (ix, r) in enumerate(results_to_compare)
     file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
     params = TrainParams(file)
     if dataset_to_compare == "train"
@@ -244,7 +244,6 @@ for r in results_to_compare
             ),
         ),
     )
-
     loss_dict, times_surrogate, times_ground_truth, =
         loss_metrics(data_surrogate, data_ground_truth)
 
@@ -254,49 +253,63 @@ for r in results_to_compare
     #Don't include 0.0 values 
     ir_mean_error = filter(x->x != 0.0, ir_mean_error)
     ii_mean_error = filter(x->x != 0.0, ii_mean_error)
+    @show length(vcat(ir_mean_error, ii_mean_error))
     @error "mean error" Statistics.mean(vcat(ir_mean_error, ii_mean_error))
     x0_data =
-        vcat(repeat(["Iᵣ"], length(ir_mean_error)), repeat(["Iᵢ"], length(ii_mean_error)))
-
-    trace1 = box(;
+        vcat(repeat(["real current"], length(ir_mean_error)), repeat(["imag. current"], length(ii_mean_error)))
+    @error length( vcat(ir_mean_error, ii_mean_error))
+    if selected_points === nothing
+        trace1 = box(;
         y = vcat(ir_mean_error, ii_mean_error),
         x = x0_data,
         boxpoints = "all",
         name = r.name,
+        marker_color = r.color,
         legendgroup = "1",
-        #marker_color = :blue,
-        marker_size = 3,
-        #jitter = 100,
-        #pointpos = 0,
+        marker_size = 2,
     )
+    else 
+        trace1 = box(;
+        y = vcat(ir_mean_error, ii_mean_error),
+        x = x0_data,
+        boxpoints = "all",
+        name = r.name,
+        marker_color = r.color,
+        legendgroup = "1",
+        selectedpoints = selected_points[ix],
+        selected_marker_color = "black",
+        selected_marker_size= 5,
+        marker_size = 2,
+    )
+    end 
     push!(traces, trace1)
 end
 layout = Layout(;
     font_family = "Times New Roman",
+    font_size = 18,
     xaxis = attr(font_size = 12, showline=true, linewidth=1, linecolor="black"),
-    yaxis = attr(title = "MAE per fault (p.u. current)",
+    yaxis = attr(title = "MAE (p.u. current)",
                  tickvals = [1e-4, 1e-3, 0.01, 0.1], 
                  ticktext=["1e-4", "1e-3", "1e-2", "1e-1"], 
                  font_size = 12, 
                  zeroline = false, 
+                 automargin = true,
                  showline=true, 
                  type="log", 
                  linewidth=1, 
                  linecolor="black"
                  ),
     legend = attr(
-        x = 1,
+        x = 0.2,
         y = 1.0,
-        font_size = 12,
-        yanchor = "bottom",
-        xanchor = "right",
+        font = attr(size=14),
         orientation = "h",
+        yanchor = "bottom",
+        xanchor = "left",
     ),
-    #width = 50,
-    #height = 40,
     boxmode = "group",
     template = "plotly_white",
-    margin = (b =20, t=0, r = 50, l =50)
+    #margin = (b =20, t=0, r = 0, l =50)
 )
 
 return PlotlyJS.plot(traces, layout)
@@ -362,7 +375,7 @@ for r in results_to_compare
         boxpoints = "all",
         name = r.name,
         legendgroup = "1",
-        #marker_color = :blue,
+        marker_color = r.color,
         marker_size = 3,
         #jitter = 100,
         #pointpos = 0,
@@ -375,7 +388,7 @@ trace1 = box(;
     y = times_gt,
     x = x0_data,
     boxpoints = "all",
-    name = "ground truth",
+    name = "Ground Truth",
     legendgroup = "1",
     marker_color = :black,
     marker_size = 3,
@@ -386,27 +399,26 @@ push!(traces, trace1)
 
 layout = Layout(;
     font_family = "Times New Roman",
-    xaxis = attr(font_size = 12, showline=true, linewidth=1, linecolor="black"),
-    yaxis = attr(title = "Simulation time per fault (s)", 
+    font_size = 16,
+    xaxis = attr(font_size = 12, showline=true, automargin =true, linewidth=1, linecolor="black"),
+    yaxis = attr(title = "Simulation time (s)", 
     tickvals = [1, 2, 5, 10], 
     #ticktext=["1e-4", "1e-3", "1e-2", "1e-1"], 
     font_size = 12, zeroline = false, type = "log", showline=true, linewidth=1, linecolor="black"),
     legend = attr(
-        x = 1,
+        x = 0.25,
         y = 1.0,
-        font_size = 12,
+        font = attr(size=14),
         yanchor = "bottom",
-        xanchor = "right",
+        xanchor = "middle",
         orientation = "h",
     ),
     boxmode = "group",
     template = "plotly_white",
-    margin = (b =20, t=30, r = 50, l =50)
+    margin = (b =35, t=30, r = 50, l =50)
 )
 return  PlotlyJS.plot(traces, layout)
 end 
-
-
 
 
 function _display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
@@ -428,11 +440,12 @@ function _display_comparisons_individual_traces(dataset_to_compare, results_to_c
     for (ix, d) in enumerate(data_ground_truth)
         if d.stable == true 
             p = make_subplots(
-                rows = 1,
-                cols = 2,
-                specs = [Spec() Spec()],
+                rows = 2,
+                cols = 1,
+                specs = [Spec(); Spec()][:, 1:1],
                # subplot_titles = ["Real Current (p.u.)" "Imaginary Current (p.u.)" ],
-                horizontal_spacing = 0.15,
+                vertical_spacing = 0.20,
+
             )
             traces_2 = GenericTrace{Dict{Symbol, Any}}[] 
             for (i,r) in enumerate(results_to_compare)
@@ -440,48 +453,52 @@ function _display_comparisons_individual_traces(dataset_to_compare, results_to_c
                 params = TrainParams(file)
                 dataset_surrogate = Serialization.deserialize(joinpath(params.output_data_path, params.train_id, string("surrogate_", dataset_to_compare, "_", string(params.test_data.id), "_", string(r.chosen_iteration), "_dataset")))
                 if  dataset_surrogate[ix].stable ==true 
-                    if i == 3 
-                        trace_surrogate_ir = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ir],  mode="lines",  name =r.name, line_dash = "dashdot", line_color = colors[i])
-                        trace_surrogate_ii = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ii],  mode="lines",  name =r.name, line_dash = "dashdot", line_color = colors[i],  showlegend=false)
-                    else 
-                        trace_surrogate_ir = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ir],  mode="lines",  name =r.name, line_color = colors[i])
-                        trace_surrogate_ii = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ii],  mode="lines",  name =r.name, line_color = colors[i],  showlegend=false)
-                    end 
+                    trace_surrogate_ir = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ir],  mode="lines",  name =r.name, line_color = r.color)
+                    trace_surrogate_ii = PlotlyJS.scatter(;x=dataset_surrogate[ix].tsteps, y = get_device_terminal_data(dataset_surrogate[ix])[:ii],  mode="lines",  name =r.name, line_color = r.color, showlegend=false)
                     add_trace!(p, trace_surrogate_ir, row =1, col=1)
-                    add_trace!(p, trace_surrogate_ii, row =1, col=2)
+                    add_trace!(p, trace_surrogate_ii, row =2, col=1)
 
                 end 
             end 
-            trace_ground_truth_ir =  PlotlyJS.scatter(;x=d.tsteps, y= get_device_terminal_data(d)[:ir], mode="lines", name = "ground truth", line_color = "black")
-            trace_ground_truth_ii =  PlotlyJS.scatter(;x=d.tsteps, y= get_device_terminal_data(d)[:ii], mode="lines", name = "ground truth", line_color = "black", showlegend=false)
+            trace_ground_truth_ir =  PlotlyJS.scatter(;x=d.tsteps, y= get_device_terminal_data(d)[:ir], mode="lines", name = "Ground Truth", line_color = "black")
+            trace_ground_truth_ii =  PlotlyJS.scatter(;x=d.tsteps, y= get_device_terminal_data(d)[:ii], mode="lines", name = "Ground Truth", line_color = "black", showlegend=false)
             add_trace!(p, trace_ground_truth_ir, row =1, col=1)
-            add_trace!(p, trace_ground_truth_ii, row =1, col=2)
+            add_trace!(p, trace_ground_truth_ii, row =2, col=1)
 
 
             relayout!(p, showlegend = true)
-            p.plot.layout.xaxis = attr(title = "Time (s)", font_size = 12,  zeroline = false,  linecolor="black" )
+            p.plot.layout.xaxis = attr(automargin=true,  font_size = 12,  zeroline = false,  linecolor="black" )
             p.plot.layout.xaxis2 = attr(title = "Time (s)", font_size =12, linecolor="black")
-            p.plot.layout.yaxis =  attr(title = "Real current (p.u.)", font_size =12, linecolor ="black", zeroline = false) # range = [-1.85, -1.5]
+            p.plot.layout.yaxis =  attr(automargin = true, title = "Real current (p.u.)", font_size =12, linecolor ="black", zeroline = false) # range = [-1.85, -1.5]
             p.plot.layout.yaxis2 = attr(title = "Imag. current (p.u.)", font_size =12, linecolor="black",  zeroline = false)
             p.plot.layout.template = "plotly_white"
             p.plot.layout.font_family = "Times New Roman"
+            p.plot.layout.font_size = 16
             p.plot.layout.legend = attr(
-                x = 0.09,
+                x = 0.2,
                 y = 1.05,
-                font_size = 12,
+                font_size = 14,
                 yanchor = "bottom",
                 xanchor = "middle",
                 orientation = "h",
             )
-            display(p)
-
-            PlotlyJS.savefig(
-                p,
-                joinpath(@__DIR__, "..", "outputs", string("traces", ix, ".pdf")), 
-                width = 400,
-                height = 300,
-                scale = 1,
-            )
+            #display(p)
+            if ix == 3  #Arbitrary choice of trace to include in paper
+                PlotlyJS.savefig(
+                    p,
+                    joinpath(@__DIR__, "..", "outputs", string("traces", ix, ".pdf")), 
+                    width = 400,
+                    height = 450,
+                    scale = 1,
+                )
+                PlotlyJS.savefig(
+                    p,
+                    joinpath(@__DIR__, "..", "outputs", string("traces", ix, ".png")), 
+                    width = 400,
+                    height = 450,
+                    scale = 1,
+                )
+            end 
         end 
     end  
 end 

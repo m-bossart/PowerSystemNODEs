@@ -28,11 +28,11 @@ traces_vi = GenericTrace{Dict{Symbol, Any}}[]
 traces_ir = GenericTrace{Dict{Symbol, Any}}[]
 traces_ii = GenericTrace{Dict{Symbol, Any}}[]
 p = make_subplots(
-    rows = 2,
-    cols = 2,
-    specs = [Spec() Spec(); Spec() Spec()],
+    rows = 4,
+    cols = 1,
+    specs = [PlotlyJS.Spec(); PlotlyJS.Spec(); PlotlyJS.Spec(); PlotlyJS.Spec()][:, 1:1], #weird indexing makes matrix not vector    
     #subplot_titles = ["Neural ODE States" "Real Current (p.u.)" "Imaginary Current (p.u.)" missing],
-    vertical_spacing = 0.1,
+    vertical_spacing = 0.05,
     horizontal_spacing = 0.15,
 )
 ix_max_up = 20 #16 index of maximum load step up 
@@ -66,20 +66,20 @@ for (ix, t) in enumerate(dataset)
                 y = t.device_terminal_data["Bus 6 -> Bus 26"][:vi],
                 line_color = v_color,
             ),
-            row = 1,
-            col = 2,
-        )
-        add_trace!(
-            p,
-            PlotlyJS.scatter(; x = t.tsteps, y = t.device_terminal_data["Bus 6 -> Bus 26"][:ir], line_color = i_color),
             row = 2,
             col = 1,
         )
         add_trace!(
             p,
+            PlotlyJS.scatter(; x = t.tsteps, y = t.device_terminal_data["Bus 6 -> Bus 26"][:ir], line_color = i_color),
+            row = 3,
+            col = 1,
+        )
+        add_trace!(
+            p,
             PlotlyJS.scatter(; x = t.tsteps, y =  t.device_terminal_data["Bus 6 -> Bus 26"][:ii], line_color = i_color),
-            row = 2,
-            col = 2,
+            row = 4,
+            col = 1,
         )
     end 
 end
@@ -87,16 +87,16 @@ end
 relayout!(p, showlegend = false)
 p.plot.layout.xaxis = attr( showgrid = true, zeroline = false, linecolor="black")
 p.plot.layout.xaxis2 = attr(  showgrid = true, zeroline = false, linecolor="black")
-p.plot.layout.xaxis3 = attr(title = "Time (s)", showgrid = true, zeroline = false, linecolor="black")
-p.plot.layout.xaxis4 = attr(title = "Time (s)", showgrid = true, zeroline = false, linecolor="black")
-p.plot.layout.yaxis = attr(title = "Real voltage (p.u.)", showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.xaxis3 = attr( showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.xaxis4 = attr(automargin = true, title = "Time (s)", showgrid = true, zeroline = false, linecolor="black")
+p.plot.layout.yaxis = attr(automargin = true, title = "Real voltage (p.u.)", showgrid = true, zeroline = false, linecolor="black")
 p.plot.layout.yaxis2 =
     attr(title = "Imag. voltage (p.u.)", showgrid = true, zeroline = false, linecolor="black")
 p.plot.layout.yaxis3 =
     attr(title = "Real current (p.u.)", showgrid = true, zeroline = false, linecolor="black")
 p.plot.layout.yaxis4 =
     attr(title = "Imag current (p.u.)", showgrid = true, zeroline = false, linecolor="black")
-p.plot.layout.font_size = 12
+p.plot.layout.font_size = 14
 p.plot.layout.font_family = "Times New Roman"
 p.plot.layout.template = "plotly_white"
 p.plot.layout.margin = (
@@ -112,8 +112,17 @@ PlotlyJS.savefig(
     p,
     joinpath(@__DIR__, "..", "outputs", "dataset.pdf"),
     scale = 1.0,
-    width = 500,
-    height = 375,
+    width = 400,
+    height = 750,
+    #height = Int64(2.25 * 300),
+    #width = Int64(3.5 * 300),
+)
+PlotlyJS.savefig(
+    p,
+    joinpath(@__DIR__, "..", "outputs", "dataset.png"),
+    scale = 1.0,
+    width = 400,
+    height = 750,
     #height = Int64(2.25 * 300),
     #width = Int64(3.5 * 300),
 )

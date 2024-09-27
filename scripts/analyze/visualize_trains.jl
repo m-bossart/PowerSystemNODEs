@@ -1,11 +1,12 @@
 using PowerSystems
 using PowerSimulationNODE
-using Plots
+using Plots #NOTE: script fails if PlotlyJS is defined in main REPL?
 using JSON3
 using Logging
 using Serialization
 #include("../system_data/dynamic_components_data.jl")
-train_folder = joinpath("transfers", "exp_05_22_23_data_grid")
+train_folder = joinpath("data_from_hpc", "exp_data_sample_0.1") 
+#train_folder = joinpath("transfers", "exp_08_07_23_data_random")
 
 configure_logging(console_level = Logging.Info)
 visualize_level = isempty(ARGS) ? 3 : parse(Int64, ARGS[1])
@@ -40,6 +41,8 @@ for file in train_files_with_output
     path_to_output = joinpath(params.output_data_path, params.train_id)
     output_dict =
         JSON3.read(read(joinpath(path_to_output, "high_level_outputs")), Dict{String, Any})
+    @show output_dict["recorded_iterations"]
+    @show output_dict["chosen_iteration"]
     n_recorded_iterations = length(output_dict["recorded_iterations"])
     visualize_training(file, vcat(1:50, (n_recorded_iterations - 150):n_recorded_iterations))
     #animate_training(file, skip = 100) 
@@ -54,6 +57,10 @@ for file in train_files_with_output
         df_predictions = PowerSimulationNODE.read_arrow_file_to_dataframe(
             joinpath(path_to_output, "predictions"),
         )
+        output_dict["chosen_iteration"] = 5000 #untrained! -> should at least converge and solve! 
+        #@show  output_dict["chosen_iteration"]
+        #@show  output_dict["recorded_iterations"]
+        #@assert false 
         chosen_iteration_index =
             indexin(output_dict["chosen_iteration"], output_dict["recorded_iterations"])[1]
         θ = df_predictions[chosen_iteration_index, "parameters"][1]
@@ -61,6 +68,7 @@ for file in train_files_with_output
         println(first_sol.destats)
         #        @warn first_sol.deq_iterations  
         #surrogate_dataset_validation = Serialization.deserialize(string(p.output_data_path, "surrogate_validation_dataset"))  #If already generated the data
+        
         surrogate_dataset_validation = generate_surrogate_dataset(
             validation_sys,
             validation_sys_aux,
@@ -70,9 +78,13 @@ for file in train_files_with_output
             data_collection_location,
             params.model_params,
         )
+        #TODO - fill in the evaluated loss so we can use the same summary code. 
+      #=   plots_validation_performance =
+            visualize_loss(surrogate_dataset_validation, validation_dataset) =#
 
-        plots_validation_performance =
-            visualize_loss(surrogate_dataset_validation, validation_dataset)
+        output_dict["final_loss"] = evaluate_loss(surrogate_dataset_validation, validation_dataset)
+        PowerSimulationNODE._capture_output(output_dict, params.output_data_path, params.train_id)
+
         Serialization.serialize(
             joinpath(
                 params.output_data_path,
@@ -81,9 +93,9 @@ for file in train_files_with_output
             ),
             surrogate_dataset_validation,
         )
-        for (i, p) in enumerate(plots_validation_performance)
-            Plots.png(p, joinpath(path_to_output, string("validation_dataset_", i)))
-        end
+        #for (i, p) in enumerate(plots_validation_performance)
+        #    Plots.png(p, joinpath(path_to_output, string("validation_dataset_", i)))
+        #end
     end
     #Cleanup to be able to delete the arrow files: https://github.com/apache/arrow-julia/issues/61
     #GC.gc() 

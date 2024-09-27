@@ -8,10 +8,8 @@ const PSIDS = PowerSimulationsDynamicsSurrogates
 using Logging
 using Serialization
 using Plots
-
-include("../build_datasets/utils.jl")
-include("../hpc_train/utils.jl")
-train_folder = "data_from_hpc/exp_09_08_24_full_surrogate_untrained"
+include(joinpath(@__DIR__, "..", "build_datasets", "utils.jl"))
+include(joinpath(@__DIR__, "..", "hpc_train", "utils.jl"))
 system_name = "36bus_fix"
 project_folder = "PowerSystemNODEs"
 scratch_path = joinpath(pwd(), "..")

@@ -1,14 +1,17 @@
 using PowerSimulationNODE
+using PowerSystems
+using PowerSimulationsDynamics
 using PowerSimulationsDynamicsSurrogates
+using Random
 const PSIDS = PowerSimulationsDynamicsSurrogates
-include(joinpath(@__DIR__, "utils.jl"))
+include(joinpath(@__DIR__, "..", "hpc_train", "utils.jl"))
 if Sys.iswindows() || Sys.isapple()
     const SCRATCH_PATH = joinpath(pwd(), "..")
 else
     const SCRATCH_PATH = "/scratch/alpine/mabo4366"
 end
-train_folder = "exp_data_grid_expository"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
-system_name = "36bus_fix"           #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
+train_folder = "exp_data_sample_0.1"    #The name of the folder where everything related to the group of trainings will be stored (inputs, outputs, systems, logging, etc.)
+system_name = "36bus_fix"               #The specific system from the "systems" folder to use. Will be copied over to the train_folder to make it self-contained.
 project_folder = "PowerSystemNODEs"
 
 _copy_full_system_to_train_directory(
@@ -20,36 +23,23 @@ _copy_full_system_to_train_directory(
 
 base_option = TrainParams(
     train_id = "BASE",
-    surrogate_buses = [
-        21,
-        22,
-        23,
-        24,
-        25,
-        26,
-        27,
-        28,
-        29,
-        31,
-        32,
-        33,
-        34,
-        35,
-        36,
-        37,
-        38,
-        39,
-    ],
+    surrogate_buses = vcat(21:29, 31:39),
     train_data = (
         id = "1",
-        operating_points = PSIDS.SurrogateOperatingPoint[
-            PSIDS.GenerationLoadScale(generation_scale = 1.0, load_scale = 1.0),
-            #PSIDS.GenerationLoadScale(generation_scale = 0.9, load_scale = 0.9),   #Try a single operating point for expository 
-        ],
-        perturbations = repeat(
-            [[PSIDS.RandomLoadChange(time = 3.0, load_multiplier_range = (0.0, 2.0))]],
-            1,
+        operating_points = repeat(
+            [
+                RandomOperatingPointXiao(
+                    generator_voltage_range = (0.94, 1.06),
+                    generator_power_range = (0.0, 1.0),
+                    load_multiplier_range = (0.5, 1.5),
+                ),
+            ],
+            23,
         ),
+         perturbations = repeat(
+            [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
+            1,
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -73,12 +63,12 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            1,
+            20,
         ),
-        perturbations = repeat(
+         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             1,
-        ),
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -101,12 +91,12 @@ base_option = TrainParams(
                     load_multiplier_range = (0.5, 1.5),
                 ),
             ],
-            1,
+            100,
         ),
-        perturbations = repeat(
+         perturbations = repeat(
             [[PSIDS.RandomLoadChange(time = 1.0, load_multiplier_range = (0.0, 2.0))]],
             1,
-        ),
+        ), 
         params = PSIDS.GenerateDataParams(
             solver = "Rodas5",
             solver_tols = (reltol = 1e-3, abstol = 1e-6),
@@ -123,24 +113,23 @@ base_option = TrainParams(
         name = "source_1",
         n_ports = 1,
         initializer_layer_type = "dense",
-        initializer_n_layer = 2,
-        initializer_width_layers_relative_input = 5,
+        initializer_n_layer = 3,
+        initializer_width_layers_relative_input = 15,
         initializer_activation = "tanh",
         dynamic_layer_type = "dense",
         dynamic_hidden_states = 10,
         dynamic_n_layer = 3,
-        dynamic_width_layers_relative_input = 5,
+        dynamic_width_layers_relative_input = 15,
         dynamic_activation = "tanh",
         dynamic_σ2_initialization = 0.0,
-        dynamic_last_layer_bias = false,
     ),
     optimizer = [
         (
             auto_sensealg = "Zygote",
             algorithm = "Adam",
-            log_η = -3.0,
+            log_η = -7.0,
             initial_stepnorm = 0.0,
-            maxiters = 2000,
+            maxiters = 10100,
             steadystate_solver = (
                 solver = "NLSolveJL",
                 reltol = 1e-4,
@@ -162,9 +151,11 @@ base_option = TrainParams(
             loss_function = (α = 0.5, β = 1.0, residual_penalty = 1.0e2),
         ),
     ],
-    check_validation_loss_iterations = [], #collect(1000:50:6000),
+    check_validation_loss_iterations = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000],
+    final_validation_loss = true,
+    time_limit_buffer_seconds = 7200,
     rng_seed = 11,
-    output_mode_skip = 1,
+    output_mode_skip = 100,   #Increase this to collect less data! 
     train_time_limit_seconds = 1e9,
     base_path = joinpath(SCRATCH_PATH, project_folder, train_folder),
     system_path = joinpath(
@@ -175,12 +166,20 @@ base_option = TrainParams(
         string(system_name, ".json"),
     ),
 )
-g1 = (:rng_seed, (1, 2))
-g2 = (:dynamic_hidden_states, (5, 10))
-g3 = (:log_η, (-4.0, -3.0, -2.0))
 
-params_data = build_grid_search!(base_option, g1, g2, g3);
-##
+total_runs = 1
+#r1 = (:rng_seed, (min = 1, max = 1000))
+r1 = (:initializer_n_layer, (min = 2, max = 2))
+r2 = (:initializer_width_layers_relative_input, (min = 14, max = 14))
+r3 = (:dynamic_n_layer, (min = 1, max = 1))
+r4 = (:dynamic_hidden_states, (min = 14, max = 14))
+r5 = (:dynamic_width_layers_relative_input, (min = 2, max = 2))
+r6 = (:log_η, (min = -1.5222667876898068, max = -1.5222667876898068))
+r7 = (:α, (min = 0.7583466574469843, max = 0.7583466574469843))
+
+Random.seed!(1234)
+params_data = build_random_search!(base_option, total_runs, r1, r2, r3, r4, r5, r6, r7)
+
 #=
  hpc_params = SavioHPCTrain(;
     username = "jdlara",
@@ -195,13 +194,13 @@ hpc_params = AlpineHPCTrain(;
     project_folder = project_folder,
     train_folder = train_folder,
     scratch_path = SCRATCH_PATH,
-    time_limit_train = "0-23:59:59",
+    time_limit_train = "5-23:59:59",
     time_limit_generate_data = "0-02:00:00",
-    QoS = "normal",
+    QoS = "long",
     partition = "amilan",
-    train_folder_for_data = nothing,
-    mb_per_cpu = 9600,  #Avoide OOM error on HPC 
+    train_folder_for_data = nothing, #"data",
+    mb_per_cpu = 9600,  #Avoide OOM error on HPC
 )
 generate_train_files(hpc_params)
 ##                                   
-run_parallel_train(hpc_params)
+#run_parallel_train(hpc_params)
