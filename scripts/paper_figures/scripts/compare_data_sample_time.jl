@@ -1,5 +1,3 @@
-#The main result of the paper. 
-
 using PlotlyJS
 using DataFrames
 using Plots
@@ -172,15 +170,4 @@ PlotlyJS.savefig(
 )
 
 # LOOK AT INDIVIDUAL DATA TRACES 
-_display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
-
-
-
-
-##
-#Parameter change plots 
-#= for r in results_to_compare
-    file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
-    show_parameter_change(file)
-end =#
-
+#_display_comparisons_individual_traces(dataset_to_compare, results_to_compare)

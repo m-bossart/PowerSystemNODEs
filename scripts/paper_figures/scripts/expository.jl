@@ -1,6 +1,6 @@
 #https://stackoverflow.com/questions/69016568/unable-to-export-plotly-images-to-png-with-kaleido
 using Pkg
-exp_folder = "transfers/exp_09_05_24_data_expository" #"transfers/exp_03_23_23_data_grid_expository"
+exp_folder = "data_from_hpc/exp_data_grid_expository"
 #Pkg.activate(exp_folder)
 #Pkg.instantiate()
 using PowerSimulationNODE

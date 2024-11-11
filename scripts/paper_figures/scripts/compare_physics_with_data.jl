@@ -30,7 +30,7 @@ results_to_compare = [
     (
         exp_folder = "data_from_hpc/exp_09_08_24_Load+GFL+GFM",
         train_id = "001",
-        chosen_iteration = 1,
+        chosen_iteration = 0,
         name = "Load + GFL + GFM",
         color = "#1f77b4",
         generate_data = false,
@@ -136,7 +136,7 @@ _regenerate_datasets(dataset_to_compare, results_to_compare)
 
 # PLOT BOX PLOTS OF MEAN ERRORS 
 include(joinpath(@__DIR__, "surrogate_accuracy_plot_utils.jl"))
-p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare; selected_points=[[2, 91], [2, 91], [2, 92],  [2, 91]  ]);
+p_accuracy = _plot_box_plot_mean_errors(dataset_to_compare, results_to_compare; selected_points=[[2, 91], [2, 92], [2, 91]]);
 PlotlyJS.savefig(
     p_accuracy,
     joinpath(@__DIR__, "..", "outputs", "box_plot_node_error.pdf"),
@@ -173,13 +173,4 @@ PlotlyJS.savefig(
 # LOOK AT INDIVIDUAL DATA TRACES 
 _display_comparisons_individual_traces(dataset_to_compare, results_to_compare)
 
-
-
-
-##
-#Parameter change plots 
-#= for r in results_to_compare
-    file = joinpath(r.exp_folder, "input_data", string("train_", r.train_id, ".json"))
-    show_parameter_change(file)
-end =#
 

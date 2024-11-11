@@ -10,7 +10,7 @@ include(joinpath(pwd(), "scripts", "build_datasets", "utils.jl"))
 include(joinpath(pwd(), "scripts", "hpc_train", "utils.jl"))
 
 ########### INPUT DATA ###########      
-exp_folder = "transfers/exp_08_07_23_data_random" #"evaluate_new_system", "data_from_hpc/"
+exp_folder = "data_from_hpc/exp_08_23_23_data_random" #"evaluate_new_system", "data_from_hpc/"
 train_id = 1
 
 train_data_path = joinpath(exp_folder, "input_data", string("train_data_", train_id))
